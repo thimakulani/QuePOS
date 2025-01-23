@@ -1,0 +1,431 @@
+﻿@page "/login/index"
+
+@if (signin)
+{
+
+    <div class="hold-transition login-page">
+        <div class="login-box">
+            <!-- /.login-logo -->
+            <div class="card card-outline card-primary">
+                <div class="card-header text-center">
+                    <a class="h1"><b>Log</b>In</a>
+                </div>
+                <div class="card-body">
+                    @if (show_login)
+                    {
+                        <p class="login-box-msg">Sign in to start your session</p>
+                        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+                            <div class="input-group mb-3">
+                                <InputText id="Username" class="form-control" placeholder="Email" @bind-Value="loginModel.Email" />
+                                <div class="input-group-append">
+                                    <div class="input-group-text">
+                                        <span class="fas fa-envelope"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group mb-3">
+                                <InputText class="form-control" @bind-Value="loginModel.Password" placeholder="Password" type="password" />
+                                <div class="input-group-append">
+                                    <div class="input-group-text">
+                                        <span class="fas fa-lock"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="icheck-primary">
+                                        <input type="checkbox" id="remember">
+                                        <label for="remember">
+                                            Remember Me
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- /.col -->
+                                <div class="col-4">
+                                    <MudButton ButtonType="ButtonType.Submit" Disabled="@_processing" Variant="Variant.Filled" FullWidth="true" Color="Color.Primary">
+                                        @if (_processing)
+                                        {
+                                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                            <MudText Class="ms-2"></MudText>
+                                        }
+                                        else
+                                        {
+                                            <MudText>Login</MudText>
+                                        }
+                                    </MudButton>
+                                </div>
+                                <!-- /.col -->
+                            </div>
+
+                        </EditForm>
+
+                        <div class="social-auth-links text-center">
+                            <p>- OR -</p>
+                            <a @onclick="HandleSignUp" class="btn btn-block btn-primary">
+                                Sign up
+                            </a>
+
+                        </div>
+                        <p class="mb-1">
+                            <a @onclick="@HandleForgotPassword" href="#">I forgot my password</a>
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="login-box-msg">Password Reset</p>
+                        <EditForm Model="@ForgotPassword" FormName="PasswordForm">
+                            @if (password_reset_steps == 2)
+                            {
+                                <MudAlert Severity="Severity.Success"> A One-Time PIN (OTP) has been sent to your email. If you do not see it in your inbox, please check your spam or junk folder. </MudAlert>
+                            }
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <InputText id="email" class="form-control" @bind-Value="ForgotPassword.Email" />
+                                <ValidationMessage For="@(() => ForgotPassword.Email)" />
+                            </div>
+                            @if (password_reset_steps == 2)
+                            {
+                                <div class="mb-3">
+                                    <label for="OneTimePin" class="form-label">One Time Pin</label>
+                                    <InputText id="OneTimePin" class="form-control" @bind-Value="ForgotPassword.Otp" />
+                                    <ValidationMessage For="@(() => ForgotPassword.Otp)" />
+                                </div>
+
+                            }
+                            else if (password_reset_steps == 3)
+                            {
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <InputText class="form-control" @bind-Value="ForgotPassword.Password" type="password" />
+                                    <ValidationMessage For="@(() => ForgotPassword.Password)" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                    <InputText id="confirmPassword" class="form-control" @bind-Value="ConfirmPassword" type="password" />
+                                    <ValidationMessage For="@(() => ConfirmPassword)" />
+                                </div>
+                            }
+
+
+                            <MudButton ButtonType="ButtonType.Submit" Disabled="@_processing" Variant="Variant.Filled" OnClick="HandlePasswordReset" FullWidth="true" Color="Color.Primary">
+                                @if (_processing)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">Loading....</MudText>
+                                }
+                                else
+                                {
+                                    @if (password_reset_steps == 1)
+                                    {
+                                        <MudText>Request OTP</MudText>
+                                    }
+                                    else if (password_reset_steps == 2)
+                                    {
+                                        <MudText>Verify One Time Pin(OTP)</MudText>
+                                    }
+                                    else
+                                    {
+
+                                        <MudText>Reset Password</MudText>
+                                    }
+                                }
+                            </MudButton>
+                            <MudButton Variant="Variant.Text" Color="Color.Secondary" Class="mt-2" OnClick="HandleShowOtp">
+                                Already Have OTP
+                            </MudButton>
+                            <MudButton Variant="Variant.Text" Color="Color.Secondary" Class="mt-2" OnClick="HandleSwitchToLogin">
+                                Login
+                            </MudButton>
+
+
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+
+    <div class="hold-transition login-page">
+        <div class="login-box">
+            <!-- /.login-logo -->
+            <div class="card card-outline card-primary">
+                <div class="card-header text-center">
+                    <a class="h1"><b>Sign</b>Up</a>
+                </div>
+                <div class="card-body">
+                    @*  <p class="login-box-msg">Sign in to start your session</p> *@
+                    <EditForm Model="@signupViewModel" OnValidSubmit="HandleRegister">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div>
+                                <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Start" ShowCloseIcon="true" CloseIconClicked="(() => CloseAlert())">@errorMessage</MudAlert>
+                            </div>
+                        }
+                        <div class="input-group mb-3">
+                            <InputText class="form-control" placeholder="Firstname" @bind-Value="signupViewModel.Firstname" />
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-person-booth"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <InputText class="form-control" @bind-Value="signupViewModel.Lastname" placeholder="Lastname" />
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-person-booth"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <InputText class="form-control" @bind-Value="signupViewModel.PhoneNumber" placeholder="Phone Number" />
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-phone"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <InputText class="form-control" @bind-Value="signupViewModel.Email" placeholder="Email Address" />
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-envelope"></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="input-group mb-3">
+                            <InputText class="form-control" @bind-Value="signupViewModel.Password" placeholder="Password" type="password" />
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-lock"></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+
+                            <!-- /.col -->
+                            <div class="col-4">
+                                <MudButton ButtonType="ButtonType.Submit" Disabled="@_processing" Variant="Variant.Filled" FullWidth="true" Color="Color.Primary">
+                                    @if (_processing)
+                                    {
+                                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                        <MudText Class="ms-2"></MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudText>Register</MudText>
+                                    }
+                                </MudButton>
+                            </div>
+                            <!-- /.col -->
+                        </div>
+
+                    </EditForm>
+
+                    <div class="social-auth-links text-center">
+                        <p>- OR -</p>
+                        <a @onclick="SwitchToLogin" class="btn btn-block btn-primary">
+                            Login
+                        </a>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+@code {
+    private ForgotPasswordViewModel ForgotPassword = new ForgotPasswordViewModel();
+    @inject AuthenticationStateProvider AuthStateProvider;
+    private bool _processing = false;
+    private bool show_login = true;
+    private string ConfirmPassword;
+    private MudForm form;
+    private SignupViewModel signupViewModel = new();
+    private UserLogin loginModel = new UserLogin();
+    [Inject]
+    private IUserService UserService { get; set; }
+    @inject IHttpClientService IHttpClientService;
+    @inject ISnackbar Snackbar;
+    @inject NavigationManager Navigation;
+    private int password_reset_steps = 0;
+    bool signin = true;
+    private int _index;
+    private bool _completed;
+    private void CloseAlert()
+    {
+        errorMessage = string.Empty;
+    }
+    private async Task HandleLogin()
+    {
+
+        // Simulate login process
+        try
+        {
+
+            _processing = true;
+            var authresponse = await UserService.Login(loginModel);
+            var vm = await UserService.GetUserInfo(authresponse.AccessToken);
+            if (AuthStateProvider is CustomAuthStateProvider customProvider)
+            {
+                customProvider.NotifyNotificationState(vm);
+            }
+
+            // Redirect to home page
+
+            //Snackbar.Add($"Error: {authresponse.User.Email}", Severity.Error);
+        }
+        catch (HttpRequestException ex)
+        {
+            // Handle HTTP-specific exceptions
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            // Handle other unexpected exceptions
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _processing = false;
+            StateHasChanged();
+        }
+
+    }
+    private void HandleSignUp()
+    {
+        signin = false;
+    }
+    private void HandleForgotPassword()
+    {
+        show_login = false;
+        password_reset_steps = 1;
+    }
+    private void HandleShowOtp()
+    {
+        password_reset_steps = 2;
+        ForgotPassword = new ForgotPasswordViewModel();
+        ConfirmPassword = string.Empty;
+
+    }
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+    private void ShowPasswordReset()
+    {
+        show_login = false;
+    }
+    private string errorMessage;
+    private async Task HandlePasswordReset()
+    {
+        // Simulate login process
+        try
+        {
+            if (password_reset_steps == 3)
+            {
+                if (ForgotPassword.Password == ConfirmPassword)
+                {
+                    await IHttpClientService.PostAsync<string>("api/auth/reset_password", ForgotPassword);
+                    Snackbar.Add($"Password has been successfully updated", Severity.Success);
+                    show_login = true;
+                }
+                else
+                {
+                    Snackbar.Add($"Password doesn`t match", Severity.Error);
+
+                }
+            }
+            else if (password_reset_steps == 2)
+            {
+                _processing = true;
+                string msg = await IHttpClientService.PostAsync<string>("api/auth/verify_otp", ForgotPassword);
+                password_reset_steps = 3;
+                Snackbar.Add(msg, Severity.Success);
+
+
+            }
+            else if (password_reset_steps == 1)
+            {
+                _processing = true;
+                await IHttpClientService.PostAsync<string>("api/auth/request_otp", ForgotPassword);
+                password_reset_steps = 2;
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            // Handle HTTP-specific exceptions
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+
+        }
+        catch (Exception ex)
+        {
+            // Handle other unexpected exceptions
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+
+        }
+        finally
+        {
+            _processing = false;
+            StateHasChanged();
+        }
+    }
+    private void HandleSwitchToLogin()
+    {
+        show_login = true;
+        password_reset_steps = 0;
+    }
+
+    private async Task HandleRegister()
+    {
+        try
+        {
+            CloseAlert();
+            _processing = true;
+            await IHttpClientService.PostAsync<string>("/api/account/signup", signupViewModel);
+        }
+        catch (HttpRequestException ex)
+        {
+            // Handle HTTP-specific exceptions
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+            errorMessage = $"Error: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            // Handle other unexpected exceptions
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+        }
+        finally
+        {
+            _processing = false;
+            StateHasChanged();
+        }
+    }
+    private void SwitchToLogin(MouseEventArgs e)
+    {
+        signin = true;
+    }
+}

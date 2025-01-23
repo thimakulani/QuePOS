@@ -1,0 +1,45 @@
+﻿.wrapper {
+    background-color: #f8f9fa;
+    display: flex 1;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-title {
+    text-align: center;
+    font-weight: bold;
+    color: #343a40;
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+}
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+.signup-link {
+    text-align: center;
+    margin-top: 1rem;
+}
