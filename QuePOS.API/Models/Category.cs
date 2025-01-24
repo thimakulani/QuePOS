@@ -1,7 +1,5 @@
 ﻿namespace QuePOS.API.Models
 {
-    public partial class Entities
-    {
         public class Category
         {
             public int CategoryID { get; set; }
@@ -13,4 +11,3 @@
         }
 
     }
-}

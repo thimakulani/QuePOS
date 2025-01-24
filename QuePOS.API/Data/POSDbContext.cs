@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using QuePOS.API.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static QuePOS.API.Models.Entities;
 
 namespace QuePOS.API.Data
 {
@@ -21,6 +21,7 @@ namespace QuePOS.API.Data
         public DbSet<SaleDetail> SaleDetails { get; set; }
        // public DbSet<Customer> Customers { get; set; }
         public DbSet<Inventory> Inventories { get; set; }
+        public DbSet<Store> Stores { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

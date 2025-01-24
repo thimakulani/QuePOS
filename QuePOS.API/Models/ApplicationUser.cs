@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using static QuePOS.API.Models.Entities;
 
 namespace QuePOS.API.Models
 {

@@ -1,7 +1,5 @@
 ﻿namespace QuePOS.API.Models
 {
-    public partial class Entities
-    {
         public class StoreUser 
         {
             public int Id { get; set; } 
@@ -18,5 +16,4 @@
             public ICollection<Sale> Sales { get; set; } = new List<Sale>();
         }
 
-    }
 }

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NETCore.MailKit.Extensions;
+using NETCore.MailKit.Infrastructure.Internal;
 using QuePOS.API.Data;
 using QuePOS.API.Interfaces;
 using QuePOS.API.Models;
@@ -58,7 +60,20 @@ using (var scope = app.Services.CreateScope())
     var roleSeeder = scope.ServiceProvider.GetRequiredService<SeedService>();
     await roleSeeder.SeedAsync();
 }
+builder.Services.AddMailKit(optionBuilder =>
+{
+    optionBuilder.UseMailKit(new MailKitOptions()
+    {
 
+        Server = "smtp.gmail.com",
+        Port = 25,
+        SenderName = "QUE POS",
+        SenderEmail = "noreply",
+        Account = builder.Configuration["EmailConfigs:email"],
+        Password = builder.Configuration["EmailConfigs:password"],
+        Security = true
+    });
+});
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     // app.MapOpenApi();

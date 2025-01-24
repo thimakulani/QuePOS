@@ -7,7 +7,7 @@ namespace QuePOS.API.Services
             private readonly RoleManager<IdentityRole> _roleManager;
             public async Task SeedAsync()
             {
-                string[] roles = { "Admin", "Store" };
+                string[] roles = { "Admin", "Store Owner", "Store Employee" };
                 foreach (var roleName in roles)
                 {
                     if (!await _roleManager.RoleExistsAsync(roleName))
