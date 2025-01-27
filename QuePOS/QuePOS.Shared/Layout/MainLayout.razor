@@ -1,20 +1,167 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Security.Claims
+@inject IJSRuntime JSRuntime
+@inherits LayoutComponentBase
+@* Required *@
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<AuthorizeView>
+    <Authorized>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+        <MudLayout>
+            <MudAppBar Elevation="4">
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
+                <MudSpacer />
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+
+                <MudPopover AnchorOrigin="Origin.TopCenter"
+                            TransformOrigin="Origin.TopCenter"
+                            Visible="@ShowNotifications"
+                            CloseOnOutsideClick="true"
+                            Class="notification-popover">
+                    <MudPaper Class="notification-container" Elevation="4">
+                        <MudText Typo="Typo.h6" Class="notification-header">
+                            Notifications
+                        </MudText>
+                        <MudButton Class="mark-read"
+                                   Color="Color.Secondary"
+                                   OnClick="MarkAllAsRead">
+                            Mark as read
+                        </MudButton>
+                        <MudDivider />
+                        <MudList T="string">
+                            @* @foreach (var notification in Notifications)
+                            {
+                                <MudListItem>
+                                    <MudText Typo="Typo.subtitle2" Bold="true">@notification.Created</MudText>
+                                    <MudText Typo="Typo.body2">@notification.ADD_INFO</MudText>
+                                    <MudText Typo="Typo.caption">@notification.FILE_ID</MudText>
+                                </MudListItem>
+                            } *@
+                        </MudList>
+                    </MudPaper>
+                </MudPopover>
+
+                <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="@Logout" />
+            </MudAppBar>
+
+            <MudDrawer @bind-Open="@_drawerOpen">
+                <NavMenu />
+            </MudDrawer>
+            <MudMainContent>
+
+                <div style="margin: 5px">
+                    @Body
+                </div>
+
+
+
+            </MudMainContent>
+        </MudLayout>
+    </Authorized>
+    <NotAuthorized>
+        @if (!session_loading)
+        {
+                <div>
+                    <besp_hybrid.Shared.Pages.Login.Login />
+                </div>
+        }
+
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    @inject AuthenticationStateProvider AuthStateProvider;
+    @inject ISnackbar Snackbar;
+    @inject IUserService IUserService;
+    @inject NavigationManager NavigationManager;
+    private bool ShowNotifications = true; // Track dropdown visibility
+    private bool HasUnreadNotifications = true; // Show badge if true
+
+    bool _drawerOpen = true;
+    int BadgeContent = 1;
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+    private bool session_loading = true;
+    // private List<NotificationModel> Notifications = [];
+    protected override async Task OnInitializedAsync()
+    {
+        var claims = await AuthStateProvider.GetAuthenticationStateAsync();
+        AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+
+
+        await base.OnInitializedAsync();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+
+            var sl = await IUserService.SessionLogin();
+
+            if (sl != null)
+            {
+                if (AuthStateProvider is CustomAuthStateProvider customProvider)
+                {
+                    customProvider.NotifyNotificationState(sl);
+                }
+            }
+            else
+            {
+                session_loading = false;
+            }
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+    private void Logout()
+    {
+        if (AuthStateProvider is CustomAuthStateProvider externalAuthProvider)
+        {
+            externalAuthProvider.NotifyNotificationState(null);
+        }
+        // NavigationManager.NavigateTo("login/index");
+        session_loading = false;
+        StateHasChanged();
+        // await hubConnection.StopAsync();
+    }
+    string UserName;
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        var authState = await task;
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            UserName = user.Identity.Name;
+            string id = user.FindFirst(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            //SignalRListener(id);
+        }
+        // StateHasChanged(); //
+    }
+    public void Dispose()
+    {
+        AuthStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+    }
+    private void ToggleNotifications()
+    {
+
+    }
+    private void MarkAllAsRead()
+    {
+
+    }
+
+}
+@*     void LogoutHandle()
+    {
+        NavigationManager.NavigateTo("login/index");
+    } *@
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.

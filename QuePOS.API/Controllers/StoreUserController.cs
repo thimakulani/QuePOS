@@ -1,5 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using MailKit;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using NETCore.MailKit.Core;
+using QuePOS.API.Interfaces;
 using QuePOS.API.Models;
 using System.Text;
 
@@ -9,13 +14,35 @@ namespace QuePOS.API.Controllers
     [ApiController]
     public class StoreUserController : ControllerBase
     {
+        private IEmailService _mailService;
+        private IRepository<StoreUser> _repository;
+        private UserManager<ApplicationUser> _userManager;
 
+        public StoreUserController(IEmailService mailService, IRepository<StoreUser> repository)
+        {
+            _mailService = mailService;
+            _repository = repository;
+        }
 
         public async Task<IActionResult> Add(StoreUser storeUser)
         {
             var password = GeneratePassword();
-            string body = $"Your password for EasyCleaar mobile app is: {password}. Please keep it confidential and do not share it with anyone. If you did not request this, please contact support at support@easycleaar.co.za.";
-        
+            string body = $"Your password for QUE POS app is: {password}. Please keep it confidential and do not share it with anyone. If you did not request this, please contact support.";
+            ApplicationUser applicationUser = new ApplicationUser()
+            {
+                PhoneNumber = storeUser.PhoneNumber,
+                StoreUserId = storeUser.StoreID,
+                Email = storeUser.Email.Trim(),
+            };
+            var results = await _userManager.CreateAsync(applicationUser, password);
+            if (results.Succeeded)
+            {
+                var user = await _repository.Add(storeUser);
+                await _mailService.SendAsync(storeUser.Email, "Password", body);
+                return Ok(user);
+            }
+            var errors = string.Join("\n", results.Errors.Select(e => e.Description));
+            return BadRequest(errors);
         }
 
         public static string GeneratePassword(int length = 8, bool requireDigit = true, bool requireLowercase = true,
@@ -28,7 +55,7 @@ namespace QuePOS.API.Controllers
             const string digits = "0123456789";
             const string lowerCaseLetters = "abcdefghijklmnopqrstuvwxyz";
             const string upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const string nonAlphanumeric = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+            const string nonAlphanumeric = "!@#$%&*()-_=+[]{}|<>?";
             const string allCharacters = digits + lowerCaseLetters + upperCaseLetters + nonAlphanumeric;
 
             var passwordBuilder = new StringBuilder();
