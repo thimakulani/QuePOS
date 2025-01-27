@@ -1,9 +1,13 @@
-﻿namespace QuePOS.API.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace QuePOS.API.Models
 {
         public class Sale
         {
-            public int Id { get; set; }
-            public int UserID { get; set; }
+
+        [Key]
+        public int Id { get; set; }
+            public int StoreUserId { get; set; } 
             public DateTime SaleDate { get; set; } = DateTime.Now;
             public decimal TotalAmount { get; set; }
 

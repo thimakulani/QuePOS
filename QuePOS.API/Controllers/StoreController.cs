@@ -21,7 +21,7 @@ namespace QuePOS.API.Controllers
         public async Task<IActionResult> Add(Store store)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            store.UserId = userId;
+            store.StoreUserId = userId;
             var new_store = await _storeRepository.Add(store);
             return Ok(new_store);
         }
