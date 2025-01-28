@@ -295,7 +295,7 @@ namespace QuePOS.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CategoryID")
+                    b.Property<int?>("CategoryID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -339,7 +339,7 @@ namespace QuePOS.API.Migrations
                     b.Property<DateTime>("SaleDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("StoreID")
+                    b.Property<int?>("StoreID")
                         .HasColumnType("int");
 
                     b.Property<int>("StoreUserId")
@@ -374,7 +374,7 @@ namespace QuePOS.API.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("SaleID")
+                    b.Property<int?>("SaleID")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Total")
@@ -526,9 +526,7 @@ namespace QuePOS.API.Migrations
                 {
                     b.HasOne("QuePOS.API.Models.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("CategoryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CategoryID");
 
                     b.HasOne("QuePOS.API.Models.Store", "Store")
                         .WithMany("Products")
@@ -545,9 +543,7 @@ namespace QuePOS.API.Migrations
                 {
                     b.HasOne("QuePOS.API.Models.Store", "Store")
                         .WithMany("Sales")
-                        .HasForeignKey("StoreID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("StoreID");
 
                     b.HasOne("QuePOS.API.Models.StoreUser", "User")
                         .WithMany("Sales")
@@ -568,9 +564,7 @@ namespace QuePOS.API.Migrations
 
                     b.HasOne("QuePOS.API.Models.Sale", "Sale")
                         .WithMany("SaleDetails")
-                        .HasForeignKey("SaleID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SaleID");
 
                     b.Navigation("Product");
 

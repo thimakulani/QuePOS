@@ -14,7 +14,7 @@ namespace QuePOS.API.Models
         public string ImageUrl { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public int StockQuantity { get; set; }
-        public int CategoryID { get; set; }
+        public int? CategoryID { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Foreign Key for Store
