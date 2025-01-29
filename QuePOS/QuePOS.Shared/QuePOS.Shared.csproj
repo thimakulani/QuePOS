@@ -32,7 +32,6 @@
   <ItemGroup>
     <Folder Include="Pages\Users\" />
     <Folder Include="Pages\Sales\" />
-    <Folder Include="Pages\Products\" />
   </ItemGroup>
 
 </Project>

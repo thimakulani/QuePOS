@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35506.116 d17.12
+VisualStudioVersion = 17.12.35506.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuePOS", "QuePOS\QuePOS\QuePOS.csproj", "{ECCE4D5F-3878-4C6A-91EF-EFB10CC75EBF}"
 EndProject
@@ -19,6 +19,7 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{ECCE4D5F-3878-4C6A-91EF-EFB10CC75EBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ECCE4D5F-3878-4C6A-91EF-EFB10CC75EBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECCE4D5F-3878-4C6A-91EF-EFB10CC75EBF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{ECCE4D5F-3878-4C6A-91EF-EFB10CC75EBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECCE4D5F-3878-4C6A-91EF-EFB10CC75EBF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{21C2E1C9-B789-4DF9-AEB9-1C8569857122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

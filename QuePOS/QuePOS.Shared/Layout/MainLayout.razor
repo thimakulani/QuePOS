@@ -10,7 +10,7 @@
     <Authorized>
 
         <MudLayout>
-            <MudAppBar Elevation="4">
+            <MudAppBar Bottom="true" Elevation="4">
 
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
                 <MudSpacer />
@@ -65,7 +65,7 @@
         @if (!session_loading)
         {
                 <div>
-                    <besp_hybrid.Shared.Pages.Login.Login />
+                    <QuePOS.Shared.Pages.Login.Login />
                 </div>
         }
 
