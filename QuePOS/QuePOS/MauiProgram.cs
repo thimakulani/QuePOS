@@ -18,7 +18,11 @@ namespace QuePOS
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
-
+            builder.Services.AddHttpClient("api", client =>
+            {
+                client.BaseAddress = new Uri("https://queposapi.onrender.com");
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
             // Add device-specific services used by the QuePOS.Shared project
             builder.Services.AddSingleton<IFormFactor, FormFactor>();
 

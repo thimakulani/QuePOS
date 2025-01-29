@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Pages\Categories\**" />
+    <Compile Remove="Pages\Inventory\**" />
+    <Content Remove="Pages\Categories\**" />
+    <Content Remove="Pages\Inventory\**" />
+    <EmbeddedResource Remove="Pages\Categories\**" />
+    <EmbeddedResource Remove="Pages\Inventory\**" />
+    <None Remove="Pages\Categories\**" />
+    <None Remove="Pages\Inventory\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 
@@ -19,8 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Inventory\" />
-    <Folder Include="Pages\Categories\" />
     <Folder Include="Pages\Users\" />
     <Folder Include="Pages\Sales\" />
     <Folder Include="Pages\Products\" />

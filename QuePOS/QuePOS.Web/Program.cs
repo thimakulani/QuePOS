@@ -22,7 +22,7 @@ builder.Services.AddAuthorizationCore();
 //builder.Services.AddStorage();
 builder.Services.AddHttpClient("api", client =>
 {
-    client.BaseAddress = new Uri("https://besp-api.onrender.com");
+    client.BaseAddress = new Uri("https://queposapi.onrender.com");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 builder.Services.AddMudServices(config =>
@@ -37,7 +37,8 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
 });
 
-builder.Services.AddBlazoredSessionStorage(config => {
+builder.Services.AddBlazoredSessionStorage(config =>
+{
     config.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
     config.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     config.JsonSerializerOptions.IgnoreReadOnlyProperties = true;

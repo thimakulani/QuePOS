@@ -45,6 +45,20 @@ builder.Services
 //builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddMailKit(optionBuilder =>
+{
+    optionBuilder.UseMailKit(new MailKitOptions()
+    {
+
+        Server = "smtp.gmail.com",
+        Port = 25,
+        SenderName = "QUE POS",
+        SenderEmail = "noreply",
+        Account = builder.Configuration["EmailConfigs:email"],
+        Password = builder.Configuration["EmailConfigs:password"],
+        Security = true
+    });
+});
 var app = builder.Build();
 app.UseCors("AllowAngularOrigins");
 // Configure the HTTP request pipeline.
@@ -60,20 +74,6 @@ using (var scope = app.Services.CreateScope())
     var roleSeeder = scope.ServiceProvider.GetRequiredService<SeedService>();
     await roleSeeder.SeedAsync();
 }
-builder.Services.AddMailKit(optionBuilder =>
-{
-    optionBuilder.UseMailKit(new MailKitOptions()
-    {
-
-        Server = "smtp.gmail.com",
-        Port = 25,
-        SenderName = "QUE POS",
-        SenderEmail = "noreply",
-        Account = builder.Configuration["EmailConfigs:email"],
-        Password = builder.Configuration["EmailConfigs:password"],
-        Security = true
-    });
-});
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     // app.MapOpenApi();
