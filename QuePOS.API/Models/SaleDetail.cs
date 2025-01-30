@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuePOS.API.Models
 {
@@ -9,7 +10,9 @@ namespace QuePOS.API.Models
         public int? SaleID { get; set; }
         public int? ProductID { get; set; }
         public int Quantity { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Total { get; set; }
 
         // Relationships

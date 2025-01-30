@@ -18,12 +18,12 @@ namespace QuePOS.API.Data
         }
 
         // Define DbSets for each entity
-        public DbSet<StoreUser> StoreUsers { get; set; } 
+        public DbSet<StoreUser> StoreUsers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleDetail> SaleDetails { get; set; }
-       // public DbSet<Customer> Customers { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<AuditTrail> AuditTrails { get; set; }
         public DbSet<Store> Stores { get; set; }
 

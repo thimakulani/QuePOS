@@ -73,6 +73,7 @@ using (var scope = app.Services.CreateScope())
 {
     var roleSeeder = scope.ServiceProvider.GetRequiredService<SeedService>();
     await roleSeeder.SeedAsync();
+    await roleSeeder.SeedAdmin();
 }
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {

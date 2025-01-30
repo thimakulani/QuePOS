@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuePOS.API.Models
 {
@@ -9,6 +10,7 @@ namespace QuePOS.API.Models
         public int Id { get; set; }
         public int StoreUserId { get; set; }
         public DateTime SaleDate { get; set; } = DateTime.Now;
+        [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; }
 
         // Foreign Key for Store

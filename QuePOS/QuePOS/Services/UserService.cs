@@ -22,7 +22,7 @@ namespace QuePOS.Services
         {
             var json = JsonConvert.SerializeObject(login);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync("login", content);
+            var response = await httpClient.PostAsync("/login", content);
             if (response.IsSuccessStatusCode)
             {
                 var str_data = await response.Content.ReadAsStringAsync();

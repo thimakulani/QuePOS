@@ -12,8 +12,8 @@ using QuePOS.API.Data;
 namespace QuePOS.API.Migrations
 {
     [DbContext(typeof(POSDbContext))]
-    [Migration("20250128054331_CreateDb")]
-    partial class CreateDb
+    [Migration("20250129173141_InitializeDB")]
+    partial class InitializeDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -460,8 +460,6 @@ namespace QuePOS.API.Migrations
                     b.Property<int>("StoreUserId")
                         .HasColumnType("int");
 
-                    b.HasIndex("StoreUserId");
-
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
 
@@ -583,17 +581,6 @@ namespace QuePOS.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Store");
-                });
-
-            modelBuilder.Entity("QuePOS.API.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("QuePOS.API.Models.StoreUser", "StoreUser")
-                        .WithMany()
-                        .HasForeignKey("StoreUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("StoreUser");
                 });
 
             modelBuilder.Entity("QuePOS.API.Models.Category", b =>

@@ -10,52 +10,22 @@
     <Authorized>
 
         <MudLayout>
-            <MudAppBar Bottom="true" Elevation="4">
 
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
-                <MudSpacer />
-
-
-                <MudPopover AnchorOrigin="Origin.TopCenter"
-                            TransformOrigin="Origin.TopCenter"
-                            Visible="@ShowNotifications"
-                            CloseOnOutsideClick="true"
-                            Class="notification-popover">
-                    <MudPaper Class="notification-container" Elevation="4">
-                        <MudText Typo="Typo.h6" Class="notification-header">
-                            Notifications
-                        </MudText>
-                        <MudButton Class="mark-read"
-                                   Color="Color.Secondary"
-                                   OnClick="MarkAllAsRead">
-                            Mark as read
-                        </MudButton>
-                        <MudDivider />
-                        <MudList T="string">
-                            @* @foreach (var notification in Notifications)
-                            {
-                                <MudListItem>
-                                    <MudText Typo="Typo.subtitle2" Bold="true">@notification.Created</MudText>
-                                    <MudText Typo="Typo.body2">@notification.ADD_INFO</MudText>
-                                    <MudText Typo="Typo.caption">@notification.FILE_ID</MudText>
-                                </MudListItem>
-                            } *@
-                        </MudList>
-                    </MudPaper>
-                </MudPopover>
-
-                <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="@Logout" />
-            </MudAppBar>
-
-            <MudDrawer @bind-Open="@_drawerOpen">
-                <NavMenu />
-            </MudDrawer>
             <MudMainContent>
 
                 <div style="margin: 5px">
                     @Body
                 </div>
 
+                <MudAppBar Bottom=true Elevation="4" Style="background-color: blue; color: white;">
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
+                    <MudSpacer />
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+                    <MudSpacer />
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+                    <MudSpacer />
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+                </MudAppBar>
 
 
             </MudMainContent>
@@ -64,9 +34,7 @@
     <NotAuthorized>
         @if (!session_loading)
         {
-                <div>
-                    <QuePOS.Shared.Pages.Login.Login />
-                </div>
+            <QuePOS.Shared.Pages.Login.Login />
         }
 
     </NotAuthorized>

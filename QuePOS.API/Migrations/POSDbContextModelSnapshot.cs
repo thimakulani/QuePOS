@@ -457,8 +457,6 @@ namespace QuePOS.API.Migrations
                     b.Property<int>("StoreUserId")
                         .HasColumnType("int");
 
-                    b.HasIndex("StoreUserId");
-
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
 
@@ -580,17 +578,6 @@ namespace QuePOS.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Store");
-                });
-
-            modelBuilder.Entity("QuePOS.API.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("QuePOS.API.Models.StoreUser", "StoreUser")
-                        .WithMany()
-                        .HasForeignKey("StoreUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("StoreUser");
                 });
 
             modelBuilder.Entity("QuePOS.API.Models.Category", b =>

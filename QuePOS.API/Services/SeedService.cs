@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using QuePOS.API.Models;
+using System.Diagnostics;
 
 namespace QuePOS.API.Services
 {
@@ -18,18 +19,36 @@ namespace QuePOS.API.Services
                 }
             }
         }
-        public void SeedAdmin()
+        public async Task SeedAdmin()
         {
-            StoreUser storeUser = new StoreUser()
+            try
             {
-                CreatedAt = DateTime.UtcNow,
-                Email = "thimakulani@gmail.com",
-                FirstName = "Thima",
-                LastName = "Sigauque",
-                Password = "LUna@123",
-                PhoneNumber = "0713934923",
-                
-            };
+                ApplicationUser storeUser = new ApplicationUser()
+                {
+                    Email = "thimakulani@gmail.com",
+                    PhoneNumber = "0713934923",
+                    UserName = "thimakulani@gmail.com"
+                };
+                if (await userManager.FindByEmailAsync(storeUser.Email) == null)
+                {
+                    var results = await userManager.CreateAsync(storeUser, "LUna@123");
+                    if (results.Succeeded)
+                    {
+                        var user = await userManager.FindByEmailAsync(storeUser.Email);
+                        await userManager.AddToRoleAsync(user, "Admin");
+
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine(results.Errors.Select(x => x.Description));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+
         }
         public SeedService(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
         {
