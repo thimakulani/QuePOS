@@ -38,6 +38,14 @@ namespace QuePOS.API.Services
                     if (results.Succeeded)
                     {
                         var user = await userManager.FindByEmailAsync(appUser.Email);
+                        Store store = new Store()
+                        {
+                            Address = "",
+                            ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzK6hfC4ZU6CbPWNWxFoK01AruzZrJZZg5Zw&s",
+                            Phone = "07111111",
+                            StoreName = "SIGAUQUE",
+                            StoreUserId = appUser.Id
+                        };
                         StoreUser storeUser = new()
                         {
                             Email = appUser.Email,
@@ -46,6 +54,7 @@ namespace QuePOS.API.Services
                             PhoneNumber = "011111111",
                             CreatedAt = DateTime.Now,
                             UserId = user.Id,
+                            Store = store
                         };
                         await userManager.AddToRoleAsync(user, "Admin");
                         context.Add(storeUser);

@@ -46,7 +46,12 @@ namespace QuePOS.API.Controllers
             var errors = string.Join("\n", results.Errors.Select(e => e.Description));
             return BadRequest(errors);
         }
-
+        [HttpGet]
+        public async Task<IActionResult> All()
+        {
+            var new_store = await _repository.GetList();
+            return Ok(new_store);
+        }
         public static string GeneratePassword(int length = 8, bool requireDigit = true, bool requireLowercase = true,
                                       bool requireUppercase = true, bool requireNonAlphanumeric = true)
         {

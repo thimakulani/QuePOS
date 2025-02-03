@@ -25,5 +25,13 @@ namespace QuePOS.API.Controllers
             var new_store = await _storeRepository.Add(store);
             return Ok(new_store);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> All()
+        {
+            
+            var new_store = await _storeRepository.GetList();
+            return Ok(new_store);
+        }
     }
 }
