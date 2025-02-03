@@ -19,11 +19,11 @@ namespace QuePOS.API.Controllers
         {
             _productsRepository = productsRepository;
         }
-
+        [HttpPost]
         public async Task<IActionResult> Add(Product product)
         {
-           var prod = await _productsRepository.Add(product);
-           return  Ok(prod);
+            var prod = await _productsRepository.Add(product);
+            return Ok(prod);
 
         }
     }

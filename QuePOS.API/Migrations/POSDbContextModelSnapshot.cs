@@ -443,9 +443,14 @@ namespace QuePOS.API.Migrations
                     b.Property<int>("StoreID")
                         .HasColumnType("int");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StoreID");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("StoreUsers");
                 });
@@ -453,9 +458,6 @@ namespace QuePOS.API.Migrations
             modelBuilder.Entity("QuePOS.API.Models.ApplicationUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<int>("StoreUserId")
-                        .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
@@ -576,6 +578,12 @@ namespace QuePOS.API.Migrations
                         .HasForeignKey("StoreID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("QuePOS.API.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Store");
                 });

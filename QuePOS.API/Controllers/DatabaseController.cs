@@ -22,7 +22,7 @@ namespace QuePOS.API.Controllers
             {
                 try
                 {
-                    string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                    string connectionString = _configuration.GetConnectionString("ConnectionString");
 
                     using (SqlConnection conn = new SqlConnection(connectionString))
                     {

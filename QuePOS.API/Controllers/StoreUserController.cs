@@ -14,30 +14,32 @@ namespace QuePOS.API.Controllers
     [ApiController]
     public class StoreUserController : ControllerBase
     {
-        private IEmailService _mailService;
-        private IRepository<StoreUser> _repository;
-        private UserManager<ApplicationUser> _userManager;
+        private readonly IEmailService _mailService;
+        private readonly IRepository<StoreUser> _repository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public StoreUserController(IEmailService mailService, IRepository<StoreUser> repository)
+        public StoreUserController(IEmailService mailService, IRepository<StoreUser> repository, UserManager<ApplicationUser> userManager)
         {
             _mailService = mailService;
             _repository = repository;
+            _userManager = userManager;
         }
-
+        [HttpPost]
         public async Task<IActionResult> Add(StoreUser storeUser)
         {
             var password = GeneratePassword();
             string body = $"Your password for QUE POS app is: {password}. Please keep it confidential and do not share it with anyone. If you did not request this, please contact support.";
-            ApplicationUser applicationUser = new ApplicationUser()
+            ApplicationUser applicationUser = new()
             {
                 PhoneNumber = storeUser.PhoneNumber,
-                StoreUserId = storeUser.StoreID,
                 Email = storeUser.Email.Trim(),
             };
             var results = await _userManager.CreateAsync(applicationUser, password);
             if (results.Succeeded)
             {
+                var appUser = await _userManager.FindByEmailAsync(storeUser.Email);
                 var user = await _repository.Add(storeUser);
+                await _userManager.AddToRoleAsync(appUser, "Store Employee");
                 await _mailService.SendAsync(storeUser.Email, "Password", body);
                 return Ok(user);
             }

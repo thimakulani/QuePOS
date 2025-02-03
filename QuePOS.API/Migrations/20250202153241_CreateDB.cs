@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuePOS.API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitializeDB : Migration
+    public partial class CreateDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,7 +31,6 @@ namespace QuePOS.API.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
-                    StoreUserId = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -256,11 +255,17 @@ namespace QuePOS.API.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    StoreID = table.Column<int>(type: "int", nullable: false)
+                    StoreID = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StoreUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StoreUsers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_StoreUsers_Stores_StoreID",
                         column: x => x.StoreID,
@@ -401,6 +406,11 @@ namespace QuePOS.API.Migrations
                 name: "IX_StoreUsers_StoreID",
                 table: "StoreUsers",
                 column: "StoreID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StoreUsers_UserId",
+                table: "StoreUsers",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -431,9 +441,6 @@ namespace QuePOS.API.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "Products");
 
             migrationBuilder.DropTable(
@@ -444,6 +451,9 @@ namespace QuePOS.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "StoreUsers");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Stores");

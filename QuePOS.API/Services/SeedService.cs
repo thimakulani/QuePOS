@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using QuePOS.API.Data;
 using QuePOS.API.Models;
 using System.Diagnostics;
 
@@ -8,6 +9,7 @@ namespace QuePOS.API.Services
     {
         private UserManager<ApplicationUser> userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly POSDbContext context;
         public async Task SeedAsync()
         {
             string[] roles = { "Admin", "Store Owner", "Store Employee" };
@@ -23,19 +25,31 @@ namespace QuePOS.API.Services
         {
             try
             {
-                ApplicationUser storeUser = new ApplicationUser()
+                ApplicationUser appUser = new ApplicationUser()
                 {
                     Email = "thimakulani@gmail.com",
                     PhoneNumber = "0713934923",
                     UserName = "thimakulani@gmail.com"
                 };
-                if (await userManager.FindByEmailAsync(storeUser.Email) == null)
+
+                if (await userManager.FindByEmailAsync(appUser.Email) == null)
                 {
-                    var results = await userManager.CreateAsync(storeUser, "LUna@123");
+                    var results = await userManager.CreateAsync(appUser, "LUna@123");
                     if (results.Succeeded)
                     {
-                        var user = await userManager.FindByEmailAsync(storeUser.Email);
+                        var user = await userManager.FindByEmailAsync(appUser.Email);
+                        StoreUser storeUser = new()
+                        {
+                            Email = appUser.Email,
+                            FirstName = "Thima",
+                            LastName = "Sigauque",
+                            PhoneNumber = "011111111",
+                            CreatedAt = DateTime.Now,
+                            UserId = user.Id,
+                        };
                         await userManager.AddToRoleAsync(user, "Admin");
+                        context.Add(storeUser);
+                        context.SaveChanges();
 
                     }
                     else
@@ -50,10 +64,11 @@ namespace QuePOS.API.Services
             }
 
         }
-        public SeedService(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+        public SeedService(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, POSDbContext context)
         {
             _roleManager = roleManager;
             this.userManager = userManager;
+            this.context = context;
         }
 
 

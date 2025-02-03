@@ -6,39 +6,36 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-<AuthorizeView>
-    <Authorized>
 
-        <MudLayout>
+
+<MudLayout>
+    <AuthorizeView>
+
+        <MudAppBar Bottom=true Elevation="4" Style="background-color: #4CAF50; color: white;">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+        </MudAppBar>
+
+    </AuthorizeView>
+    <AuthorizeView>
+        <Authorized>
 
             <MudMainContent>
-
-                <div style="margin: 5px">
+                <div style="margin: 20px">
                     @Body
                 </div>
-
-                <MudAppBar Bottom=true Elevation="4" Style="background-color: blue; color: white;">
-                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
-                    <MudSpacer />
-                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
-                    <MudSpacer />
-                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
-                    <MudSpacer />
-                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
-                </MudAppBar>
-
-
             </MudMainContent>
-        </MudLayout>
-    </Authorized>
-    <NotAuthorized>
-        @if (!session_loading)
-        {
+        </Authorized>
+        <NotAuthorized>
             <QuePOS.Shared.Pages.Login.Login />
-        }
-
-    </NotAuthorized>
-</AuthorizeView>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudLayout>
 
 
 @code {
@@ -78,6 +75,7 @@
                 {
                     customProvider.NotifyNotificationState(sl);
                 }
+                NavigationManager.NavigateTo("/");
             }
             else
             {

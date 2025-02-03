@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using NETCore.MailKit.Extensions;
 using NETCore.MailKit.Infrastructure.Internal;
 using QuePOS.API.Data;
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddAuthorizationBuilder();
+//builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
 // Replace 'YourDbContext' with the name of your own DbContext derived class.
 builder.Services.AddDbContext<POSDbContext>(option =>
 {
@@ -44,7 +46,42 @@ builder.Services
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 //builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "QuePOS API",
+        Version = "v1"
+    });
+
+    // Add security definition for Bearer Token
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "bearer",
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Description = "Enter 'Bearer {your_token}' to authenticate",
+    });
+
+    // Add global security requirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new List<string>()
+        }
+    });
+});
 builder.Services.AddMailKit(optionBuilder =>
 {
     optionBuilder.UseMailKit(new MailKitOptions()
