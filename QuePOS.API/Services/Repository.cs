@@ -50,7 +50,15 @@ namespace QuePOS.API.Services
 
             return await query.ToListAsync();
         }
+        public async Task<T> GetFirstOrDefault(Expression<Func<T, bool>> predicate)
+        {
+            return await dbSet.FirstOrDefaultAsync(predicate);
+        }
 
+        public async Task<List<T>> GetWhere(Expression<Func<T, bool>> predicate)
+        {
+            return await dbSet.Where(predicate).ToListAsync();
+        }
         public async Task Update(int id, T entity)
         {
             dbSet.Update(entity);

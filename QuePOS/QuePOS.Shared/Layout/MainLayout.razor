@@ -11,14 +11,18 @@
 <MudLayout>
     <AuthorizeView>
 
-        <MudAppBar Bottom=true Elevation="4" >
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
+        <MudAppBar>
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(3)" Color="Color.Inherit" />
+        </MudAppBar>
+        <MudAppBar Bottom=true Elevation="4">
+            <MudIconButton Icon="@Icons.Material.Filled.Dashboard" OnClick="x=>SwitchView(0)" Color="Color.Inherit" Edge="Edge.Start" />
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+            <MudIconButton Icon="@Icons.Material.Filled.Inventory" OnClick="x=>SwitchView(1)" Color="Color.Inherit" />
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(2)" Color="Color.Inherit" />
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(3)" Color="Color.Inherit" />
         </MudAppBar>
 
     </AuthorizeView>
@@ -51,6 +55,21 @@
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+    private void SwitchView(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                NavigationManager.NavigateTo("/");
+                break;
+            case 1:
+                NavigationManager.NavigateTo("products/index");
+                break;
+            case 2:
+                NavigationManager.NavigateTo("products/index");
+                break;
+        }
     }
     private bool session_loading = true;
     // private List<NotificationModel> Notifications = [];

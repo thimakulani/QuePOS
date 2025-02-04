@@ -10,5 +10,7 @@ namespace QuePOS.API.Interfaces
         public Task Update(int id, T entity);
         public Task<List<T>> GetList();
         public Task<List<T>> GetList(params Expression<Func<T, object>>[] includes);
+        Task<List<T>> GetWhere(Expression<Func<T, bool>> predicate);
+        Task<T> GetFirstOrDefault(Expression<Func<T, bool>> predicate);
     }
 }
