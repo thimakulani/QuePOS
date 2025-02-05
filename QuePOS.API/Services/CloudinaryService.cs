@@ -5,12 +5,10 @@ namespace QuePOS.API.Services
 {
     public class CloudinaryService
     {
-        private IConfiguration _configuration;
         private readonly Cloudinary _cloudinary;
 
         public CloudinaryService(IConfiguration configuration)
         {
-            _configuration = configuration;
             var account = new Account(
                 configuration["CloudinarySettings:CloudName"],
                 configuration["CloudinarySettings:ApiKey"],

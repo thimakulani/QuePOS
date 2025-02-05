@@ -76,7 +76,25 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        _products = await HttpClientService.GetAsync<List<Product>>("api/products");
+        try
+        {
+            _products = await HttpClientService.GetAsync<List<Product>>("/api/products/all/store");
+        }
+        catch (HttpRequestException ex)
+        {
+            // Handle HTTP-specific exceptions
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            // Handle other unexpected exceptions
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _processing = false;
+            StateHasChanged();
+        }
     }
 
 
@@ -84,9 +102,9 @@
     private async Task SaveProduct()
     {
         if (_product.Id == 0)
-            await HttpClientService.PostAsync<Product>("api/products", _product);
+            await HttpClientService.PostAsync<Product>("/api/products", _product);
         else
-            await HttpClientService.PutAsync<Product>($"api/products/{_product.Id}", _product);
+            await HttpClientService.PutAsync<Product>($"/api/products/{_product.Id}", _product);
 
         await RefreshProducts();
         _isDialogOpen = false;
@@ -97,7 +115,7 @@
         var confirm = await DialogService.ShowMessageBox("Confirm", "Are you sure you want to delete this product?", "Yes", "No");
         if (confirm == true)
         {
-            await HttpClientService.DeleteAsync($"api/products/{id}");
+            await HttpClientService.DeleteAsync($"/api/products/{id}");
             await RefreshProducts();
         }
     }
@@ -107,7 +125,7 @@
 
         try
         {
-            _products = await HttpClientService.GetAsync<List<Product>>("api/products");
+            _products = await HttpClientService.GetAsync<List<Product>>("/api/products/all/store");
         }
         catch (HttpRequestException ex)
         {

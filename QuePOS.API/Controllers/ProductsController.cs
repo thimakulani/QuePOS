@@ -37,6 +37,14 @@ namespace QuePOS.API.Controllers
             return Ok(prod);
 
         }
+        [HttpGet]
+        public async Task<IActionResult> Get(int id)
+        {
+            
+            var prod = await _productsRepository.Get(id);
+            return Ok(prod);
+
+        }
         [HttpGet("all/store")]
         public async Task<IActionResult> GetAll()
         {

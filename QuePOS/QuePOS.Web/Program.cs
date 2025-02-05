@@ -25,6 +25,14 @@ builder.Services.AddHttpClient("api", client =>
     client.BaseAddress = new Uri("https://queposapi.onrender.com");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromDays(100);  //you can change the session expired time.  
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 builder.Services.AddMudServices(config =>
 {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
@@ -62,7 +70,7 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
-
+app.UseSession();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddAdditionalAssemblies(typeof(QuePOS.Shared._Imports).Assembly);

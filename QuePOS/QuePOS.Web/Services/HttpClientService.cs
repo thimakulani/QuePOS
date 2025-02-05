@@ -24,6 +24,9 @@ namespace QuePOS.Web.Services
         {
             _accessToken = await _sessionStorage.GetItemAsync<string>("accessToken");
             _refreshToken = await _sessionStorage.GetItemAsync<string>("refreshToken");
+            //_accessToken = HttpContext.Session.SetString("", "");// _sessionStorage.GetItemAsync<string>("accessToken");
+            //_refreshToken = await _sessionStorage.GetItemAsync<string>("refreshToken");
+
 
             if (!string.IsNullOrEmpty(_accessToken))
             {

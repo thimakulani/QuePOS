@@ -23,6 +23,7 @@ builder.Services.AddDbContext<POSDbContext>(option =>
 });
 
 //service injectioons
+builder.Services.AddTransient<CloudinaryService>();
 builder.Services.AddTransient<SeedService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 //ApplicationUser, IdentityRole
