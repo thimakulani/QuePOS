@@ -29,19 +29,41 @@
     </MudGrid>
 </MudCardContent>
 
-<MudDialog @bind-Visible="_isDialogOpen">
+<MudDialog @bind-Visible="_isDialogOpen" Options="this._dialogOptions">
     <TitleContent>@(_product.Id == 0 ? "Add Product" : "Edit Product")</TitleContent>
     <DialogContent>
-        <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="_product.Name" Required="true" />
-        <MudTextField Variant="Variant.Outlined" Label="Description" @bind-Value="_product.Description" Required="true" />
-        <MudTextField Variant="Variant.Outlined" Label="Price" @bind-Value="_product.Price" Required="true" />
-        <MudTextField Variant="Variant.Outlined" Label="Stock Quantity" @bind-Value="_product.StockQuantity" Required="true" />
-        <MudTextField Variant="Variant.Outlined" Label="Image URL" @bind-Value="_product.Name" Required="true" />
-        <MudSelect Label="Category" @bind-Value="_product.CategoryID">
-            <MudSelectItem Value="1">Category 1</MudSelectItem>
-            <MudSelectItem Value="2">Category 2</MudSelectItem>
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Name" @bind-Value="_product.Name" Required="true" />
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Description" @bind-Value="_product.Description" Required="true" />
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Price" @bind-Value="_product.Price" Required="true" />
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Stock Quantity" @bind-Value="_product.StockQuantity" Required="true" />
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Image URL" @bind-Value="_product.Name" Required="true" />
+        <MudItem>
+            <MudFileUpload @ref="@_fileUpload"
+                           T="IBrowserFile"
+                           For="@(() => File)"
+                           @bind-Files="File"
+                           >
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.CloudUpload">
+                        Upload Files
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+        </MudItem>
+        
+        <MudSelect Label="Category" @bind-Value="categoryId">
+            @foreach (var item in categories)
+            {
+                <MudSelectItem value="@item.Id">
+                    @item.CategoryName
+                </MudSelectItem>
+            }
         </MudSelect>
-    </DialogContent>
+    
+       
+    </DialogContent> 
     <DialogActions>
         <MudButton OnClick="SaveProduct" Color="Color.Primary">Save</MudButton>
         <MudButton OnClick="() => _isDialogOpen = false" Color="Color.Secondary">Cancel</MudButton>
@@ -49,17 +71,21 @@
 </MudDialog>
 
 @code {
+    private MudFileUpload<IBrowserFile> _fileUpload;
     private bool _processing = true;
+    private object Image;
+    private int categoryId;
     @inject ISnackbar Snackbar;
-    private List<Category> category = [];
+    private List<Category> categories = [];
     [Inject]
     private IHttpClientService HttpClientService { get; set; }
     private List<Product> _products = new();
     private List<Product> _filteredProducts => _products.Where(p => string.IsNullOrEmpty(_searchTerm) || p.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
     private string _searchTerm = "";
-
+    private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
     private Product _product = new();
     private bool _isDialogOpen = false;
+    private IBrowserFile File { get; set; }
     private void OpenEditDialog(Product product)
     {
         _product = product.Id == 0 ? new Product() : new Product
@@ -122,7 +148,7 @@
     {
         try
         {
-            _products = await HttpClientService.GetAsync<List<Product>>("/api/products/all/store");
+            categories = await HttpClientService.GetAsync<List<Category>>("/api/category");
         }
         catch (HttpRequestException ex)
         {
