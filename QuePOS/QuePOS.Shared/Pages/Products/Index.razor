@@ -54,6 +54,12 @@
         </MudItem>
         
         <MudSelect Label="Category" @bind-Value="categoryId">
+            @if(categories.Count== 0)
+            {
+                <MudSelectItem value="0">
+                    No Category
+                </MudSelectItem>
+            }
             @foreach (var item in categories)
             {
                 <MudSelectItem value="@item.Id">
