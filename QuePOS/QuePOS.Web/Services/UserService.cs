@@ -63,7 +63,7 @@ namespace QuePOS.Web.Services
             var password = await sessionStorage.GetItemAsync<string>("password");
             if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
             {
-                UserLogin userLogin = new UserLogin()
+                UserLogin userLogin = new()
                 {
                     Email = username,
                     Password = password

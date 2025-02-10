@@ -12,8 +12,9 @@
     <AuthorizeView>
 
         <MudAppBar>
+            <MudText> @($"STORE: ") @store?.StoreName </MudText>
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(3)" Color="Color.Inherit" />
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(-1)" Color="Color.Inherit" />
         </MudAppBar>
         <MudAppBar Bottom=true Elevation="4">
             <MudIconButton Icon="@Icons.Material.Filled.Dashboard" OnClick="x=>SwitchView(0)" Color="Color.Inherit" Edge="Edge.Start" />
@@ -36,7 +37,16 @@
             </MudMainContent>
         </Authorized>
         <NotAuthorized>
-            <QuePOS.Shared.Pages.Login.Login />
+            @if (!session_loading)
+            {
+                <QuePOS.Shared.Pages.Login.Login />
+            }
+            else
+            {
+                <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+                    <MudProgressCircular Color="Color.Primary" Style="height: 70px; width: 70px;" Indeterminate="true" />
+                </div>
+            }
         </NotAuthorized>
     </AuthorizeView>
 </MudLayout>
@@ -46,10 +56,10 @@
     @inject AuthenticationStateProvider AuthStateProvider;
     @inject ISnackbar Snackbar;
     @inject IUserService IUserService;
+    @inject IFormFactor FormFactor;
     @inject NavigationManager NavigationManager;
 
     bool _drawerOpen = true;
-    int BadgeContent = 1;
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
@@ -92,7 +102,7 @@
                 {
                     customProvider.NotifyNotificationState(sl);
                 }
-                NavigationManager.NavigateTo("/");
+
             }
             else
             {
@@ -124,8 +134,38 @@
             UserName = user.Identity.Name;
             string id = user.FindFirst(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             //SignalRListener(id);
+            // NavigationManager.NavigateTo("/");
+            await GetStore();
         }
         // StateHasChanged(); //
+    }
+    private Store store = new Store();
+    [Inject]
+    private IHttpClientService HttpClientService { get; set; }
+    private async Task GetStore()
+    {
+        try
+        {
+            store = await HttpClientService.GetAsync<Store>("/api/store");
+            await FormFactor.SetSession("StoreId", store.Id.ToString());
+
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            //StateHasChanged();
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
+        }
     }
     public void Dispose()
     {

@@ -23,7 +23,7 @@ namespace QuePOS.Services
 
         }
 
-        private async void AddAuthorizationHeaders()
+        private async Task AddAuthorizationHeaders()
         {
             _accessToken = await SecureStorage.GetAsync("accessToken");
             _refreshToken = await SecureStorage.GetAsync("refreshToken");
@@ -52,6 +52,9 @@ namespace QuePOS.Services
                     {
                         _accessToken = tokenResponse.AccessToken;
                         _refreshToken = tokenResponse.RefreshToken;
+                        await SecureStorage.SetAsync("accessToken", _accessToken);
+                        await SecureStorage.SetAsync("refreshToken", _refreshToken);
+                        Console.WriteLine("Token refreshed successfully.");
                         return true;
                     }
                 }
@@ -65,14 +68,14 @@ namespace QuePOS.Services
 
         private async Task<T> SendRequestWithRetry<T>(Func<Task<HttpResponseMessage>> requestFunc)
         {
-            AddAuthorizationHeaders();
+            await AddAuthorizationHeaders();
             var response = await requestFunc();
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
                 if (await RefreshAccessTokenAsync())
                 {
-                    AddAuthorizationHeaders();
+                    await AddAuthorizationHeaders();
                     response = await requestFunc(); // Retry the request
                 }
             }
@@ -108,6 +111,7 @@ namespace QuePOS.Services
 
         public async Task<T> GetAsync<T>(string endpoint)
         {
+
             return await SendRequestWithRetry<T>(() => _httpClient.GetAsync(endpoint));
         }
 

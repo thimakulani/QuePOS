@@ -13,8 +13,8 @@ namespace QuePOS.API.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private POSDbContext context;
-        private UserManager<ApplicationUser> manager;
+        private readonly POSDbContext context;
+        private readonly UserManager<ApplicationUser> manager;
 
         public AccountController(POSDbContext context, UserManager<ApplicationUser> userManager)
         {

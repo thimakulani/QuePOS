@@ -71,6 +71,7 @@ namespace QuePOS.Services
                     Password = password
                 };
                 var results = await Login(userLogin);
+                Console.WriteLine("AccessToken " + results.AccessToken);
                 return await GetUserInfo(results.AccessToken);
             }
             return null;

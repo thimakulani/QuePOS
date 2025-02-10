@@ -18,8 +18,8 @@ namespace QuePOS.API.Models
         // Foreign Key for Store
         public int StoreID { get; set; }
         [ForeignKey(nameof(Models.ApplicationUser))]
-        public string UserId { get; set; } = null;
-        public Store Store { get; set; } = null!;
+        public string? UserId { get; set; } = null;
+        public Store Store { get; set; } = null;
         // Relationships
         public virtual ApplicationUser ApplicationUser { get; set; }
         public virtual ICollection<Sale> Sales { get; set; } = [];

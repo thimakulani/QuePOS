@@ -61,6 +61,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazor.QRCode" Version="0.2.1" />
+    <PackageReference Include="Camera.MAUI" Version="1.5.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
@@ -70,6 +72,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QuePOS.Shared\QuePOS.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Update="MVVM\View\BarCodeScannerView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
   </ItemGroup>
 
 </Project>

@@ -295,6 +295,9 @@ namespace QuePOS.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BarCode")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("CategoryID")
                         .HasColumnType("int");
 
@@ -310,7 +313,7 @@ namespace QuePOS.API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("StockQuantity")
@@ -525,7 +528,7 @@ namespace QuePOS.API.Migrations
             modelBuilder.Entity("QuePOS.API.Models.Product", b =>
                 {
                     b.HasOne("QuePOS.API.Models.Category", "Category")
-                        .WithMany("Products")
+                        .WithMany()
                         .HasForeignKey("CategoryID");
 
                     b.HasOne("QuePOS.API.Models.Store", "Store")
@@ -574,7 +577,7 @@ namespace QuePOS.API.Migrations
             modelBuilder.Entity("QuePOS.API.Models.StoreUser", b =>
                 {
                     b.HasOne("QuePOS.API.Models.Store", "Store")
-                        .WithMany("StoreUsers")
+                        .WithMany()
                         .HasForeignKey("StoreID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -586,11 +589,6 @@ namespace QuePOS.API.Migrations
                     b.Navigation("ApplicationUser");
 
                     b.Navigation("Store");
-                });
-
-            modelBuilder.Entity("QuePOS.API.Models.Category", b =>
-                {
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("QuePOS.API.Models.Product", b =>
@@ -608,8 +606,6 @@ namespace QuePOS.API.Migrations
                     b.Navigation("Products");
 
                     b.Navigation("Sales");
-
-                    b.Navigation("StoreUsers");
                 });
 
             modelBuilder.Entity("QuePOS.API.Models.StoreUser", b =>

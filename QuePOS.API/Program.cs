@@ -20,6 +20,7 @@ builder.Services.AddDbContext<POSDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString"));
     option.EnableDetailedErrors();
+    option.EnableSensitiveDataLogging(true);
 });
 
 //service injectioons
@@ -48,6 +49,11 @@ builder.Services
 //builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -97,9 +103,20 @@ builder.Services.AddMailKit(optionBuilder =>
         Security = true
     });
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularOrigins", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 var app = builder.Build();
 app.UseCors("AllowAngularOrigins");
 // Configure the HTTP request pipeline.
+
+
 app.MapIdentityApi<ApplicationUser>();
 
 
@@ -125,8 +142,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

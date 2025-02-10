@@ -10,7 +10,6 @@ namespace QuePOS.API.Models
         public string Description { get; set; } = string.Empty;
 
         // Relationships
-        public ICollection<Product> Products { get; set; } = [];
     }
 
 }

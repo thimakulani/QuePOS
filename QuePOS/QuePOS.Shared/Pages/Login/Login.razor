@@ -262,7 +262,6 @@ else
     private bool _processing = false;
     private bool show_login = true;
     private string ConfirmPassword;
-    private MudForm form;
     private SignupViewModel signupViewModel = new();
     private UserLogin loginModel = new UserLogin();
     [Inject]
@@ -272,8 +271,6 @@ else
     @inject NavigationManager Navigation;
     private int password_reset_steps = 0;
     bool signin = true;
-    private int _index;
-    private bool _completed;
     private void CloseAlert()
     {
         errorMessage = string.Empty;

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="QuePOS.MVVM.View.BarCodeScannerView"
+             xmlns:cv="clr-namespace:Camera.MAUI;assembly=Camera.MAUI"
+             Title="BarCodeScannerView">
+    <VerticalStackLayout>
+        <cv:CameraView x:Name="cameraView" BarCodeDetectionEnabled="True" BarcodeDetected="cameraView_BarcodeDetected" WidthRequest="300" HeightRequest="200"/>
+
+        <Label x:Name="BarCodeText" />
+        <Button Text="Continue" />
+    </VerticalStackLayout>
+</ContentPage>

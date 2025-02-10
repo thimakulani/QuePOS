@@ -1,37 +1,38 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>disable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Pages\Categories\**" />
-    <Compile Remove="Pages\Inventory\**" />
-    <Content Remove="Pages\Categories\**" />
-    <Content Remove="Pages\Inventory\**" />
-    <EmbeddedResource Remove="Pages\Categories\**" />
-    <EmbeddedResource Remove="Pages\Inventory\**" />
-    <None Remove="Pages\Categories\**" />
-    <None Remove="Pages\Inventory\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Pages\Categories\**" />
+		<Compile Remove="Pages\Inventory\**" />
+		<Content Remove="Pages\Categories\**" />
+		<Content Remove="Pages\Inventory\**" />
+		<EmbeddedResource Remove="Pages\Categories\**" />
+		<EmbeddedResource Remove="Pages\Inventory\**" />
+		<None Remove="Pages\Categories\**" />
+		<None Remove="Pages\Inventory\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.1" />
-    <PackageReference Include="MudBlazor" Version="7.16.0" />
-    <PackageReference Include="MudBlazor" Version="7.15.0" />
-    <PackageReference Include="MudBlazor.ThemeManager" Version="2.1.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Blazor.QRCode" Version="0.2.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.1" />
+		<PackageReference Include="MudBlazor" Version="7.16.0" />
+		<!--<PackageReference Include="MudBlazor" Version="7.15.0" />-->
+		<PackageReference Include="MudBlazor.ThemeManager" Version="2.1.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\Users\" />
-    <Folder Include="Pages\Sales\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Pages\Users\" />
+		<Folder Include="Pages\Sales\" />
+	</ItemGroup>
 
 </Project>
