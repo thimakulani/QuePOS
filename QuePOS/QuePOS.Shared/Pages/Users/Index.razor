@@ -1,0 +1,116 @@
+﻿
+@page "/usermanagement"
+@inject HttpClient Http
+
+<MudContainer>
+    <MudCard>
+        <MudCardContent>
+            <MudTable Items="@users" Striped="true" Bordered="true" Hover="true">
+                <HeaderContent>
+                    <MudTh>First Name</MudTh>
+                    <MudTh>Last Name</MudTh>
+                    <MudTh>Phone Number</MudTh>
+                    <MudTh>Email</MudTh>
+                    <MudTh>Created At</MudTh>
+                    <MudTh>Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.FirstName</MudTd>
+                    <MudTd>@context.LastName</MudTd>
+                    <MudTd>@context.PhoneNumber</MudTd>
+                    <MudTd>@context.Email</MudTd>
+                    <MudTd>@context.CreatedAt.ToString("yyyy-MM-dd")</MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="edit" Color="Color.Primary" OnClick="() => OpenEditDialog(context)" />
+                        <MudIconButton Icon="delete" Color="Color.Error" OnClick="() => DeleteUser(context.Id)" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+
+            <MudButton Color="Color.Primary" OnClick="OpenCreateDialog">Add User</MudButton>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Create/Edit User Dialog -->
+    <MudDialog @bind-IsOpen="dialogOpen" MaxWidth="MaxWidth.Small">
+        <MudDialogTitle>@(selectedUser.Id == 0 ? "Create User" : "Edit User")</MudDialogTitle>
+        <MudDialogContent>
+            <MudTextField @bind-Value="selectedUser.FirstName" Label="First Name" Required="true" />
+            <MudTextField @bind-Value="selectedUser.LastName" Label="Last Name" Required="true" />
+            <MudTextField @bind-Value="selectedUser.PhoneNumber" Label="Phone Number" Required="true" />
+            <MudTextField @bind-Value="selectedUser.Email" Label="Email" Required="true" />
+        </MudDialogContent>
+        <MudDialogActions>
+            <MudButton OnClick="SaveUser" Color="Color.Primary">Save</MudButton>
+            <MudButton OnClick="CloseDialog" Color="Color.Secondary">Cancel</MudButton>
+        </MudDialogActions>
+    </MudDialog>
+</MudContainer>
+
+@code {
+    private List<User> users = new List<User>();
+    private bool dialogOpen = false;
+    private User selectedUser = new User();
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Http.GetFromJsonAsync<List<User>>("api/users");
+    }
+
+    private void OpenCreateDialog()
+    {
+        selectedUser = new User();
+        dialogOpen = true;
+    }
+
+    private void OpenEditDialog(User user)
+    {
+        selectedUser = new User
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            PhoneNumber = user.PhoneNumber,
+            Email = user.Email,
+            CreatedAt = user.CreatedAt
+        };
+        dialogOpen = true;
+    }
+
+    private void CloseDialog()
+    {
+        dialogOpen = false;
+    }
+
+    private async Task SaveUser()
+    {
+        if (selectedUser.Id == 0)  // Create new user
+        {
+            var response = await Http.PostAsJsonAsync("api/users", selectedUser);
+            if (response.IsSuccessStatusCode)
+            {
+                users.Add(await response.Content.ReadFromJsonAsync<User>());
+            }
+        }
+        else  // Update existing user
+        {
+            var response = await Http.PutAsJsonAsync($"api/users/{selectedUser.Id}", selectedUser);
+            if (response.IsSuccessStatusCode)
+            {
+                var index = users.FindIndex(u => u.Id == selectedUser.Id);
+                users[index] = selectedUser;
+            }
+        }
+
+        CloseDialog();
+    }
+
+    private async Task DeleteUser(int userId)
+    {
+        var response = await Http.DeleteAsync($"api/users/{userId}");
+        if (response.IsSuccessStatusCode)
+        {
+            users.RemoveAll(u => u.Id == userId);
+        }
+    }
+}
