@@ -1,13 +1,23 @@
 ﻿@page "/products/index"
 @using Blazor.QRCode
+@using BlazorQrCodeScanner
+@using BlazorQrCodeScanner.MediaTrack
 @inject IDialogService DialogService
 @* 
 <QrCodeReader OnDetect="@DetectCallBack" OnError="@ErrorCallBack" />
  *@
+<QrCodeScanner @ref="qrScanner" Style="display: flex; align-items: center; justify-content: center; overflow: hidden !important;" Width="100%" Height="100vh" OnCreated="OnScannerCreated" OnScannerStarted="OnScanStarted" OnQrSuccess="OnQrCodeScanned">
+    @if (isScannerStarted)
+    {
+        <div id="highlightFrame" style="position: fixed; z-index: 2; width: 100vw; height: 150px; background-color: transparent; outline: 2px solid yellow;">
+        </div>
+    }
+</QrCodeScanner>
+<img src="@scannedImage" width="100%" />
 
 <MudCardHeader>
     <MudTextField @bind-Value="_searchTerm" Placeholder="Search..." Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" />
-    <MudButton Variant="Variant.Outlined" Style="margin-left:5dp" Color="Color.Primary" OnClick="()=> OpenEditDialog(new Product())">Add</MudButton>
+    <MudButton Variant="Variant.Outlined" Style="margin-left:5px" Color="Color.Primary" OnClick="()=> OpenEditDialog(new Product())">Add</MudButton>
 </MudCardHeader>
 <MudCardContent>
     <MudGrid>
@@ -18,7 +28,7 @@
                     <MudCardContent Class="d-flex align-center">
                         @*  <MudAvatar Size="Size.Large" Image="@product.ImageUrl" Alt="Product Image" Class="mr-2" /> *@
                         <MudAvatar>
-                            <MudImage Src="@product.ImageUrl" Alt="An image of the best dog ever!"></MudImage>
+                            <MudImage Src="@product.ImageUrl"></MudImage>
                         </MudAvatar>
                         <div>
                             <MudText Typo="Typo.h6">@product.Name</MudText>
@@ -263,5 +273,47 @@
             _processing = false;
             StateHasChanged();
         }
+    }
+
+
+    /// <summary>
+    ///
+    /// </summary>
+    ///
+    private QrCodeScanner? qrScanner;
+    private bool isScannerStarted;
+    private string scannedImage;
+    private void OnScannerCreated()
+    {
+        qrScanner?.StartAsync(new MediaTrackConstraintSet
+            {
+                FacingMode = VideoFacingMode.Environment
+            }, new QrCodeConfig
+            {
+                FormatsToSupport = new[] { BarcodeType.QR_CODE },
+                QrBox = new QrBoxFunction("calculateBoundingBox"), // or pass QrBoxSize width and height or aspectratio as QrBoxNumber
+                ExperimentalFeatures = new ExperimentalFeaturesConfig
+                {
+                    UseBarCodeDetectorIfSupported = true
+                },
+                DefaultZoomValueIfSupported = 2,
+                Fps = 10
+            });
+    }
+    private void OnQrCodeScanned(QrCodeScanResult result)
+    {
+        Console.WriteLine(result.DecodedText);
+        scannedImage = result.ImageUrl;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Called when the scanner starts.
+    /// </summary>
+    private async void OnScanStarted()
+    {
+        await Task.Delay(500); // let camera element in dom get created
+        isScannerStarted = true;
+        StateHasChanged();
     }
 }

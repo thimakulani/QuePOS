@@ -62,11 +62,14 @@
 
   <ItemGroup>
     <PackageReference Include="Blazor.QRCode" Version="0.2.1" />
+    <PackageReference Include="BlazorQrCodeScanner" Version="1.0.0.1" />
+    <PackageReference Include="BlazorQrCodeScanner.Maui" Version="1.0.0" />
+    <PackageReference Include="BootstrapBlazor.BarCode" Version="9.0.0" />
     <PackageReference Include="Camera.MAUI" Version="1.5.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
-    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.30" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.30" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 

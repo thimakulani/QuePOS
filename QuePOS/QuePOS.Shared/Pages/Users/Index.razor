@@ -1,6 +1,4 @@
-﻿
-@page "/usermanagement"
-@inject HttpClient Http
+﻿@page "/users/index"
 
 <MudContainer>
     <MudCard>
@@ -18,7 +16,7 @@
                     <MudTd>@context.FirstName</MudTd>
                     <MudTd>@context.LastName</MudTd>
                     <MudTd>@context.PhoneNumber</MudTd>
-                    <MudTd>@context.Email</MudTd>
+                    @* <MudTd>@context.Email</MudTd> *@
                     <MudTd>@context.CreatedAt.ToString("yyyy-MM-dd")</MudTd>
                     <MudTd>
                         <MudIconButton Icon="edit" Color="Color.Primary" OnClick="() => OpenEditDialog(context)" />
@@ -33,47 +31,47 @@
 
     <!-- Create/Edit User Dialog -->
     <MudDialog @bind-IsOpen="dialogOpen" MaxWidth="MaxWidth.Small">
-        <MudDialogTitle>@(selectedUser.Id == 0 ? "Create User" : "Edit User")</MudDialogTitle>
-        <MudDialogContent>
+        <TitleContent>@(selectedUser.Id == 0 ? "CREATE USER" : "EDIT USER")</TitleContent>
+        <DialogContent>
             <MudTextField @bind-Value="selectedUser.FirstName" Label="First Name" Required="true" />
             <MudTextField @bind-Value="selectedUser.LastName" Label="Last Name" Required="true" />
             <MudTextField @bind-Value="selectedUser.PhoneNumber" Label="Phone Number" Required="true" />
-            <MudTextField @bind-Value="selectedUser.Email" Label="Email" Required="true" />
-        </MudDialogContent>
-        <MudDialogActions>
+            @* <MudTextField @bind-Value="selectedUser.Email" Label="Email" Required="true" /> *@
+        </DialogContent>
+        <DialogActions>
             <MudButton OnClick="SaveUser" Color="Color.Primary">Save</MudButton>
             <MudButton OnClick="CloseDialog" Color="Color.Secondary">Cancel</MudButton>
-        </MudDialogActions>
+        </DialogActions>
     </MudDialog>
 </MudContainer>
 
 @code {
-    private List<User> users = new List<User>();
+    private List<StoreUser> users = new List<StoreUser>();
     private bool dialogOpen = false;
-    private User selectedUser = new User();
-
+    private StoreUser selectedUser = new StoreUser();
+    @inject IHttpClientService HttpClientService;
     protected override async Task OnInitializedAsync()
     {
-        users = await Http.GetFromJsonAsync<List<User>>("api/users");
+        users = await HttpClientService.GetAsync<List<StoreUser>>("/api/users");
     }
 
     private void OpenCreateDialog()
     {
-        selectedUser = new User();
+        selectedUser = new StoreUser();
         dialogOpen = true;
     }
 
-    private void OpenEditDialog(User user)
+    private void OpenEditDialog(StoreUser user)
     {
-        selectedUser = new User
-        {
-            Id = user.Id,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            PhoneNumber = user.PhoneNumber,
-            Email = user.Email,
-            CreatedAt = user.CreatedAt
-        };
+        selectedUser = new StoreUser
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                //Email = user.Email,
+                CreatedAt = user.CreatedAt
+            };
         dialogOpen = true;
     }
 
@@ -86,20 +84,16 @@
     {
         if (selectedUser.Id == 0)  // Create new user
         {
-            var response = await Http.PostAsJsonAsync("api/users", selectedUser);
-            if (response.IsSuccessStatusCode)
-            {
-                users.Add(await response.Content.ReadFromJsonAsync<User>());
-            }
+            var response = await HttpClientService.PostAsync<StoreUser>("/api/users", selectedUser);
+
+            users.Add(response);
+
         }
         else  // Update existing user
         {
-            var response = await Http.PutAsJsonAsync($"api/users/{selectedUser.Id}", selectedUser);
-            if (response.IsSuccessStatusCode)
-            {
-                var index = users.FindIndex(u => u.Id == selectedUser.Id);
-                users[index] = selectedUser;
-            }
+            var response = await HttpClientService.PutAsync<StoreUser>($"/api/users/{selectedUser.Id}", selectedUser);
+            var index = users.FindIndex(u => u.Id == selectedUser.Id);
+            users[index] = selectedUser;
         }
 
         CloseDialog();
@@ -107,10 +101,7 @@
 
     private async Task DeleteUser(int userId)
     {
-        var response = await Http.DeleteAsync($"api/users/{userId}");
-        if (response.IsSuccessStatusCode)
-        {
-            users.RemoveAll(u => u.Id == userId);
-        }
+        await HttpClientService.DeleteAsync($"/api/users/{userId}");
+        users.RemoveAll(u => u.Id == userId);
     }
 }

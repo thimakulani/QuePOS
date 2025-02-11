@@ -5,7 +5,7 @@
              xmlns:cv="clr-namespace:Camera.MAUI;assembly=Camera.MAUI"
              Title="BarCodeScannerView">
     <VerticalStackLayout>
-        <cv:CameraView x:Name="cameraView" BarCodeDetectionEnabled="True" BarcodeDetected="cameraView_BarcodeDetected" WidthRequest="300" HeightRequest="200"/>
+        <cv:CameraView x:Name="cameraView" HorizontalOptions="FillAndExpand" BarCodeDetectionEnabled="True" BarcodeDetected="cameraView_BarcodeDetected" WidthRequest="300" HeightRequest="200"/>
 
         <Label x:Name="BarCodeText" />
         <Button Text="Continue" />

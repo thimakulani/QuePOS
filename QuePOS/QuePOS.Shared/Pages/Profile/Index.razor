@@ -1,0 +1,47 @@
+﻿@page "/profile"
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4 mx-auto">
+    <MudCard>
+        <MudCardHeader>
+            <MudAvatar Class="me-2" Size="Size.Large" Color="Color.Primary">
+            </MudAvatar>
+            <MudText Typo="Typo.h5">@Profile.FirstName </MudText>
+            <MudText Typo="Typo.subtitle1" Color="Color.Secondary">@Profile.LastName</MudText>
+        </MudCardHeader>
+
+        <MudCardContent>
+            <MudList Dense="true" T="object">
+                <MudListItem>
+                    <MudIcon Icon="@Icons.Material.Outlined.Phone" />
+                    <MudText>@Profile.PhoneNumber</MudText>
+                </MudListItem>
+                <MudListItem>
+                    <MudIcon Icon="@Icons.Material.Outlined.DateRange" />
+                    <MudText>Member Since: @Profile.CreatedAt.ToString("MMMM dd, yyyy")</MudText>
+                </MudListItem>
+            </MudList>
+        </MudCardContent>
+
+        <MudCardActions>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="mdi-pencil">
+                Edit Profile
+            </MudButton>
+            <MudButton Color="Color.Secondary" Variant="Variant.Outlined" StartIcon="mdi-settings">
+                Settings
+            </MudButton>
+        </MudCardActions>
+    </MudCard>
+</MudContainer>
+
+@code {
+    public StoreUser Profile { get; set; } = new StoreUser
+        {
+            Id = 1,
+            FirstName = "John",
+            LastName = "Doe",
+            //ProfileImage = "https://via.placeholder.com/150",
+            PhoneNumber = "+1 (123) 456-7890",
+            CreatedAt = new DateTime(2020, 5, 15)
+        };
+}
+

@@ -1,7 +1,18 @@
 ﻿@page "/"
-@using QuePOS.Shared.Services
+
 @inject IFormFactor FormFactor
 
+
+
+
+
+<p>How to do this:</p>
+<ul class="ul-demo mb-3">
+    <li>Click the code to pop up the selection file box</li>
+    <li>Select a picture that contains barcodes</li>
+    <li>Start recognizing barcodes</li>
+</ul>
+<BarcodeReader ScanType="@ScanType.Image" OnResult="@OnImageResult" OnError="@OnImageError" />
 
 <div>
 
@@ -357,4 +368,12 @@
 @code {
     private string factor => FormFactor.GetFormFactor();
     private string platform => FormFactor.GetPlatform();
+    private void OnImageError()
+    {
+
+    }
+    private void OnImageResult()
+    {
+
+    }
 }

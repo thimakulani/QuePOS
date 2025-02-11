@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="_content/QuePOS.Shared/dist/css/adminlte.min.css" />
     <link rel="stylesheet" href="_content/QuePOS.Shared/plugins/fontawesome-free/css/all.min.css" />
     <link rel="stylesheet" href="_content/QuePOS.Shared/plugins/icheck-bootstrap/icheck-bootstrap.min.css" />
-
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         /* Custom Loading Spinner */
         #loading-screen {
@@ -75,7 +75,19 @@
                 document.getElementById('app').style.display = 'block';
             }, 2000); // Adjust this delay as needed
         });
+        // in app.js imported we have viewPort calculation function
+        window.calculateBoundingBox = function (viewfinderWidth, viewfinderHeight) {
+            let minEdgePercentage = 0.999;
+            let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+            let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+            return {
+                width: qrboxSize,
+                height: 150,
+            };
+        };
+
     </script>
+
 </body>
 
 </html>
