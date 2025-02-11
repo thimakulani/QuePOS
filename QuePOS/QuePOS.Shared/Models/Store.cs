@@ -8,9 +8,9 @@ public class Store
     public string Phone { get; set; } = string.Empty;
 
     // Relationships
-    public ICollection<StoreUser> Users { get; set; } = new List<StoreUser>();
-    public ICollection<Product> Products { get; set; } = new List<Product>();
-    public ICollection<Sale> Sales { get; set; } = new List<Sale>();
-    public ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
+    public ICollection<StoreUser> Users { get; set; } = [];
+    public ICollection<Product> Products { get; set; } = [];
+    public ICollection<Sale> Sales { get; set; } = [];
+    public ICollection<Inventory> Inventories { get; set; } = [];
 }
 

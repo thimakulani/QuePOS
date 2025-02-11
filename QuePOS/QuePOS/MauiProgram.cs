@@ -6,6 +6,7 @@ using MudBlazor;
 using MudBlazor.Services;
 using QuePOS.Services;
 using QuePOS.Shared.Services;
+using ZXing.Net.Maui;
 namespace QuePOS
 {
     public static class MauiProgram

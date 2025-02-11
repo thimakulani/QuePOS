@@ -2,20 +2,11 @@
 
 @inject IFormFactor FormFactor
 
+<QuePOS.Shared.Pages.Components.Calculator />
 
 
-
-
-<p>How to do this:</p>
-<ul class="ul-demo mb-3">
-    <li>Click the code to pop up the selection file box</li>
-    <li>Select a picture that contains barcodes</li>
-    <li>Start recognizing barcodes</li>
-</ul>
-<BarcodeReader ScanType="@ScanType.Image" OnResult="@OnImageResult" OnError="@OnImageError" />
-
+@* 
 <div>
-
     <div class="mt-5 container">
         <div class="row">
             <a class="col-md-3">
@@ -364,7 +355,7 @@
         </div>
     </div>
 </div>
-
+ *@
 @code {
     private string factor => FormFactor.GetFormFactor();
     private string platform => FormFactor.GetPlatform();

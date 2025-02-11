@@ -7,12 +7,12 @@ namespace QuePOS.API.Services
 {
     public class SeedService
     {
-        private UserManager<ApplicationUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly POSDbContext context;
         public async Task SeedAsync()
         {
-            string[] roles = { "Admin", "Store Owner", "Store Employee" };
+            string[] roles = ["Admin", "Store Owner", "Store Employee"];
             foreach (var roleName in roles)
             {
                 if (!await _roleManager.RoleExistsAsync(roleName))
@@ -25,7 +25,7 @@ namespace QuePOS.API.Services
         {
             try
             {
-                ApplicationUser appUser = new ApplicationUser()
+                ApplicationUser appUser = new()
                 {
                     Email = "thimakulani@gmail.com",
                     PhoneNumber = "0713934923",
@@ -38,7 +38,7 @@ namespace QuePOS.API.Services
                     if (results.Succeeded)
                     {
                         var user = await userManager.FindByEmailAsync(appUser.Email);
-                        Store store = new Store()
+                        Store store = new()
                         {
                             Address = "",
                             ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzK6hfC4ZU6CbPWNWxFoK01AruzZrJZZg5Zw&s",

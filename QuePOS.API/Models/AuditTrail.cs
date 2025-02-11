@@ -8,7 +8,7 @@ namespace QuePOS.API.Models
         [Key]
         public int Id { get; set; }
         [ForeignKey(nameof(Models.ApplicationUser))]
-        public string? UserId { get; set; } = null;
+        public string UserId { get; set; } = null;
         public string Action { get; set; }
         public string TableName { get; set; }
         public int RecordId { get; set; }

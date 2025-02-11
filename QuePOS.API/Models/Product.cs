@@ -25,7 +25,7 @@ namespace QuePOS.API.Models
 
         // Relationships
         public Category Category { get; set; } = null!;
-        public ICollection<SaleDetail> SaleDetails { get; set; } = new List<SaleDetail>();
+        public ICollection<SaleDetail> SaleDetails { get; set; } = [];
     }
 
 }

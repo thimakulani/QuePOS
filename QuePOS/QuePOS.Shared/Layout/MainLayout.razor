@@ -24,6 +24,7 @@
             <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(2)" Color="Color.Inherit" />
             <MudSpacer />
             <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(3)" Color="Color.Inherit" />
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(4)" Color="Color.Inherit" />
         </MudAppBar>
 
     </AuthorizeView>
@@ -76,6 +77,9 @@
                 break;
             case 2:
                 NavigationManager.NavigateTo("products/index");
+                break;
+            case 4:
+                NavigationManager.NavigateTo("/users/index");
                 break;
         }
     }

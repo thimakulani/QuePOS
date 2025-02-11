@@ -1,0 +1,129 @@
+﻿@page "/calculator"
+
+@using MudBlazor
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="4" lg="3">
+        <MudPaper Elevation="4" Class="p-4 text-center">
+            <MudText Typo="Typo.h5">POS Calculator</MudText>
+
+            <MudGrid Justify="SpaceBetween" AlignItems="Center" Class="mb-2">
+                <MudItem xs="8">
+                    <MudTextField @bind-Value="expression" ReadOnly="true" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTextField @bind-Value="displayValue" ReadOnly="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid Spacing="1">
+                @foreach (var row in buttonLayout)
+                {
+                    <MudItem xs="3">
+                        @foreach (var btn in row)
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="m-1" OnClick="() => OnButtonClick(btn)">
+                                @btn
+                            </MudButton>
+                        }
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private string displayValue = "0";
+    private string expression = "";
+    private string currentInput = "";
+    private string lastOperator = "";
+    private double result = 0;
+    private bool isNewInput = true;
+    private bool lastWasEqual = false;
+
+    private readonly string[][] buttonLayout = new string[][]
+    {
+        new string[] { "7", "8", "9", "/" },
+        new string[] { "4", "5", "6", "*" },
+        new string[] { "1", "2", "3", "-" },
+        new string[] { "0", ".", "=", "+" },
+        new string[] { "C" }
+    };
+
+    private void OnButtonClick(string btn)
+    {
+        if (double.TryParse(btn, out _) || btn == ".")
+        {
+            if (isNewInput || lastWasEqual)
+            {
+                displayValue = btn;
+                currentInput = btn;
+                isNewInput = false;
+                lastWasEqual = false;
+            }
+            else
+            {
+                displayValue += btn;
+                currentInput += btn;
+            }
+            expression += btn;
+        }
+        else if (btn == "C")
+        {
+            displayValue = "0";
+            expression = "";
+            currentInput = "";
+            lastOperator = "";
+            result = 0;
+            isNewInput = true;
+            lastWasEqual = false;
+        }
+        else if (btn == "=")
+        {
+            Calculate();
+            lastOperator = "";
+            isNewInput = true;
+            lastWasEqual = true;
+        }
+        else
+        {
+            if (!string.IsNullOrEmpty(currentInput))
+            {
+                Calculate();
+                lastOperator = btn;
+                currentInput = "";
+                isNewInput = true;
+            }
+
+            if (!string.IsNullOrEmpty(expression) && !char.IsDigit(expression[^1]))
+            {
+                expression = expression[..^1] + btn;
+            }
+            else
+            {
+                expression += btn;
+            }
+        }
+    }
+
+    private void Calculate()
+    {
+        if (double.TryParse(currentInput, out double num))
+        {
+            if (lastOperator == "")
+                result = num;
+            else if (lastOperator == "+")
+                result += num;
+            else if (lastOperator == "-")
+                result -= num;
+            else if (lastOperator == "*")
+                result *= num;
+            else if (lastOperator == "/" && num != 0)
+                result /= num;
+
+            displayValue = result.ToString();
+            currentInput = result.ToString();
+        }
+    }
+}

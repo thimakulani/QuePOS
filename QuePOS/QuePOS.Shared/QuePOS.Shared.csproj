@@ -24,16 +24,14 @@
 	<ItemGroup>
 		<PackageReference Include="Blazor.QRCode" Version="0.2.1" />
 		<PackageReference Include="BlazorQrCodeScanner" Version="1.0.0.1" />
+		<PackageReference Include="BootstrapBlazor" Version="9.3.0" />
 		<PackageReference Include="BootstrapBlazor.BarcodeGenerator" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.1" />
 		<PackageReference Include="MudBlazor" Version="8.2.0" />
 		<!--<PackageReference Include="MudBlazor" Version="7.15.0" />-->
 		<PackageReference Include="MudBlazor.ThemeManager" Version="3.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Pages\Sales\" />
+		<PackageReference Include="ZXing.Net.Maui" Version="0.4.0" />
 	</ItemGroup>
 
 </Project>

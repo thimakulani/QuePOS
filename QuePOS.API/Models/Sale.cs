@@ -19,7 +19,7 @@ namespace QuePOS.API.Models
 
         // Relationships
         public StoreUser User { get; set; } = null!;
-        public ICollection<SaleDetail> SaleDetails { get; set; } = new List<SaleDetail>();
+        public ICollection<SaleDetail> SaleDetails { get; set; } = [];
     }
 
 }

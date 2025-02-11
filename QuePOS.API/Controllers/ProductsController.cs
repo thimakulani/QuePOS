@@ -17,10 +17,10 @@ namespace QuePOS.API.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private IRepository<Product> _productsRepository;
-        private IRepository<StoreUser> _storeRepository;
-        private CloudinaryService cloudinaryService;
-        private POSDbContext _posdbContext;
+        private readonly IRepository<Product> _productsRepository;
+        private readonly IRepository<StoreUser> _storeRepository;
+        private readonly CloudinaryService cloudinaryService;
+        private readonly POSDbContext _posdbContext;
         public ProductsController(IRepository<Product> productsRepository, IRepository<StoreUser> storeRepository, CloudinaryService cloudinaryService, POSDbContext posdbContext)
         {
             _productsRepository = productsRepository;

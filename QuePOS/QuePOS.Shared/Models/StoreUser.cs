@@ -13,7 +13,7 @@
         public Store Store { get; set; } = null!;
 
         // Relationships
-        public ICollection<Sale> Sales { get; set; } = new List<Sale>();
+        public ICollection<Sale> Sales { get; set; } = [];
     }
 
 }

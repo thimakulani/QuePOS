@@ -14,8 +14,8 @@ namespace QuePOS.API.Controllers
     [ApiController]
     public class StoreController : ControllerBase
     {
-        private IRepository<Store> _storeRepository;
-        private POSDbContext context;
+        private readonly IRepository<Store> _storeRepository;
+        private readonly POSDbContext context;
         public StoreController(IRepository<Store> storeRepository, POSDbContext context)
         {
             _storeRepository = storeRepository;
