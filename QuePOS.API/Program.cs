@@ -11,7 +11,13 @@ using QuePOS.API.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddAuthentication()
+    .AddBearerToken(IdentityConstants.BearerScheme, option =>
+    {
+        option.BearerTokenExpiration = TimeSpan.FromSeconds(10);
+        option.RefreshTokenExpiration = TimeSpan.FromDays(1);
 
+    });
 builder.Services.AddControllers();
 builder.Services.AddAuthorizationBuilder();
 //builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
@@ -29,7 +35,7 @@ builder.Services.AddTransient<SeedService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 //ApplicationUser, IdentityRole
 builder.Services
-    .AddIdentityApiEndpoints<ApplicationUser>(options =>
+    .AddIdentityCore<ApplicationUser>(options =>
     {
         options.Password.RequireDigit = true;
         options.Password.RequiredLength = 8;

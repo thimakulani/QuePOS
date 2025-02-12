@@ -5,42 +5,38 @@
 <MudGrid>
     <MudItem xs="12" sm="8" md="6" lg="6">
         <MudPaper Elevation="4" Class="p-4">
-            <MudText Typo="Typo.h5">Transaction</MudText>
-
-            <!-- Product Selection -->
-            @*   <MudAutocomplete T="string" Label="Search Product" SearchFunc="SearchProducts" OnSelected="AddToCart" />
-            <MudAutocomplete T="string"
-                             Label="Search Product"
-                             SearchFunc="SearchProducts"
-                             onselect="@(item => AddToCart(item))" *@
-
-            />
-            <select class="select2 form-control">
-                @foreach (var item in products)
+            <MudText Style="margin: 10px" Typo="Typo.h5">Transaction</MudText>
+            <br />
+            <MudGrid Class="mb-2" Justify="Justify.SpaceAround">
+                <MudButton Variant="Variant.Outlined" OnClick="ShowScanner" StartIcon="@Icons.Material.Outlined.QrCodeScanner" >Scan </MudButton>
+                <MudButton Variant="Variant.Outlined" OnClick="ShowProducts" StartIcon="@Icons.Material.Outlined.Add">Get Products</MudButton>
+            </MudGrid>
+            <MudList Dense T="string" Class="mt-2">
+                @foreach (var item in cartItems)
                 {
-                    <option value="@item.Id"> @item.Name</option>
+                    <MudListItem>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="2">
+                            <!-- Item Name -->
+                            <MudText Typo="Typo.h6">@item.Name</MudText>
+
+                            <!-- Quantity Stepper -->
+                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="() => UpdateQuantity(item, item.Quantity - 1)" Disabled="item.Quantity <= 1" Size="Size.Small" />
+                                <MudText>@item.Quantity</MudText>
+                                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => UpdateQuantity(item, item.Quantity + 1)" Size="Size.Small" />
+                            </MudStack>
+
+                            <!-- Total Price -->
+                            <MudText Typo="Typo.h6">@((item.Quantity * item.Price).ToString("C"))</MudText>
+
+                            <!-- Remove Item Button -->
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => RemoveItem(item)" Color="Color.Error" />
+                        </MudStack>
+                    </MudListItem>
                 }
-            </select>
-            <MudTable Items="cartItems" Dense Class="mt-2">
-                <HeaderContent>
-                    <MudTh>Item</MudTh>
-                    <MudTh>Quantity</MudTh>
-                    <MudTh>Price</MudTh>
-                    <MudTh>Total</MudTh>
-                    <MudTh>Action</MudTh>
-                </HeaderContent>
-                <RowTemplate Context="item">
-                    <MudTd>@item.Name</MudTd>
-                    <MudTd>
-                        <MudNumericField T="int" Value="@item.Quantity" ValueChanged="(val) => UpdateQuantity(item, val)" Min="1" />
-                    </MudTd>
-                    <MudTd>@item.Price.ToString("C")</MudTd>
-                    <MudTd>@(item.Quantity * item.Price).ToString("C")</MudTd>
-                    <MudTd>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => RemoveItem(item)" Color="Color.Error" />
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
+            </MudList>
+
+
 
             <MudDivider Class="my-2" />
             <MudText Typo="Typo.h6">Total: @totalAmount.ToString("C")</MudText>
@@ -50,9 +46,45 @@
     </MudItem>
 </MudGrid>
 
+
+<MudDialog @bind-Visible="products_visible" Options="_dialogOptions">
+    <TitleContent>
+        <MudListSubheader>
+        </MudListSubheader>
+    </TitleContent>
+    <DialogContent>
+        <MudItem>
+            <MudList T="string"  ReadOnly="false" CheckBoxColor="MudBlazor.Color.Tertiary">
+
+                @foreach (var item in products)
+                {
+                    <MudListItem >
+
+                        <MudStack Row="true" AlignItems="AlignItems.Center"  Spacing="2">
+                            <MudText>@item.Price</MudText>
+                            <MudText>@item.Name</MudText>
+                            <MudSpacer />
+                            <MudIconButton Icon="@Icons.Material.Rounded.Add" />
+                        </MudStack>
+                    </MudListItem>
+                }
+            </MudList>
+        </MudItem>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="MudBlazor.Color.Primary" OnClick="CloseDlg">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+
+
+
 @code {
     private List<Product> products = [];
     @inject ISnackbar Snackbar;
+    private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
+    private bool products_visible;
     [Inject]
     private IHttpClientService HttpClientService { get; set; }
     private List<CartItem> cartItems = [];
@@ -64,7 +96,18 @@
             .Where(p => p.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
             .Select(p => p.Name));
     }
+    private void CloseDlg()
+    {
 
+    }    
+    private void ShowScanner()
+    {
+
+    }    
+    private void ShowProducts()
+    {
+        products_visible = true;
+    }
     protected override async Task OnInitializedAsync()
     {
         await GetProducts();
