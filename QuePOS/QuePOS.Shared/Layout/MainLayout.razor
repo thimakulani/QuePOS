@@ -14,16 +14,18 @@
         <MudAppBar>
             <MudText> @($"STORE: ") @store?.StoreName </MudText>
             <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="x=>SwitchView(-1)" Color="Color.Inherit" />
             <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(-1)" Color="Color.Inherit" />
         </MudAppBar>
         <MudAppBar Bottom=true Elevation="4">
             <MudIconButton Icon="@Icons.Material.Filled.Dashboard" OnClick="x=>SwitchView(0)" Color="Color.Inherit" Edge="Edge.Start" />
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Inventory" OnClick="x=>SwitchView(1)" Color="Color.Inherit" />
+            <MudIconButton Icon="@Icons.Material.Filled.Inventory2" OnClick="x=>SwitchView(1)" Color="Color.Inherit" />
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(2)" Color="Color.Inherit" />
+            <MudIconButton Icon="@Icons.Material.Filled.PointOfSale" OnClick="x=>SwitchView(2)" Color="Color.Inherit" />
             <MudSpacer />
             <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(3)" Color="Color.Inherit" />
+            <MudSpacer />
             <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(4)" Color="Color.Inherit" />
         </MudAppBar>
 

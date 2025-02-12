@@ -1,5 +1,133 @@
-﻿<h3>Index</h3>
+﻿@page "/transection/index"
+
+@using MudBlazor
+
+<MudGrid>
+    <MudItem xs="12" sm="8" md="6" lg="6">
+        <MudPaper Elevation="4" Class="p-4">
+            <MudText Typo="Typo.h5">Transaction</MudText>
+
+            <!-- Product Selection -->
+            @*   <MudAutocomplete T="string" Label="Search Product" SearchFunc="SearchProducts" OnSelected="AddToCart" />
+            <MudAutocomplete T="string"
+                             Label="Search Product"
+                             SearchFunc="SearchProducts"
+                             onselect="@(item => AddToCart(item))" *@
+
+            />
+            <select class="select2 form-control">
+                @foreach (var item in products)
+                {
+                    <option value="@item.Id"> @item.Name</option>
+                }
+            </select>
+            <MudTable Items="cartItems" Dense Class="mt-2">
+                <HeaderContent>
+                    <MudTh>Item</MudTh>
+                    <MudTh>Quantity</MudTh>
+                    <MudTh>Price</MudTh>
+                    <MudTh>Total</MudTh>
+                    <MudTh>Action</MudTh>
+                </HeaderContent>
+                <RowTemplate Context="item">
+                    <MudTd>@item.Name</MudTd>
+                    <MudTd>
+                        <MudNumericField T="int" Value="@item.Quantity" ValueChanged="(val) => UpdateQuantity(item, val)" Min="1" />
+                    </MudTd>
+                    <MudTd>@item.Price.ToString("C")</MudTd>
+                    <MudTd>@(item.Quantity * item.Price).ToString("C")</MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => RemoveItem(item)" Color="Color.Error" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+
+            <MudDivider Class="my-2" />
+            <MudText Typo="Typo.h6">Total: @totalAmount.ToString("C")</MudText>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-2" OnClick="ProcessSale">Complete Sale</MudButton>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
 
 @code {
+    private List<Product> products = [];
+    @inject ISnackbar Snackbar;
+    [Inject]
+    private IHttpClientService HttpClientService { get; set; }
+    private List<CartItem> cartItems = [];
+    private double totalAmount => cartItems.Sum(i => i.Quantity * i.Price);
 
+    private Task<IEnumerable<string>> SearchProducts(string value, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(products
+            .Where(p => p.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
+            .Select(p => p.Name));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetProducts();
+        await base.OnInitializedAsync();
+    }
+    private void AddToCart(string productName)
+    {
+        var product = products.FirstOrDefault(p => p.Name == productName);
+        if (product != null)
+        {
+            var existingItem = cartItems.FirstOrDefault(i => i.Name == product.Name);
+            if (existingItem != null)
+            {
+                existingItem.Quantity++;
+            }
+            else
+            {
+                cartItems.Add(new CartItem { Name = product.Name, Quantity = 1, Price = (double)product.Price });
+            }
+        }
+    }
+
+    private void UpdateQuantity(CartItem item, int quantity)
+    {
+        item.Quantity = quantity;
+    }
+
+    private void RemoveItem(CartItem item)
+    {
+        cartItems.Remove(item);
+    }
+
+    private void ProcessSale()
+    {
+        // Logic for processing the sale (e.g., saving transaction, printing receipt, etc.)
+        cartItems.Clear();
+    }
+    private async Task GetProducts()
+    {
+        try
+        {
+            //string id = FormFactor.GetSession()
+            products = await HttpClientService.GetAsync<List<Product>>("/api/products/all/store");
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+
+    private class CartItem
+    {
+        public string Name { get; set; } = "";
+        public int Quantity { get; set; } = 1;
+        public double Price { get; set; } = 0;
+    }
 }

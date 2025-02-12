@@ -38,6 +38,7 @@ builder.Services
         options.Password.RequireLowercase = true;
         options.User.RequireUniqueEmail = true;
         options.SignIn.RequireConfirmedEmail = false;
+
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<POSDbContext>()
@@ -70,7 +71,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         In = ParameterLocation.Header,
         Name = "Authorization",
-        Description = "Enter 'Bearer {your_token}' to authenticate",
+        Description = "Enter '{your_token}' to authenticate",
     });
 
     // Add global security requirement

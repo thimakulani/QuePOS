@@ -58,6 +58,10 @@ namespace QuePOS.Services
                         return true;
                     }
                 }
+                else
+                {
+                    Console.WriteLine($"Failed to refresh token: {await response.Content.ReadAsStringAsync()}");
+                }
             }
             catch (Exception ex)
             {

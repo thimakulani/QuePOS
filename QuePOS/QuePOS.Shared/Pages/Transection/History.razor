@@ -1,0 +1,65 @@
+﻿@page "/transection/history"
+
+@using MudBlazor
+
+<MudGrid>
+    <MudItem xs="12" sm="8" md="6" lg="4">
+        <MudPaper Elevation="4" Class="p-4 text-center">
+            <MudText Typo="Typo.h5">TRANSACTION</MudText>
+
+            <MudTable Items="items" Dense>
+                <HeaderContent>
+                    <MudTh>Item</MudTh>
+                    <MudTh>Quantity</MudTh>
+                    <MudTh>Price</MudTh>
+                    <MudTh>Total</MudTh>
+                    <MudTh>Action</MudTh>
+                </HeaderContent>
+                <RowTemplate Context="item">
+                    <MudTd>@item.Name</MudTd>
+                    <MudTd>
+                        <MudNumericField T="int" Value="@item.Quantity" ValueChanged="(val) => UpdateQuantity(item, val)" Min="1" />
+                    </MudTd>
+                    <MudTd>@item.Price.ToString("C")</MudTd>
+                    <MudTd>@(item.Quantity * item.Price).ToString("C")</MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => RemoveItem(item)" Color="Color.Error" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+
+            <MudDivider Class="my-2" />
+            <MudText Typo="Typo.h6">Total: @totalAmount.ToString("C")</MudText>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-2" OnClick="CompleteTransaction">Complete Transaction</MudButton>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<TransactionItem> items = new();
+    private decimal totalAmount => items.Sum(i => i.Quantity * i.Price);
+
+    private void UpdateQuantity(TransactionItem item, int quantity)
+    {
+        item.Quantity = quantity;
+    }
+
+    private void RemoveItem(TransactionItem item)
+    {
+        items.Remove(item);
+    }
+
+    private void CompleteTransaction()
+    {
+        // Logic for completing transaction (e.g., saving to database, printing receipt, etc.)
+        items.Clear();
+    }
+
+    private class TransactionItem
+    {
+        public string Name { get; set; } = "";
+        public int Quantity { get; set; } = 1;
+        public decimal Price { get; set; } = 0;
+    }
+}
