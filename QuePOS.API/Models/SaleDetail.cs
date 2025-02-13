@@ -16,7 +16,7 @@ namespace QuePOS.API.Models
         public decimal Total { get; set; }
 
         // Relationships
-        public Sale Sale { get; set; } = null!;
-        public Product Product { get; set; } = null!;
+        public virtual Sale Sale { get; set; } = null!;
+        public virtual Product Product { get; set; } = null!;
     }
 }

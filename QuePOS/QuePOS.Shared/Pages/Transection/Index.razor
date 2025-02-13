@@ -3,8 +3,8 @@
 @using MudBlazor
 
 <MudGrid>
-    <MudItem xs="12" sm="8" md="6" lg="6">
-        <MudPaper Elevation="4" Class="p-4">
+    <MudItem xs="12" sm="8" md="2" lg="6">
+        <MudPaper Elevation="4" Class="p-2">
             <MudText Style="margin: 10px" Typo="Typo.h5">Transaction</MudText>
             <br />
             <MudGrid Class="mb-2" Justify="Justify.SpaceAround">
@@ -15,23 +15,24 @@
                 @foreach (var item in cartItems)
                 {
                     <MudListItem>
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="2">
-                            <!-- Item Name -->
-                            <MudText Typo="Typo.h6">@item.Name</MudText>
+                        <MudPaper Elevation="3" Class="p-2">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="2">
+                                <!-- Item Name -->
+                                <MudText Color="Color.Success" Typo="Typo.subtitle1">@item.Name</MudText>
+                                <MudSpacer />
+                                <!-- Quantity Stepper -->
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity - 1)" Disabled="item.Quantity <= 1" Size="Size.Small" />
+                                    <MudText>@item.Quantity</MudText>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity + 1)" Size="Size.Small" />
+                                </MudStack>
 
-                            <!-- Quantity Stepper -->
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                <MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="() => UpdateQuantity(item, item.Quantity - 1)" Disabled="item.Quantity <= 1" Size="Size.Small" />
-                                <MudText>@item.Quantity</MudText>
-                                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => UpdateQuantity(item, item.Quantity + 1)" Size="Size.Small" />
+                                <!-- Total Price -->
+                                <MudText Align="Align.Right" Typo="Typo.subtitle1">@((item.Quantity * item.Price).ToString("C"))</MudText>
+                                <!-- Remove Item Button -->
+                                <MudIconButton  Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => RemoveItem(item)" Color="Color.Error" />
                             </MudStack>
-
-                            <!-- Total Price -->
-                            <MudText Typo="Typo.h6">@((item.Quantity * item.Price).ToString("C"))</MudText>
-
-                            <!-- Remove Item Button -->
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => RemoveItem(item)" Color="Color.Error" />
-                        </MudStack>
+                        </MudPaper>
                     </MudListItem>
                 }
             </MudList>
@@ -64,9 +65,9 @@
                                 <MudSpacer />
                                 <MudText Typo="Typo.body1" Color="Color.Secondary">@item.Price?.ToString("C")</MudText>
                                 <MudIconButton Icon="@Icons.Material.Rounded.Add"
-                                               OnClick="@(() => AddItemToCart(item))"
-                                               Color="Color.Primary"
-                                               Size="Size.Small" />
+                                OnClick="@(() => AddItemToCart(item))"
+                                Color="Color.Primary"
+                                Size="Size.Small" />
                             </MudStack>
                         </MudPaper>
                     </MudListItem>
@@ -91,7 +92,7 @@
     private bool products_visible;
     [Inject]
     private IHttpClientService HttpClientService { get; set; }
-    private List<CartItem> cartItems = [];
+    private List<SaleDetail> cartItems = [];
     private double totalAmount => cartItems.Sum(i => i.Quantity * i.Price);
 
     private Task<IEnumerable<string>> SearchProducts(string value, CancellationToken cancellationToken)
@@ -129,7 +130,7 @@
             }
             else
             {
-                cartItems.Add(new CartItem { Name = product.Name, Quantity = 1, Price = (double)product.Price });
+                cartItems.Add(new SaleDetail { Name = product.Name, Quantity = 1, Price = (double)product.Price });
             }
         }
     }
@@ -145,25 +146,47 @@
             }
             else
             {
-                cartItems.Add(new CartItem { Name = product.Name, Quantity = 1, Price = (double)product.Price });
+                cartItems.Add(new SaleDetail { Name = product.Name, Quantity = 1, Price = (double)product.Price });
             }
         }
     }
 
-    private void UpdateQuantity(CartItem item, int quantity)
+    private void UpdateQuantity(SaleDetail item, int quantity)
     {
         item.Quantity = quantity;
     }
 
-    private void RemoveItem(CartItem item)
+    private void RemoveItem(SaleDetail item)
     {
         cartItems.Remove(item);
     }
 
     private void ProcessSale()
     {
-        // Logic for processing the sale (e.g., saving transaction, printing receipt, etc.)
-        cartItems.Clear();
+        try
+        {
+            Sale sale = new Sale()
+                {
+                    SaleDate = DateTime.Now,
+                    TotalAmount = (decimal)totalAmount,
+                    SaleDetails = cartItems,
+                };
+
+            cartItems.Clear();
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+
     }
     private async Task GetProducts()
     {
@@ -187,10 +210,5 @@
     }
 
 
-    private class CartItem
-    {
-        public string Name { get; set; } = "";
-        public int Quantity { get; set; } = 1;
-        public double Price { get; set; } = 0;
-    }
+
 }
