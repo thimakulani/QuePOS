@@ -8,7 +8,7 @@
             <MudText Style="margin: 10px" Typo="Typo.h5">Transaction</MudText>
             <br />
             <MudGrid Class="mb-2" Justify="Justify.SpaceAround">
-                <MudButton Variant="Variant.Outlined" OnClick="ShowScanner" StartIcon="@Icons.Material.Outlined.QrCodeScanner" >Scan </MudButton>
+                <MudButton Variant="Variant.Outlined" OnClick="ShowScanner" StartIcon="@Icons.Material.Outlined.QrCodeScanner">Scan </MudButton>
                 <MudButton Variant="Variant.Outlined" OnClick="ShowProducts" StartIcon="@Icons.Material.Outlined.Add">Get Products</MudButton>
             </MudGrid>
             <MudList Dense T="string" Class="mt-2">
@@ -20,7 +20,7 @@
                             <MudText Typo="Typo.h6">@item.Name</MudText>
 
                             <!-- Quantity Stepper -->
-                            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                                 <MudIconButton Icon="@Icons.Material.Filled.Remove" OnClick="() => UpdateQuantity(item, item.Quantity - 1)" Disabled="item.Quantity <= 1" Size="Size.Small" />
                                 <MudText>@item.Quantity</MudText>
                                 <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => UpdateQuantity(item, item.Quantity + 1)" Size="Size.Small" />
@@ -30,7 +30,7 @@
                             <MudText Typo="Typo.h6">@((item.Quantity * item.Price).ToString("C"))</MudText>
 
                             <!-- Remove Item Button -->
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => RemoveItem(item)" Color="Color.Error" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => RemoveItem(item)" Color="Color.Error" />
                         </MudStack>
                     </MudListItem>
                 }
@@ -49,30 +49,34 @@
 
 <MudDialog @bind-Visible="products_visible" Options="_dialogOptions">
     <TitleContent>
-        <MudListSubheader>
-        </MudListSubheader>
+            Products
     </TitleContent>
     <DialogContent>
         <MudItem>
-            <MudList T="string"  ReadOnly="false" CheckBoxColor="MudBlazor.Color.Tertiary">
+            <MudList T="string" ReadOnly="true" CheckBoxColor="MudBlazor.Color.Tertiary">
 
                 @foreach (var item in products)
                 {
-                    <MudListItem >
-
-                        <MudStack Row="true" AlignItems="AlignItems.Center"  Spacing="2">
-                            <MudText>@item.Price</MudText>
-                            <MudText>@item.Name</MudText>
-                            <MudSpacer />
-                            <MudIconButton Icon="@Icons.Material.Rounded.Add" />
-                        </MudStack>
+                    <MudListItem Class="p-2">
+                        <MudPaper Elevation="3" Class="p-2">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
+                                <MudText Typo="Typo.h6">@item.Name</MudText>
+                                <MudSpacer />
+                                <MudText Typo="Typo.body1" Color="Color.Secondary">@item.Price?.ToString("C")</MudText>
+                                <MudIconButton Icon="@Icons.Material.Rounded.Add"
+                                               OnClick="@(() => AddItemToCart(item))"
+                                               Color="Color.Primary"
+                                               Size="Size.Small" />
+                            </MudStack>
+                        </MudPaper>
                     </MudListItem>
+
                 }
             </MudList>
         </MudItem>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="MudBlazor.Color.Primary" OnClick="CloseDlg">Close</MudButton>
+        <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" OnClick="CloseDlg">Close</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -98,12 +102,12 @@
     }
     private void CloseDlg()
     {
-
-    }    
+        products_visible = false;
+    }
     private void ShowScanner()
     {
 
-    }    
+    }
     private void ShowProducts()
     {
         products_visible = true;
@@ -116,6 +120,22 @@
     private void AddToCart(string productName)
     {
         var product = products.FirstOrDefault(p => p.Name == productName);
+        if (product != null)
+        {
+            var existingItem = cartItems.FirstOrDefault(i => i.Name == product.Name);
+            if (existingItem != null)
+            {
+                existingItem.Quantity++;
+            }
+            else
+            {
+                cartItems.Add(new CartItem { Name = product.Name, Quantity = 1, Price = (double)product.Price });
+            }
+        }
+    }
+    private void AddItemToCart(Product product)
+    {
+        //var product = products.FirstOrDefault(p => p.Name == productName);
         if (product != null)
         {
             var existingItem = cartItems.FirstOrDefault(i => i.Name == product.Name);
