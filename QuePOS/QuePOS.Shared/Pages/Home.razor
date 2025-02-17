@@ -8,13 +8,31 @@
         <a href="/transection/index" class="col-12 col-sm-6 col-md-3">
             <div class="info-box">
                 <span class="info-box-icon bg-info elevation-1">
-                    <i class="fa-solid fa-briefcase"></i>
+                    @* <i class="fa-solid fa-briefcase"></i> *@
+                    <MudIcon Icon="@Icons.Material.Outlined.ProductionQuantityLimits" />
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Transection</span>
                     <span class="info-box-number">
-                        10
-                        <small>%</small>
+
+                        <small>@vm.DayCount</small>
+                    </span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </a>
+        <a href="/transection/history" class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+                <span class="info-box-icon bg-info elevation-1">
+                    @* <i class="fa-solid fa-briefcase"></i> *@
+                    <MudIcon Icon="@Icons.Material.Outlined.History" />
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Transection Histry</span>
+                    <span class="info-box-number">
+
+                        <small>@vm.TotalCount</small>
                     </span>
                 </div>
                 <!-- /.info-box-content -->
@@ -25,367 +43,36 @@
     </div>
 </div>
 
-
-@* 
-<div>
-    <div class="mt-5 container">
-        <div class="row">
-            <a class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-blue">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div>
-                        <h5>Messages</h5>
-                        <h3>1,410</h3>
-                    </div>
-                </div>
-            </a>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-green">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <div>
-                        <h5>Bookmarks</h5>
-                        <h3>410</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-yellow">
-                        <i class="fas fa-upload"></i>
-                    </div>
-                    <div>
-                        <h5>Uploads</h5>
-                        <h3>13,648</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="info-box">
-                    <div class="icon info-box-red">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div>
-                        <h5>Likes</h5>
-                        <h3>93,139</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
- *@
 @code {
     private string factor => FormFactor.GetFormFactor();
     private string platform => FormFactor.GetPlatform();
-    private void OnImageError()
+    private CounterViewModel vm = new();
+    @inject IHttpClientService HttpClientService;
+    @inject ISnackbar Snackbar;
+    protected override async Task OnInitializedAsync()
     {
-
+        await LoadSales();
+        await base.OnInitializedAsync();
     }
-    private void OnImageResult()
+
+    private async Task LoadSales()
     {
 
+        try
+        {
+            vm = await HttpClientService.GetAsync<CounterViewModel>($"api/sales/get_counter");
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 }

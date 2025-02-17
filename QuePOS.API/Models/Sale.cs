@@ -15,9 +15,9 @@ namespace QuePOS.API.Models
 
         // Foreign Key for Store
         public int? StoreID { get; set; }
-        public Store Store { get; set; } = null!;
 
         // Relationships
+        public Store Store { get; set; } = null!;
         public StoreUser User { get; set; } = null!;
         public ICollection<SaleDetail> SaleDetails { get; set; } = [];
     }

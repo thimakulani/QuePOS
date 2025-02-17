@@ -73,5 +73,10 @@ namespace QuePOS.Web.Services
             }
             return null;
         }
+
+        public Task<AuthToken> Login()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

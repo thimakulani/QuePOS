@@ -16,11 +16,12 @@ namespace QuePOS.Services
         private readonly HttpClient _httpClient;
         private string _accessToken;
         private string _refreshToken;
+        private readonly IUserService userService;
 
-        public HttpClientService(IHttpClientFactory httpClientFactory)
+        public HttpClientService(IHttpClientFactory httpClientFactory, IUserService userService)
         {
             _httpClient = httpClientFactory.CreateClient("api");
-
+            this.userService = userService;
         }
 
         private async Task AddAuthorizationHeaders()
@@ -58,9 +59,22 @@ namespace QuePOS.Services
                         return true;
                     }
                 }
-                else
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    Console.WriteLine($"Failed to refresh token: {await response.Content.ReadAsStringAsync()}");
+                    var username = await SecureStorage.GetAsync("username");
+                    var password = await SecureStorage.GetAsync("password");
+                    if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+                    {
+                        UserLogin userLogin = new UserLogin()
+                        {
+                            Email = username,
+                            Password = password
+                        };
+                        //var results = await Login(userLogin);
+                        var token = await userService.Login(userLogin);
+                        _accessToken = token.AccessToken;
+                        _refreshToken = token.RefreshToken;
+                    }
                 }
             }
             catch (Exception ex)
@@ -121,7 +135,8 @@ namespace QuePOS.Services
 
         public async Task<T> PostAsync<T>(string endpoint, object payload)
         {
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+            var json = JsonConvert.SerializeObject(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
             return await SendRequestWithRetry<T>(() => _httpClient.PostAsync(endpoint, content));
         }
 
@@ -134,6 +149,7 @@ namespace QuePOS.Services
         public async Task DeleteAsync(string endpoint)
         {
             await SendRequestWithRetry<object>(() => _httpClient.DeleteAsync(endpoint));
+
         }
     }
 

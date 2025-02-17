@@ -1,4 +1,3 @@
-using Camera.MAUI;
 
 namespace QuePOS.MVVM.View;
 
@@ -8,24 +7,24 @@ public partial class BarCodeScannerView : ContentPage
     {
         InitializeComponent();
     }
-    private void CameraView_CamerasLoaded(object sender, EventArgs e)
-    {
-        if (cameraView.NumCamerasDetected > 0)
+    /*    private void CameraView_CamerasLoaded(object sender, EventArgs e)
         {
-            cameraView.Camera = cameraView.Cameras.First();
-            MainThread.BeginInvokeOnMainThread(async () =>
+            if (cameraView.NumCamerasDetected > 0)
             {
-                await cameraView.StopCameraAsync();
-                await cameraView.StartCameraAsync();
-            });
-        }
-    }
+                cameraView.Camera = cameraView.Cameras.First();
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    await cameraView.StopCameraAsync();
+                    await cameraView.StartCameraAsync();
+                });
+            }
+        }*/
 
-    private void cameraView_BarcodeDetected(object sender, Camera.MAUI.ZXingHelper.BarcodeEventArgs args)
-    {
-        MainThread.BeginInvokeOnMainThread(() =>
+    /*    private void cameraView_BarcodeDetected(object sender, Camera.MAUI.ZXingHelper.BarcodeEventArgs args)
         {
-            BarCodeText.Text = $"{args.Result[0].BarcodeFormat}: {args.Result[0].Text}";
-        });
-    }
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                BarCodeText.Text = $"{args.Result[0].BarcodeFormat}: {args.Result[0].Text}";
+            });
+        }*/
 }

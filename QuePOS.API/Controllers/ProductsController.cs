@@ -51,20 +51,10 @@ namespace QuePOS.API.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(int id)
         {
-
             var prod = await _productsRepository.Get(id);
             return Ok(prod);
-
         }
-        [HttpGet("all/store/products/{storeId}")]
-        public async Task<IActionResult> GetAll(int storeId)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            //var store_user = await _storeRepository?.GetFirstOrDefault(u => u.UserId == userId);
-            var prod = await _productsRepository.GetWhere(x => x.StoreID == storeId);
-            return Ok(prod);
 
-        }
         [HttpGet("all/store")]
         public async Task<IActionResult> GetAll()
         {
@@ -75,9 +65,67 @@ namespace QuePOS.API.Controllers
             {
                 return BadRequest("User not found");
             }
-            var products = _posdbContext.Products.Where(x => x.StoreID == user.StoreID);
+            var products = _posdbContext.Products.Where(x => x.StoreID == user.StoreID && !x.IsDeleted);
             return Ok(products);
 
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var product = await _posdbContext.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound("Product not found");
+            }
+            if (!string.IsNullOrEmpty(product.PublicId))
+            {
+                await cloudinaryService.DeleteImageAsync(product.PublicId);
+            }
+
+            // Perform soft delete by setting IsDeleted to true
+            product.IsDeleted = true;
+
+            _posdbContext.Products.Update(product);
+            await _posdbContext.SaveChangesAsync();
+
+            return Ok("Product deleted successfully");
+        }
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> Update(int id, Product updatedProduct)
+        {
+            if (updatedProduct == null || id != updatedProduct.Id)
+            {
+                return BadRequest("Invalid product data");
+            }
+
+            var existingProduct = await _posdbContext.Products.FindAsync(id);
+            if (existingProduct == null || existingProduct.IsDeleted)
+            {
+                return NotFound("Product not found");
+            }
+            if (!string.IsNullOrEmpty(updatedProduct.Base64Url))
+            {
+                if (!string.IsNullOrEmpty(existingProduct.PublicId))
+                {
+                    await cloudinaryService.DeleteImageAsync(existingProduct.PublicId);
+                }
+                var url = await cloudinaryService.UploadImageAsync(updatedProduct.Base64Url, Guid.NewGuid().ToString());
+                existingProduct.ImageUrl = url.Url.ToString();
+                existingProduct.PublicId = url.PublicId;
+            }
+            // Update properties
+            existingProduct.Name = updatedProduct.Name;
+            existingProduct.Price = updatedProduct.Price;
+            existingProduct.StockQuantity = updatedProduct.StockQuantity;
+            existingProduct.Description = updatedProduct.Description;
+            existingProduct.CategoryID = updatedProduct.CategoryID;
+
+            // Add more fields as needed
+
+            _posdbContext.Products.Update(existingProduct);
+            await _posdbContext.SaveChangesAsync();
+
+            return Ok(existingProduct);
         }
     }
 }

@@ -1,65 +1,78 @@
 ﻿@page "/transection/history"
 
-@using MudBlazor
 
-<MudGrid>
-    <MudItem xs="12" sm="8" md="6" lg="4">
-        <MudPaper Elevation="4" Class="p-4 text-center">
-            <MudText Typo="Typo.h5">TRANSACTION</MudText>
+<MudCard>
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" md="4" class="d-flex align-center">
+                <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="Start Date" @bind-Date="startDate" Disabled="true" />
+                <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="End Date" @bind-Date="endDate" Disabled="true" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadSales">Apply Filter</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
 
-            <MudTable Items="items" Dense>
-                <HeaderContent>
-                    <MudTh>Item</MudTh>
-                    <MudTh>Quantity</MudTh>
-                    <MudTh>Price</MudTh>
-                    <MudTh>Total</MudTh>
-                    <MudTh>Action</MudTh>
-                </HeaderContent>
-                <RowTemplate Context="item">
-                    <MudTd>@item.Name</MudTd>
-                    <MudTd>
-                        <MudNumericField T="int" Value="@item.Quantity" ValueChanged="(val) => UpdateQuantity(item, val)" Min="1" />
-                    </MudTd>
-                    <MudTd>@item.Price.ToString("C")</MudTd>
-                    <MudTd>@(item.Quantity * item.Price).ToString("C")</MudTd>
-                    <MudTd>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => RemoveItem(item)" Color="Color.Error" />
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
-
-            <MudDivider Class="my-2" />
-            <MudText Typo="Typo.h6">Total: @totalAmount.ToString("C")</MudText>
-
-            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-2" OnClick="CompleteTransaction">Complete Transaction</MudButton>
-        </MudPaper>
-    </MudItem>
-</MudGrid>
+<MudTable Items="sales" Dense="true">
+    <HeaderContent>
+        <MudTh>Sale ID</MudTh>
+        <MudTh>User</MudTh>
+        <MudTh>Date</MudTh>
+        <MudTh>Quantity</MudTh>
+        <MudTh>Total Amount</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="sale">
+        <MudTd DataLabel="Sale ID">@sale.Id</MudTd>
+        <MudTd DataLabel="User">@sale.User.FirstName</MudTd>
+        <MudTd DataLabel="Date">@sale.SaleDate.ToShortDateString()</MudTd>
+        <MudTd DataLabel="Quantity">@sale.SaleDetails.Count()</MudTd>
+        <MudTd DataLabel="Total Amount">@sale.TotalAmount.ToString("C")</MudTd>
+    </RowTemplate>
+</MudTable>
 
 @code {
-    private List<TransactionItem> items = new();
-    private decimal totalAmount => items.Sum(i => i.Quantity * i.Price);
-
-    private void UpdateQuantity(TransactionItem item, int quantity)
+    private string selectedFilter = "Daily";
+    private DateTime? startDate = DateTime.Today;
+    private DateTime? endDate = DateTime.Today;
+    private List<Sale> sales = new();
+    private MudDateRangePicker _picker;
+    private DateRange _dateRange = new DateRange(DateTime.Now.Date, DateTime.Now.AddDays(5).Date);
+    private bool _autoClose;
+    @inject IHttpClientService HttpClientService;
+    @inject ISnackbar Snackbar;
+    protected override async Task OnInitializedAsync()
     {
-        item.Quantity = quantity;
+        await LoadSales();
+        await base.OnInitializedAsync();
     }
 
-    private void RemoveItem(TransactionItem item)
+    private async Task LoadSales()
     {
-        items.Remove(item);
-    }
-
-    private void CompleteTransaction()
-    {
-        // Logic for completing transaction (e.g., saving to database, printing receipt, etc.)
-        items.Clear();
-    }
-
-    private class TransactionItem
-    {
-        public string Name { get; set; } = "";
-        public int Quantity { get; set; } = 1;
-        public decimal Price { get; set; } = 0;
+        /*
+         *
+        FilterViewModel filter = new()
+             {
+                 StartDate = startDate,
+                 EndDate = endDate,
+             };
+         */
+        try
+        {
+            sales = await HttpClientService.GetAsync<List<Sale>>($"api/sales/get_history");
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using QuePOS.API.Data;
 using QuePOS.API.Interfaces;
 using System.Linq.Expressions;
