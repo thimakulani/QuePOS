@@ -15,6 +15,7 @@ namespace QuePOS.API.Models
 
         // Foreign Key for Store
         public int? StoreID { get; set; }
+        public string PaymentType { get; set; } = "Cash";
 
         // Relationships
         public Store Store { get; set; } = null!;
