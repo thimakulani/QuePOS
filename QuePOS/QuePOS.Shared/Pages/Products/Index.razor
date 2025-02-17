@@ -1,7 +1,4 @@
 ﻿@page "/products/index"
-@using Blazor.QRCode
-@using BlazorQrCodeScanner
-@using BlazorQrCodeScanner.MediaTrack
 @inject IDialogService DialogService
 
 <MudCardHeader>
@@ -17,7 +14,7 @@
                     <MudCardContent Class="d-flex align-center">
                         @*  <MudAvatar Size="Size.Large" Image="@product.ImageUrl" Alt="Product Image" Class="mr-2" /> *@
                         <MudAvatar>
-                            <MudImage Src="@product.ImageUrl"></MudImage>
+                            <img src="@product.ImageUrl" />
                         </MudAvatar>
                         <div>
                             <MudText Typo="Typo.h6">@product.Name</MudText>
@@ -26,8 +23,8 @@
                         </div>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton Color="Color.Primary" OnClick="@(() => OpenEditDialog(product))">Edit</MudButton>
-                        <MudButton Color="Color.Error" OnClick="@(() => ConfirmDelete(product.Id))">Delete</MudButton>
+                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" Margin="Margin.Dense" OnClick="@(() => OpenEditDialog(product))">Edit</MudButton>
+                        <MudButton Color="Color.Error" Variant="Variant.Outlined" Margin="Margin.Dense" OnClick="@(() => ConfirmDelete(product.Id))">Delete</MudButton>
                     </MudCardActions>
                 </MudCard>
             </MudItem>
@@ -152,13 +149,13 @@
                     _product.Base64Url = await ConvertFileToBase64(File);
                 }
                 _product.CategoryID = categoryId;
-                await HttpClientService.PostAsync<Product>("/api/products", _product);
-
+                var product = await HttpClientService.PostAsync<Product>("/api/products", _product);
+                _products.Add(product);
+                Snackbar.Add("Product added successfully", Severity.Success);
             }
             else
             {
-
-                await HttpClientService.PutAsync<Product>($"/api/products/{_product.Id}", _product);
+                await HttpClientService.PutAsync<Product>($"/api/products/update/{_product.Id}", _product);
             }
 
             await RefreshProducts();
@@ -187,7 +184,13 @@
             try
             {
                 await HttpClientService.DeleteAsync($"/api/products/{id}");
-                await RefreshProducts();
+                //await RefreshProducts();
+                var productToRemove = _products.FirstOrDefault(p => p.Id == id);
+                if (productToRemove != null)
+                {
+                    _products.Remove(productToRemove);
+                }
+                Snackbar.Add("Product deleted successfully", Severity.Success);
             }
             catch (HttpRequestException ex)
             {

@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthentication()
     .AddBearerToken(IdentityConstants.BearerScheme, option =>
     {
-        option.BearerTokenExpiration = TimeSpan.FromSeconds(10);
+        option.BearerTokenExpiration = TimeSpan.FromMinutes(10);
         option.RefreshTokenExpiration = TimeSpan.FromDays(1);
 
     });

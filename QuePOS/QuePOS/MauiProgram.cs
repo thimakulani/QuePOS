@@ -1,12 +1,9 @@
-﻿using BlazorQrCodeScanner.Maui;
-using Camera.MAUI;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
 using MudBlazor.Services;
 using QuePOS.Services;
 using QuePOS.Shared.Services;
-using ZXing.Net.Maui;
 namespace QuePOS
 {
     public static class MauiProgram
@@ -16,8 +13,6 @@ namespace QuePOS
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
-                .UseMauiCameraView()
-                .ConfigureMauiQrCodeScanner()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

@@ -15,7 +15,7 @@
             <MudText> @($"STORE: ") @store?.StoreName </MudText>
             <MudSpacer />
             <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="x=>SwitchView(-1)" Color="Color.Inherit" />
-            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="x=>SwitchView(-1)" Color="Color.Inherit" />
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Color="Color.Inherit" />
         </MudAppBar>
         <MudAppBar Bottom=true Elevation="4">
             <MudIconButton Icon="@Icons.Material.Filled.Dashboard" OnClick="x=>SwitchView(0)" Color="Color.Inherit" Edge="Edge.Start" />
@@ -75,12 +75,12 @@
                 NavigationManager.NavigateTo("/");
                 break;
             case 1:
-                NavigationManager.NavigateTo("products/index");
+                NavigationManager.NavigateTo("/products/index");
                 break;
             case 2:
-                NavigationManager.NavigateTo("products/index");
+                NavigationManager.NavigateTo("/transaction/index");
                 break;
-            case 4:
+            case 3:
                 NavigationManager.NavigateTo("/users/index");
                 break;
         }
@@ -91,8 +91,6 @@
     {
         var claims = await AuthStateProvider.GetAuthenticationStateAsync();
         AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
-
-
         await base.OnInitializedAsync();
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -124,7 +122,7 @@
         {
             externalAuthProvider.NotifyNotificationState(null);
         }
-        // NavigationManager.NavigateTo("login/index");
+        NavigationManager.NavigateTo("login/index");
         session_loading = false;
         StateHasChanged();
         // await hubConnection.StopAsync();

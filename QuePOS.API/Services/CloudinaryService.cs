@@ -16,6 +16,16 @@ namespace QuePOS.API.Services
             );
             _cloudinary = new Cloudinary(account);
         }
+        public async Task<DeletionResult> DeleteImageAsync(string publicId)
+        {
+            if (string.IsNullOrEmpty(publicId))
+                throw new ArgumentException("Public ID cannot be null or empty.", nameof(publicId));
+
+            var deletionParams = new DeletionParams(publicId);
+            var result = await _cloudinary.DestroyAsync(deletionParams);
+
+            return result;
+        }
         public async Task<ImageUploadResult> UploadImageAsync(string base64string, string fileName)
         {
             var uploadResult = new ImageUploadResult();
@@ -51,5 +61,6 @@ namespace QuePOS.API.Services
 
             return uploadResult;
         }
+
     }
 }

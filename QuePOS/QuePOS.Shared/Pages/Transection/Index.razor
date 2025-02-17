@@ -30,7 +30,7 @@
                                 <!-- Total Price -->
                                 <MudText Align="Align.Right" Typo="Typo.subtitle1">@((item.Quantity * item.Price).ToString("C"))</MudText>
                                 <!-- Remove Item Button -->
-                                <MudIconButton  Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => RemoveItem(item)" Color="Color.Error" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => RemoveItem(item)" Color="Color.Error" />
                             </MudStack>
                         </MudPaper>
                     </MudListItem>
@@ -53,10 +53,12 @@
         Products
     </TitleContent>
     <DialogContent>
-        <MudItem>
-            <MudList T="string" ReadOnly="true" CheckBoxColor="MudBlazor.Color.Tertiary">
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="searchText" Label="Search by Name or Barcode" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
 
-                @foreach (var item in products)
+        <MudItem>
+
+            <MudList T="string" ReadOnly="true" CheckBoxColor="MudBlazor.Color.Tertiary">
+                @foreach (var item in FilteredProducts)
                 {
                     <MudListItem Class="p-2">
                         <MudPaper Elevation="3" Class="p-2">
@@ -65,13 +67,12 @@
                                 <MudSpacer />
                                 <MudText Typo="Typo.body1" Color="Color.Secondary">@item.Price?.ToString("C")</MudText>
                                 <MudIconButton Icon="@Icons.Material.Rounded.Add"
-                                OnClick="@(() => AddItemToCart(item))"
-                                Color="Color.Primary"
-                                Size="Size.Small" />
+                                               OnClick="@(() => AddItemToCart(item))"
+                                               Color="Color.Primary"
+                                               Size="Size.Small" />
                             </MudStack>
                         </MudPaper>
                     </MudListItem>
-
                 }
             </MudList>
         </MudItem>
@@ -85,8 +86,10 @@
 
 
 
+
 @code {
     private List<Product> products = [];
+    private List<Product> filteredProducts = new();
     @inject ISnackbar Snackbar;
     private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
     private bool products_visible;
@@ -94,13 +97,14 @@
     private IHttpClientService HttpClientService { get; set; }
     private List<SaleDetail> cartItems = [];
     private double totalAmount => cartItems.Sum(i => i.Quantity * i.Price);
-
-    private Task<IEnumerable<string>> SearchProducts(string value, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(products
-            .Where(p => p.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
-            .Select(p => p.Name));
-    }
+    private string searchText = string.Empty;
+    private List<Product> FilteredProducts => products.Where(p => string.IsNullOrEmpty(searchText) || p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+    /* private Task<IEnumerable<string>> SearchProducts(string value, CancellationToken cancellationToken)
+         {
+         return Task.FromResult(products
+             .Where(p => p.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
+             .Select(p => p.Name));
+     }*/
     private void CloseDlg()
     {
         products_visible = false;
@@ -115,6 +119,7 @@
     }
     protected override async Task OnInitializedAsync()
     {
+
         await GetProducts();
         await base.OnInitializedAsync();
     }
@@ -130,7 +135,7 @@
             }
             else
             {
-                cartItems.Add(new SaleDetail { Name = product.Name, Quantity = 1, Price = (double)product.Price });
+                cartItems.Add(new SaleDetail { Name = product.Name, ProductID = product.Id, Quantity = 1, Price = (double)product.Price });
             }
         }
     }
@@ -146,7 +151,7 @@
             }
             else
             {
-                cartItems.Add(new SaleDetail { Name = product.Name, Quantity = 1, Price = (double)product.Price });
+                cartItems.Add(new SaleDetail { Name = product.Name, ProductID = product.Id, Quantity = 1, Price = (double)product.Price });
             }
         }
     }
@@ -161,18 +166,25 @@
         cartItems.Remove(item);
     }
 
-    private void ProcessSale()
+    private async void ProcessSale()
     {
         try
         {
+            if (cartItems.Count == 0)
+            {
+                Snackbar.Add($"Select Items", Severity.Warning);
+                return;
+            }
             Sale sale = new Sale()
                 {
                     SaleDate = DateTime.Now,
                     TotalAmount = (decimal)totalAmount,
                     SaleDetails = cartItems,
-                };
 
+                };
+            await HttpClientService.PostAsync<Sale>("/api/sales/add", sale);
             cartItems.Clear();
+            Snackbar.Add($"Transaction was successful", Severity.Success);
         }
         catch (HttpRequestException ex)
         {
