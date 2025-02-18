@@ -1,4 +1,5 @@
 ﻿@page "/products/index"
+@using ZXing.Net.Maui
 @inject IDialogService DialogService
 
 <MudCardHeader>
@@ -23,8 +24,8 @@
                         </div>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" Margin="Margin.Dense" OnClick="@(() => OpenEditDialog(product))">Edit</MudButton>
-                        <MudButton Color="Color.Error" Variant="Variant.Outlined" Margin="Margin.Dense" OnClick="@(() => ConfirmDelete(product.Id))">Delete</MudButton>
+                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="@(() => OpenEditDialog(product))">Edit</MudButton>
+                        <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="@(() => ConfirmDelete(product.Id))">Delete</MudButton>
                     </MudCardActions>
                 </MudCard>
             </MudItem>
@@ -114,8 +115,11 @@
     }
     private async void ScannBarCode()
     {
-        await FormFactor.ShowBarCodeScanner();
+        var results = await FormFactor.ShowBarCodeScanner();
+        Snackbar.Add(results.FirstOrDefault().Value, Severity.Success);
+        _product.BarCode = results.FirstOrDefault().Value;
     }
+
     private async Task<string> ConvertFileToBase64(IBrowserFile file)
     {
         using var stream = file.OpenReadStream();

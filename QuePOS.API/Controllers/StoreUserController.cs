@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NETCore.MailKit.Core;
+using QuePOS.API.Data;
 using QuePOS.API.Interfaces;
 using QuePOS.API.Models;
+using System.Security.Claims;
 using System.Text;
 
 namespace QuePOS.API.Controllers
@@ -17,12 +19,14 @@ namespace QuePOS.API.Controllers
         private readonly IEmailService _mailService;
         private readonly IRepository<StoreUser> _repository;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly POSDbContext dbContext;
 
-        public StoreUserController(IEmailService mailService, IRepository<StoreUser> repository, UserManager<ApplicationUser> userManager)
+        public StoreUserController(IEmailService mailService, IRepository<StoreUser> repository, UserManager<ApplicationUser> userManager, POSDbContext dbContext)
         {
             _mailService = mailService;
             _repository = repository;
             _userManager = userManager;
+            this.dbContext = dbContext;
         }
         [HttpPost]
         public async Task<IActionResult> Add(StoreUser storeUser)
@@ -50,6 +54,14 @@ namespace QuePOS.API.Controllers
         public async Task<IActionResult> All()
         {
             var new_store = await _repository.GetList();
+            return Ok(new_store);
+        }
+        [HttpGet("users")]
+        public async Task<IActionResult> AllStoreUsers()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var store = dbContext.Stores.Where(x => x.StoreUserId == userId).FirstOrDefault();
+            var new_store = await _repository.GetWhere(x => x.StoreID == store.Id);
             return Ok(new_store);
         }
         public static string GeneratePassword(int length = 8, bool requireDigit = true, bool requireLowercase = true,

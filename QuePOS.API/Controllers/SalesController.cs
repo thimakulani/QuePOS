@@ -81,8 +81,7 @@ namespace QuePOS.API.Controllers
                 return Unauthorized("User not found");
 
             var sales = await context.Sales
-                .Where(x => x.StoreID == user.StoreID
-                            )
+                .Where(x => x.StoreID == user.StoreID)
                 .Include(x => x.SaleDetails)
                 .ToListAsync();
 
@@ -97,8 +96,7 @@ namespace QuePOS.API.Controllers
                 return Unauthorized("User not found");
 
             var sales = await context.Sales
-                .Where(x => x.StoreID == user.StoreID
-                            )
+                .Where(x => x.StoreID == user.StoreID)
                 .Include(x => x.SaleDetails)
                 .ToListAsync();
             CounterViewModel counterView = new CounterViewModel()

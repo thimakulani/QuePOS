@@ -27,6 +27,7 @@ namespace QuePOS.API.Data
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<AuditTrail> AuditTrails { get; set; }
         public DbSet<Store> Stores { get; set; }
+        public DbSet<ProductItems> ProductItems { get; set; }
 
         private readonly IHttpContextAccessor _httpContextAccessor;
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

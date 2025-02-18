@@ -1,5 +1,6 @@
 using QuePOS.MVVM.View;
 using QuePOS.Shared.Services;
+using ZXing.Net.Maui;
 
 namespace QuePOS.Services
 {
@@ -24,10 +25,12 @@ namespace QuePOS.Services
         {
             await SecureStorage.SetAsync(key, value);
         }
-        public async Task<string> ShowBarCodeScanner()
+        public async Task<BarcodeResult[]> ShowBarCodeScanner()
         {
-            await Application.Current.Windows[0].Navigation.PushModalAsync(new BarCodeScannerView());
-            return await Task.FromResult("");
+            var camview = new BarCodeScannerView();
+            await Application.Current.Windows[0].Navigation.PushModalAsync(camview);
+            return await camview.WaitForResultAsync();
+            //return await Task.FromResult("");
         }
     }
 }
