@@ -18,6 +18,7 @@ namespace QuePOS.API.Data
         }
 
         // Define DbSets for each entity
+        public DbSet<ProductItems> ProductItems { get; set; } 
         public DbSet<StoreUser> StoreUsers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
