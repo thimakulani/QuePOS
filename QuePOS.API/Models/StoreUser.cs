@@ -14,7 +14,7 @@ namespace QuePOS.API.Models
         [NotMapped]
         public string Password { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-
+        //public bool HasAccess { get; set; } = true;
         // Foreign Key for Store
         public int StoreID { get; set; }
         [ForeignKey(nameof(Models.ApplicationUser))]
