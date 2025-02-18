@@ -5,7 +5,7 @@
 <div class="mt-5 container">
     <div class="row">
 
-        <a href="/transection/index" class="col-12 col-sm-6 col-md-3">
+        <a href="/transaction/index" class="col-12 col-sm-6 col-md-3">
             <div class="info-box">
                 <span class="info-box-icon bg-info elevation-1">
                     @* <i class="fa-solid fa-briefcase"></i> *@
@@ -22,18 +22,35 @@
             </div>
             <!-- /.info-box -->
         </a>
-        <a href="/transection/history" class="col-12 col-sm-6 col-md-3">
+        <a href="/transaction/history" class="col-12 col-sm-6 col-md-3">
             <div class="info-box">
                 <span class="info-box-icon bg-info elevation-1">
                     @* <i class="fa-solid fa-briefcase"></i> *@
                     <MudIcon Icon="@Icons.Material.Outlined.History" />
                 </span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Transection Histry</span>
+                    <span class="info-box-text">Transaction Histry</span>
                     <span class="info-box-number">
 
                         <small>@vm.TotalCount</small>
                     </span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </a>
+        <a href="/admin/index" class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+                <span class="info-box-icon bg-info elevation-1">
+                    @* <i class="fa-solid fa-briefcase"></i> *@
+                    <MudIcon Icon="@Icons.Material.Outlined.AdminPanelSettings" />
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Admin</span>
+                    @* <span class="info-box-number">
+
+                        <small>@vm.TotalCount</small>
+                    </span> *@
                 </div>
                 <!-- /.info-box-content -->
             </div>

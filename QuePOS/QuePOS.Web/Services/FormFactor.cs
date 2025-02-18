@@ -1,5 +1,6 @@
 using Blazored.SessionStorage;
 using QuePOS.Shared.Services;
+using ZXing.Net.Maui;
 
 namespace QuePOS.Web.Services
 {
@@ -34,6 +35,11 @@ namespace QuePOS.Web.Services
         public async Task<string> ShowBarCodeScanner()
         {
             return await Task.FromResult("");
+        }
+
+        Task<BarcodeResult[]> IFormFactor.ShowBarCodeScanner()
+        {
+            throw new NotImplementedException();
         }
     }
 }

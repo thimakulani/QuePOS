@@ -1,3 +1,5 @@
+using ZXing.Net.Maui;
+
 namespace QuePOS.Shared.Services
 {
     public interface IFormFactor
@@ -6,6 +8,6 @@ namespace QuePOS.Shared.Services
         public string GetPlatform();
         public Task SetSession(string key, string value);
         public Task<string> GetSession(string key);
-        public Task<string> ShowBarCodeScanner();
+        public Task<BarcodeResult[]> ShowBarCodeScanner();
     }
 }

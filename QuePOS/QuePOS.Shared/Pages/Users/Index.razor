@@ -1,49 +1,45 @@
 ﻿@page "/users/index"
 
-<MudContainer>
-    <MudCard>
-        <MudCardContent>
-            <MudTable Items="@users" Striped="true" Bordered="true" Hover="true">
-                <HeaderContent>
-                    <MudTh>First Name</MudTh>
-                    <MudTh>Last Name</MudTh>
-                    <MudTh>Phone Number</MudTh>
-                    <MudTh>Email</MudTh>
-                    <MudTh>Created At</MudTh>
-                    <MudTh>Actions</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd>@context.FirstName</MudTd>
-                    <MudTd>@context.LastName</MudTd>
-                    <MudTd>@context.PhoneNumber</MudTd>
-                    @* <MudTd>@context.Email</MudTd> *@
-                    <MudTd>@context.CreatedAt.ToString("yyyy-MM-dd")</MudTd>
-                    <MudTd>
-                        <MudIconButton Icon="edit" Color="Color.Primary" OnClick="() => OpenEditDialog(context)" />
-                        <MudIconButton Icon="delete" Color="Color.Error" OnClick="() => DeleteUser(context.Id)" />
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
+<MudCard>
+    <MudCardContent>
+        <MudButton Color="Color.Primary" OnClick="OpenCreateDialog">Add User</MudButton>
+        <MudTable Items="@users" Striped="true" Bordered="true" Hover="true">
+            <HeaderContent>
+                <MudTh>First Name</MudTh>
+                <MudTh>Last Name</MudTh>
+                <MudTh>Phone Number</MudTh>
+                <MudTh>Created At</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="First Name">@context.FirstName</MudTd>
+                <MudTd DataLabel="Last Name">@context.LastName</MudTd>
+                <MudTd DataLabel="Phone Number">@context.PhoneNumber</MudTd>
+                <MudTd DataLabel="Created At">@context.CreatedAt.ToString("yyyy-MM-dd")</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudIconButton Icon="@Icons.Material.Outlined.Edit" Color="Color.Primary" OnClick="() => OpenEditDialog(context)" />
+                    <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="() => DeleteUser(context.Id)" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
 
-            <MudButton Color="Color.Primary" OnClick="OpenCreateDialog">Add User</MudButton>
-        </MudCardContent>
-    </MudCard>
+    </MudCardContent>
+</MudCard>
 
-    <!-- Create/Edit User Dialog -->
-    <MudDialog @bind-IsOpen="dialogOpen" MaxWidth="MaxWidth.Small">
-        <TitleContent>@(selectedUser.Id == 0 ? "CREATE USER" : "EDIT USER")</TitleContent>
-        <DialogContent>
-            <MudTextField @bind-Value="selectedUser.FirstName" Label="First Name" Required="true" />
-            <MudTextField @bind-Value="selectedUser.LastName" Label="Last Name" Required="true" />
-            <MudTextField @bind-Value="selectedUser.PhoneNumber" Label="Phone Number" Required="true" />
-            @* <MudTextField @bind-Value="selectedUser.Email" Label="Email" Required="true" /> *@
-        </DialogContent>
-        <DialogActions>
-            <MudButton OnClick="SaveUser" Color="Color.Primary">Save</MudButton>
-            <MudButton OnClick="CloseDialog" Color="Color.Secondary">Cancel</MudButton>
-        </DialogActions>
-    </MudDialog>
-</MudContainer>
+<!-- Create/Edit User Dialog -->
+<MudDialog @bind-IsOpen="dialogOpen" MaxWidth="MaxWidth.Small">
+    <TitleContent>@(selectedUser.Id == 0 ? "CREATE USER" : "EDIT USER")</TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="selectedUser.FirstName" Label="First Name" Required="true" />
+        <MudTextField @bind-Value="selectedUser.LastName" Label="Last Name" Required="true" />
+        <MudTextField @bind-Value="selectedUser.PhoneNumber" Label="Phone Number" Required="true" />
+        @* <MudTextField @bind-Value="selectedUser.Email" Label="Email" Required="true" /> *@
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="SaveUser" Color="Color.Primary">Save</MudButton>
+        <MudButton OnClick="CloseDialog" Color="Color.Secondary">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     private List<StoreUser> users = new List<StoreUser>();
@@ -54,10 +50,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        try{
+        try
+        {
 
-            users = await HttpClientService.GetAsync<List<StoreUser>>("/api/users");
-        
+            users = await HttpClientService.GetAsync<List<StoreUser>>("/api/StoreUser/users");
+
         }
         catch (HttpRequestException ex)
         {
