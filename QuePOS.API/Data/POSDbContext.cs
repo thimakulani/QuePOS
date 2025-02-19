@@ -18,7 +18,7 @@ namespace QuePOS.API.Data
         }
 
         // Define DbSets for each entity
-        public DbSet<ProductItems> ProductItems { get; set; } 
+        public DbSet<ProductItems> ProductItems { get; set; }
         public DbSet<StoreUser> StoreUsers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -27,54 +27,53 @@ namespace QuePOS.API.Data
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<AuditTrail> AuditTrails { get; set; }
         public DbSet<Store> Stores { get; set; }
-        public DbSet<ProductItems> ProductItems { get; set; }
 
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
-                var userAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent;
-                var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var entries = ChangeTracker.Entries().ToList(); // Create a copy of the entries collection
-                foreach (var entry in entries)
+        /*        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
                 {
-                    var entity = entry.Entity;
-                    var action = entry.State switch
+                    try
                     {
-                        EntityState.Added => "Added",
-                        EntityState.Modified => "Modified",
-                        EntityState.Deleted => "Deleted",
-                        _ => null
-                    };
-
-                    if (action != null)
-                    {
-                        var auditLog = new AuditTrail
+                        var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+                        var userAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent;
+                        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                        var entries = ChangeTracker.Entries().ToList(); // Create a copy of the entries collection
+                        foreach (var entry in entries)
                         {
-                            UserId = userId,
-                            Action = action,
-                            TableName = entity.GetType().Name,
-                            RecordId = GetRecordId(entity),
-                            Timestamp = DateTime.UtcNow,
-                            Details = $"{action}",
-                            IPAddress = ipAddress,
-                            UserAgent = userAgent
-                        };
+                            var entity = entry.Entity;
+                            var action = entry.State switch
+                            {
+                                EntityState.Added => "Added",
+                                EntityState.Modified => "Modified",
+                                EntityState.Deleted => "Deleted",
+                                _ => null
+                            };
 
-                        AuditTrails.Add(auditLog);
+                            if (action != null)
+                            {
+                                var auditLog = new AuditTrail
+                                {
+                                    UserId = userId,
+                                    Action = action,
+                                    TableName = entity.GetType().Name,
+                                    RecordId = GetRecordId(entity),
+                                    Timestamp = DateTime.UtcNow,
+                                    Details = $"{action}",
+                                    IPAddress = ipAddress,
+                                    UserAgent = userAgent
+                                };
+
+                                AuditTrails.Add(auditLog);
+                            }
+                        }
+
+
                     }
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error : " + ex.Message);
-            }
-            return base.SaveChangesAsync(cancellationToken);
-        }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error : " + ex.Message);
+                    }
+                    return base.SaveChangesAsync(cancellationToken);
+                }*/
 
         private static int GetRecordId(object entity)
         {
