@@ -43,14 +43,14 @@
         <MudNumericField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Stock Quantity" @bind-Value="_product.StockQuantity" Required="true" />
         <MudItem>
             <MudFileUpload @ref="@_fileUpload"
-                           T="IBrowserFile"
-                           Accept="Image/*"
-                           For="@(() => File)"
-                           @bind-Files="File">
+            T="IBrowserFile"
+            Accept="Image/*"
+            For="@(() => File)"
+            @bind-Files="File">
                 <ActivatorContent>
                     <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.CloudUpload">
+                    Color="Color.Primary"
+                    StartIcon="@Icons.Material.Filled.CloudUpload">
                         Upload Files
                     </MudButton>
                 </ActivatorContent>
@@ -118,8 +118,34 @@
         var results = await FormFactor.ShowBarCodeScanner();
         Snackbar.Add(results.FirstOrDefault().Value, Severity.Success);
         _product.BarCode = results.FirstOrDefault().Value;
+        await SearchProduct(results.FirstOrDefault().Value);
+        StateHasChanged();
+
     }
 
+    private async Task SearchProduct(string barcode)
+    {
+        try
+        {
+            var _productItem = await HttpClientService.GetAsync<ProductItems>($"/api/productitems/{barcode.Trim()}");
+            _product.Description = _productItem.Desc_sourced;
+            _product.Name = _productItem.brn;
+            StateHasChanged();
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            //_processing = false;
+            StateHasChanged();
+        }
+    }
     private async Task<string> ConvertFileToBase64(IBrowserFile file)
     {
         using var stream = file.OpenReadStream();

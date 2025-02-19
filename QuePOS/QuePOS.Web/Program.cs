@@ -22,7 +22,7 @@ builder.Services.AddAuthorizationCore();
 //builder.Services.AddStorage();
 builder.Services.AddHttpClient("api", client =>
 {
-    client.BaseAddress = new Uri("https://queposapi.onrender.com");
+    client.BaseAddress = new Uri(builder.Configuration["api:url"]);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 builder.Services.AddDistributedMemoryCache();
