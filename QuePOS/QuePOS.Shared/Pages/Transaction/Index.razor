@@ -90,10 +90,13 @@
     private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
     private bool products_visible;
     [Inject]
+    private IFormFactor FormFactor { get; set; }
+    [Inject]
     private IHttpClientService HttpClientService { get; set; }
     private List<SaleDetail> cartItems = [];
     private double totalAmount => cartItems.Sum(i => i.Quantity * i.Price);
     private string searchText = string.Empty;
+
     private List<Product> FilteredProducts => products.Where(p => string.IsNullOrEmpty(searchText) || p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
     /* private Task<IEnumerable<string>> SearchProducts(string value, CancellationToken cancellationToken)
          {
@@ -105,9 +108,37 @@
     {
         products_visible = false;
     }
-    private void ShowScanner()
+    private async void ShowScanner()
     {
-
+        try
+        {
+            var result = await FormFactor.ShowBarCodeScanner();
+            await GetProductByBarCode(result?.FirstOrDefault().Value);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+    private async Task GetProductByBarCode(string barcode)
+    {
+        try
+        {
+            var prod = await HttpClientService.GetAsync<Product>($"/api/products/scan/{barcode}");
+            AddItemToCart(prod);
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
     private void ShowProducts()
     {

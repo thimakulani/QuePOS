@@ -48,6 +48,22 @@ namespace QuePOS.API.Controllers
             return Ok(prod);
 
         }
+        [HttpGet("scan/{barcode}")]
+        public async Task<IActionResult> Scan(string barcode)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            //var store_user = await _storeRepository?.GetFirstOrDefault(u => u.UserId == userId);
+            var user = await _posdbContext.StoreUsers.Where(x => x.UserId == userId).FirstOrDefaultAsync();//.Include(x => x.Store).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+            var product = await _posdbContext.Products
+                    .FirstOrDefaultAsync(x => x.StoreID == user.StoreID && x.BarCode == barcode && !x.IsDeleted);
+
+            return Ok(product);
+        }
+
         [HttpGet]
         public async Task<IActionResult> Get(int id)
         {

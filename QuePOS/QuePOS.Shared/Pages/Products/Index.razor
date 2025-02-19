@@ -14,8 +14,8 @@
                 <MudCard Elevation="2">
                     <MudCardContent Class="d-flex align-center">
                         @*  <MudAvatar Size="Size.Large" Image="@product.ImageUrl" Alt="Product Image" Class="mr-2" /> *@
-                        <MudAvatar>
-                            <img src="@product.ImageUrl" />
+                        <MudAvatar Size="Size.Large">
+                            <img src="@product.ImageUrl.Replace("http://", "https://")" />
                         </MudAvatar>
                         <div>
                             <MudText Typo="Typo.h6">@product.Name</MudText>
@@ -24,8 +24,8 @@
                         </div>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="@(() => OpenEditDialog(product))">Edit</MudButton>
-                        <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="@(() => ConfirmDelete(product.Id))">Delete</MudButton>
+                        <MudButton Color="Color.Primary" Size="Size.Small" Variant="Variant.Outlined" OnClick="@(() => OpenEditDialog(product))">Edit</MudButton>
+                        <MudButton Color="Color.Error" Size="Size.Small" Variant="Variant.Outlined" OnClick="@(() => ConfirmDelete(product.Id))">Delete</MudButton>
                     </MudCardActions>
                 </MudCard>
             </MudItem>
@@ -43,16 +43,17 @@
         <MudNumericField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Stock Quantity" @bind-Value="_product.StockQuantity" Required="true" />
         <MudItem>
             <MudFileUpload @ref="@_fileUpload"
-            T="IBrowserFile"
-            Accept="Image/*"
-            For="@(() => File)"
-            @bind-Files="File">
+                           T="IBrowserFile"
+                           Accept="Image/*"
+                           For="@(() => File)"
+                           @bind-Files="File">
                 <ActivatorContent>
                     <MudButton Variant="Variant.Filled"
-                    Color="Color.Primary"
-                    StartIcon="@Icons.Material.Filled.CloudUpload">
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.CloudUpload">
                         Upload Files
                     </MudButton>
+
                 </ActivatorContent>
             </MudFileUpload>
         </MudItem>
@@ -75,8 +76,8 @@
 
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="SaveProduct" Color="Color.Primary">Save</MudButton>
-        <MudButton OnClick="() => _isDialogOpen = false" Color="Color.Secondary">Cancel</MudButton>
+        <MudButton OnClick="SaveProduct" Variant="Variant.Outlined" Color="Color.Primary">Save</MudButton>
+        <MudButton OnClick="() => _isDialogOpen = false" Variant="Variant.Outlined" Color="Color.Secondary">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -115,11 +116,18 @@
     }
     private async void ScannBarCode()
     {
-        var results = await FormFactor.ShowBarCodeScanner();
-        Snackbar.Add(results.FirstOrDefault().Value, Severity.Success);
-        _product.BarCode = results.FirstOrDefault().Value;
-        await SearchProduct(results.FirstOrDefault().Value);
-        StateHasChanged();
+        try
+        {
+            var results = await FormFactor.ShowBarCodeScanner();
+            Snackbar.Add(results.FirstOrDefault().Value, Severity.Success);
+            _product.BarCode = results.FirstOrDefault().Value;
+            await SearchProduct(results.FirstOrDefault().Value);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        //StateHasChanged();
 
     }
 
@@ -127,14 +135,14 @@
     {
         try
         {
-            var _productItem = await HttpClientService.GetAsync<ProductItems>($"/api/productitems/{barcode.Trim()}");
+            var _productItem = await HttpClientService.GetAsync<ProductItems>($"/api/ProductItems/scan/{barcode}");
             _product.Description = _productItem.Desc_sourced;
             _product.Name = _productItem.brn;
-            StateHasChanged();
         }
         catch (HttpRequestException ex)
         {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+            if (ex.StatusCode != System.Net.HttpStatusCode.NotFound)
+                Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
         catch (Exception ex)
         {

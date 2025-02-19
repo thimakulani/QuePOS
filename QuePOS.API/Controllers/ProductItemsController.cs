@@ -18,7 +18,7 @@ namespace QuePOS.API.Controllers
             this.repository = repository;
             this.context = context;
         }
-        [HttpGet]
+        [HttpGet("scan/{barcode}")]
         public async Task<ActionResult<ProductItems>> Scan(string barcode)
         {
             var prod = await repository.GetFirstOrDefault(x => x.Bc == barcode);

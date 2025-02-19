@@ -104,7 +104,7 @@ namespace QuePOS.Services
                 switch (response.StatusCode)
                 {
                     case System.Net.HttpStatusCode.NotFound:
-                        throw new HttpRequestException($"Resource not found: {response.RequestMessage?.RequestUri}");
+                        throw new HttpRequestException($"Not found: {await response.Content.ReadAsStringAsync()}");
 
                     case System.Net.HttpStatusCode.BadRequest:
                         var badRequestContent = await response.Content.ReadAsStringAsync();

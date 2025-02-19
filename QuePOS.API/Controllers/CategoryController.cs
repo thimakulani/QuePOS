@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using QuePOS.API.Data;
 using QuePOS.API.Interfaces;
 using QuePOS.API.Models;
 
@@ -12,10 +14,12 @@ namespace QuePOS.API.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly IRepository<Category> repository;
+        private readonly POSDbContext _context;
 
-        public CategoryController(IRepository<Category> repository)
+        public CategoryController(IRepository<Category> repository, POSDbContext context)
         {
             this.repository = repository;
+            this._context = context;
         }
         [HttpPost]
         public async Task<IActionResult> Add(Category category)
@@ -25,6 +29,20 @@ namespace QuePOS.API.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
+            return Ok(await repository.GetList());
+        }
+        [HttpGet("set")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Set()
+        {
+            var items = await _context.ProductItems.Select(x => x.Cat).Distinct().ToListAsync();
+            var cat = new List<Category>();
+            foreach (var item in items)
+            {
+                cat.Add(new Category() { CategoryName = item });
+            }
+            await _context.AddRangeAsync(cat);
+            await _context.SaveChangesAsync();
             return Ok(await repository.GetList());
         }
     }
