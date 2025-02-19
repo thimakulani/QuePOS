@@ -29,51 +29,51 @@ namespace QuePOS.API.Data
         public DbSet<Store> Stores { get; set; }
 
         private readonly IHttpContextAccessor _httpContextAccessor;
-        /*        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+                var userAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent;
+                var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var entries = ChangeTracker.Entries().ToList(); // Create a copy of the entries collection
+                foreach (var entry in entries)
                 {
-                    try
+                    var entity = entry.Entity;
+                    var action = entry.State switch
                     {
-                        var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
-                        var userAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent;
-                        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                        var entries = ChangeTracker.Entries().ToList(); // Create a copy of the entries collection
-                        foreach (var entry in entries)
+                        EntityState.Added => "Added",
+                        EntityState.Modified => "Modified",
+                        EntityState.Deleted => "Deleted",
+                        _ => null
+                    };
+
+                    if (action != null)
+                    {
+                        var auditLog = new AuditTrail
                         {
-                            var entity = entry.Entity;
-                            var action = entry.State switch
-                            {
-                                EntityState.Added => "Added",
-                                EntityState.Modified => "Modified",
-                                EntityState.Deleted => "Deleted",
-                                _ => null
-                            };
+                            UserId = userId,
+                            Action = action,
+                            TableName = entity.GetType().Name,
+                            RecordId = GetRecordId(entity),
+                            Timestamp = DateTime.UtcNow,
+                            Details = $"{action}",
+                            IPAddress = ipAddress,
+                            UserAgent = userAgent
+                        };
 
-                            if (action != null)
-                            {
-                                var auditLog = new AuditTrail
-                                {
-                                    UserId = userId,
-                                    Action = action,
-                                    TableName = entity.GetType().Name,
-                                    RecordId = GetRecordId(entity),
-                                    Timestamp = DateTime.UtcNow,
-                                    Details = $"{action}",
-                                    IPAddress = ipAddress,
-                                    UserAgent = userAgent
-                                };
-
-                                AuditTrails.Add(auditLog);
-                            }
-                        }
-
-
+                        AuditTrails.Add(auditLog);
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Error : " + ex.Message);
-                    }
-                    return base.SaveChangesAsync(cancellationToken);
-                }*/
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error : " + ex.Message);
+            }
+            return base.SaveChangesAsync(cancellationToken);
+        }
 
         private static int GetRecordId(object entity)
         {
