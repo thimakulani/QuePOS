@@ -1,5 +1,4 @@
 ﻿@page "/transaction/index"
-
 @using MudBlazor
 
 <MudGrid>
@@ -8,28 +7,27 @@
             <MudText Style="margin: 10px" Typo="Typo.h5">Transaction</MudText>
             <br />
             <MudGrid Class="mb-2" Justify="Justify.SpaceAround">
-                <MudButton Variant="Variant.Outlined" OnClick="ShowScanner" StartIcon="@Icons.Material.Outlined.QrCodeScanner">Scan </MudButton>
+                <MudButton Variant="Variant.Outlined" OnClick="ShowScanner" StartIcon="@Icons.Material.Outlined.QrCodeScanner">Scan</MudButton>
                 <MudButton Variant="Variant.Outlined" OnClick="ShowProducts" StartIcon="@Icons.Material.Outlined.Add">Get Products</MudButton>
             </MudGrid>
+
+            <!-- Cart Items -->
             <MudList Dense T="string" Class="mt-2">
                 @foreach (var item in cartItems)
                 {
                     <MudListItem>
                         <MudPaper Elevation="3" Class="p-2">
                             <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="2">
-                                <!-- Item Name -->
                                 <MudText Color="Color.Success" Typo="Typo.subtitle1">@item.Name</MudText>
                                 <MudSpacer />
-                                <!-- Quantity Stepper -->
+
                                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                                     <MudIconButton Icon="@Icons.Material.Filled.Remove" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity - 1)" Disabled="item.Quantity <= 1" Size="Size.Small" />
                                     <MudText>@item.Quantity</MudText>
                                     <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity + 1)" Size="Size.Small" />
                                 </MudStack>
 
-                                <!-- Total Price -->
                                 <MudText Align="Align.Right" Typo="Typo.subtitle1">@((item.Quantity * item.Price).ToString("C"))</MudText>
-                                <!-- Remove Item Button -->
                                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => RemoveItem(item)" Color="Color.Error" />
                             </MudStack>
                         </MudPaper>
@@ -37,26 +35,46 @@
                 }
             </MudList>
 
-
-
             <MudDivider Class="my-2" />
-            <MudText Typo="Typo.h6">Total: @totalAmount.ToString("C")</MudText>
+            <MudText Typo="Typo.h6">Total: @totalAmount.ToString("C") (@cartItems.Sum(i => i.Quantity) items)</MudText>
 
-            <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-2" OnClick="ProcessSale">Complete Sale</MudButton>
+            <MudSelect @bind-Value="selectedPaymentMethod" Label="Payment Method" Margin="Margin.Dense" Variant="Variant.Outlined">
+                @foreach (var method in paymentMethods)
+                {
+                    <MudSelectItem Value="@method">@method</MudSelectItem>
+                }
+            </MudSelect>
+            @if (selectedPaymentMethod == "Cash")
+            {
+                <MudNumericField @bind-Value="cashReceived" Label="Cash Received" Variant="Variant.Outlined"
+                                 Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Money" />
+
+                <MudText Typo="Typo.subtitle1">Change: @changeAmount.ToString("C")</MudText>
+
+                @if (changeAmount < 0)
+                {
+                    <MudText Color="Color.Error" Typo="Typo.body2">* Insufficient cash received</MudText>
+                }
+            }
+
+
+            <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success" OnClick="() => confirmSaleDialog = true">
+                Complete Sale
+            </MudButton>
+            <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Error" OnClick="ClearCart">
+                Clear Cart
+            </MudButton>
         </MudPaper>
     </MudItem>
 </MudGrid>
 
-
+<!-- Product Dialog -->
 <MudDialog @bind-Visible="products_visible" Options="_dialogOptions">
-    <TitleContent>
-        Products
-    </TitleContent>
+    <TitleContent>Products</TitleContent>
     <DialogContent>
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="searchText" Label="Search by Name or Barcode" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
 
         <MudItem>
-
             <MudList T="string" ReadOnly="true" CheckBoxColor="MudBlazor.Color.Tertiary">
                 @foreach (var item in FilteredProducts)
                 {
@@ -66,10 +84,7 @@
                                 <MudText Typo="Typo.h6">@item.Name</MudText>
                                 <MudSpacer />
                                 <MudText Typo="Typo.body1" Color="Color.Secondary">@item.Price?.ToString("C")</MudText>
-                                <MudIconButton Icon="@Icons.Material.Rounded.Add"
-                                               OnClick="@(() => AddItemToCart(item))"
-                                               Color="Color.Primary"
-                                               Size="Size.Small" />
+                                <MudIconButton Icon="@Icons.Material.Rounded.Add" OnClick="@(() => AddItemToCart(item))" Color="Color.Primary" Size="Size.Small" />
                             </MudStack>
                         </MudPaper>
                     </MudListItem>
@@ -82,32 +97,59 @@
     </DialogActions>
 </MudDialog>
 
+<!-- Confirmation Dialog -->
+<MudDialog @bind-Visible="confirmSaleDialog">
+    <TitleContent>Confirm Transaction</TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body1">Are you sure you want to complete this sale?</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Error" OnClick="() => confirmSaleDialog = false">Cancel</MudButton>
+        <MudButton Color="Color.Success" OnClick="ProcessSale">Confirm</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     private List<Product> products = [];
-    private List<Product> filteredProducts = new();
-    @inject ISnackbar Snackbar;
-    private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
-    private bool products_visible;
-    [Inject]
-    private IFormFactor FormFactor { get; set; }
-    [Inject]
-    private IHttpClientService HttpClientService { get; set; }
     private List<SaleDetail> cartItems = [];
-    private double totalAmount => cartItems.Sum(i => i.Quantity * i.Price);
+    private List<string> paymentMethods = new() { "Cash", "Card" };
+    private string selectedPaymentMethod = "Cash";
     private string searchText = string.Empty;
+    private bool products_visible;
+    private bool confirmSaleDialog;
 
-    private List<Product> FilteredProducts => products.Where(p => string.IsNullOrEmpty(searchText) || p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
-    /* private Task<IEnumerable<string>> SearchProducts(string value, CancellationToken cancellationToken)
-         {
-         return Task.FromResult(products
-             .Where(p => p.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
-             .Select(p => p.Name));
-     }*/
-    private void CloseDlg()
+    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private IFormFactor FormFactor { get; set; }
+    [Inject] private IHttpClientService HttpClientService { get; set; }
+    private double cashReceived = 0;
+    private double changeAmount => cashReceived - totalAmount;
+    /*
+
+    private void CalculateChange(ChangeEventArgs e)
     {
-        products_visible = false;
+        if (double.TryParse(e.Value?.ToString(), out var cash))
+        {
+            cashReceived = cash;
+            changeAmount = cashReceived - totalAmount;
+        }
+        else
+        {
+            cashReceived = 0;
+            changeAmount = -totalAmount;
+        }
     }
+     */
+    private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
+    private double totalAmount => cartItems.Sum(i => i.Quantity * i.Price);
+
+    private List<Product> FilteredProducts => products
+        .Where(p => string.IsNullOrEmpty(searchText)
+            || p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+            || p.BarCode.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    private void CloseDlg() => products_visible = false;
+
     private async void ShowScanner()
     {
         try
@@ -117,137 +159,75 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
     }
+
     private async Task GetProductByBarCode(string barcode)
     {
         try
         {
             var prod = await HttpClientService.GetAsync<Product>($"/api/products/scan/{barcode}");
-            AddItemToCart(prod);
-        }
-        catch (HttpRequestException ex)
-        {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+            if (prod != null)
+            {
+                AddItemToCart(prod);
+                Snackbar.Add($"Added {prod.Name} to cart", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Product not found", Severity.Warning);
+            }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            StateHasChanged();
+            Snackbar.Add($"Unexpected error: {ex.Message}", Severity.Error);
         }
     }
-    private void ShowProducts()
-    {
-        products_visible = true;
-    }
+
+    private void ShowProducts() => products_visible = true;
+
     protected override async Task OnInitializedAsync()
     {
-
         await GetProducts();
-        await base.OnInitializedAsync();
-    }
-    private void AddToCart(string productName)
-    {
-        var product = products.FirstOrDefault(p => p.Name == productName);
-        if (product != null)
-        {
-            var existingItem = cartItems.FirstOrDefault(i => i.Name == product.Name);
-            if (existingItem != null)
-            {
-                existingItem.Quantity++;
-            }
-            else
-            {
-                cartItems.Add(new SaleDetail { Name = product.Name, ProductID = product.Id, Quantity = 1, Price = (double)product.Price });
-            }
-        }
-    }
-    private void AddItemToCart(Product product)
-    {
-        //var product = products.FirstOrDefault(p => p.Name == productName);
-        if (product != null)
-        {
-            var existingItem = cartItems.FirstOrDefault(i => i.Name == product.Name);
-            if (existingItem != null)
-            {
-                existingItem.Quantity++;
-            }
-            else
-            {
-                cartItems.Add(new SaleDetail { Name = product.Name, ProductID = product.Id, Quantity = 1, Price = (double)product.Price });
-            }
-        }
     }
 
-    private void UpdateQuantity(SaleDetail item, int quantity)
-    {
-        item.Quantity = quantity;
-    }
-
-    private void RemoveItem(SaleDetail item)
-    {
-        cartItems.Remove(item);
-    }
-
-    private async void ProcessSale()
-    {
-        try
-        {
-            if (cartItems.Count == 0)
-            {
-                Snackbar.Add($"Select Items", Severity.Warning);
-                return;
-            }
-            Sale sale = new Sale()
-                {
-                    SaleDate = DateTime.Now,
-                    TotalAmount = (decimal)totalAmount,
-                    SaleDetails = cartItems,
-
-                };
-            await HttpClientService.PostAsync<Sale>("/api/sales/add", sale);
-            cartItems.Clear();
-            Snackbar.Add($"Transaction was successful", Severity.Success);
-        }
-        catch (HttpRequestException ex)
-        {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            StateHasChanged();
-        }
-
-    }
     private async Task GetProducts()
     {
         try
         {
-            //string id = FormFactor.GetSession()
             products = await HttpClientService.GetAsync<List<Product>>("/api/products/all/store");
-        }
-        catch (HttpRequestException ex)
-        {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            StateHasChanged();
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
     }
 
+    private void AddItemToCart(Product product)
+    {
+        var existingItem = cartItems.FirstOrDefault(i => i.Name == product.Name);
+        if (existingItem != null) existingItem.Quantity++;
+        else cartItems.Add(new SaleDetail { Name = product.Name, ProductID = product.Id, Quantity = 1, Price = (double)product.Price });
+        StateHasChanged();
+    }
 
+    private void UpdateQuantity(SaleDetail item, int quantity) => item.Quantity = quantity;
 
+    private void RemoveItem(SaleDetail item) => cartItems.Remove(item);
+
+    private void ClearCart() => cartItems.Clear();
+
+    private async void ProcessSale()
+    {
+        confirmSaleDialog = false;
+        if (cartItems.Count == 0)
+        {
+            Snackbar.Add("Select Items", Severity.Warning);
+            return;
+        }
+
+        await HttpClientService.PostAsync<Sale>("/api/sales/add", new Sale { SaleDate = DateTime.Now, TotalAmount = (decimal)totalAmount, PaymentType = selectedPaymentMethod, SaleDetails = cartItems });
+        cartItems.Clear();
+        Snackbar.Add("Transaction was successful", Severity.Success);
+    }
 }
