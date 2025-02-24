@@ -27,7 +27,7 @@
 </MudCard>
 
 <!-- Create/Edit User Dialog -->
-<MudDialog @bind-IsOpen="dialogOpen" MaxWidth="MaxWidth.Small">
+<MudDialog @bind-IsOpen="dialogOpen" Options="dialogOptions">
     <TitleContent>@(selectedUser.Id == 0 ? "CREATE USER" : "EDIT USER")</TitleContent>
     <DialogContent>
         <MudTextField @bind-Value="selectedUser.FirstName" Label="First Name" Required="true" />
@@ -44,6 +44,7 @@
 @code {
     private List<StoreUser> users = new List<StoreUser>();
     private bool dialogOpen = false;
+    private DialogOptions dialogOptions = new DialogOptions { MaxWidth = MaxWidth.Medium };
     private StoreUser selectedUser = new StoreUser();
     @inject IHttpClientService HttpClientService;
     @inject ISnackbar Snackbar;

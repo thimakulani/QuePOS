@@ -61,20 +61,27 @@ namespace QuePOS.Services
 
         public async Task<ApplicationUserViewModel> SessionLogin()
         {
-            var username = await SecureStorage.GetAsync("username");
-            var password = await SecureStorage.GetAsync("password");
-            if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+            try
             {
-                UserLogin userLogin = new UserLogin()
+                var username = await SecureStorage.GetAsync("username");
+                var password = await SecureStorage.GetAsync("password");
+                if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
                 {
-                    Email = username,
-                    Password = password
-                };
-                var results = await Login(userLogin);
-                Console.WriteLine("AccessToken " + results.AccessToken);
-                return await GetUserInfo(results.AccessToken);
+                    UserLogin userLogin = new()
+                    {
+                        Email = username,
+                        Password = password
+                    };
+                    var results = await Login(userLogin);
+                    Console.WriteLine("AccessToken " + results.AccessToken);
+                    return await GetUserInfo(results.AccessToken);
+                }
+                return null;
             }
-            return null;
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public Task<AuthToken> Login()

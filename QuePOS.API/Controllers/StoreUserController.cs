@@ -117,9 +117,7 @@ namespace QuePOS.API.Controllers
         private static string Shuffle(string input)
         {
             var random = new Random();
-            return new string(input.ToCharArray()
-                                   .OrderBy(_ => random.Next())
-                                   .ToArray());
+            return new string([.. input.ToCharArray().OrderBy(_ => random.Next())]);
         }
     }
 

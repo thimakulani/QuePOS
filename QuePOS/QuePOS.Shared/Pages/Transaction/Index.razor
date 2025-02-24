@@ -36,7 +36,7 @@
             </MudList>
 
             <MudDivider Class="my-2" />
-            <MudText Typo="Typo.h6">Total: @totalAmount.ToString("C") (@cartItems.Sum(i => i.Quantity) items)</MudText>
+            <MudText Color="Color.Dark" Typo="Typo.h6">Total: @totalAmount.ToString("C") (@cartItems.Sum(i => i.Quantity) items)</MudText>
 
             <MudSelect @bind-Value="selectedPaymentMethod" Label="Payment Method" Margin="Margin.Dense" Variant="Variant.Outlined">
                 @foreach (var method in paymentMethods)
@@ -46,8 +46,8 @@
             </MudSelect>
             @if (selectedPaymentMethod == "Cash")
             {
-                <MudNumericField @bind-Value="cashReceived" Label="Cash Received" Variant="Variant.Outlined"
-                                 Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Money" />
+                <MudNumericField @bind-Value="cashReceived" Format="F1" Label="Cash Received" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                 Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Rounded.Money" />
 
                 <MudText Typo="Typo.subtitle1">Change: @changeAmount.ToString("C")</MudText>
 
@@ -121,8 +121,9 @@
     [Inject] private ISnackbar Snackbar { get; set; }
     [Inject] private IFormFactor FormFactor { get; set; }
     [Inject] private IHttpClientService HttpClientService { get; set; }
-    private double cashReceived = 0;
+    private double cashReceived;
     private double changeAmount => cashReceived - totalAmount;
+
     /*
 
     private void CalculateChange(ChangeEventArgs e)

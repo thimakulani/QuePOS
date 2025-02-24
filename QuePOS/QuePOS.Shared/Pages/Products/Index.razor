@@ -1,7 +1,14 @@
 ﻿@page "/products/index"
 @using ZXing.Net.Maui
 @inject IDialogService DialogService
-
+<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@code {
+    private List<BreadcrumbItem> _items =
+    [
+        new("Home", href: "/", icon: Icons.Material.Filled.Home),
+    new("Products", href: null),
+    ];
+}
 <MudCardHeader>
     <MudTextField @bind-Value="_searchTerm" Placeholder="Search..." Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" />
     <MudButton Variant="Variant.Outlined" Style="margin-left:5px" Color="Color.Primary" OnClick="()=> OpenEditDialog(new Product())">Add</MudButton>
@@ -24,13 +31,19 @@
                         </div>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton Color="Color.Primary" Size="Size.Small" Variant="Variant.Outlined" OnClick="@(() => OpenEditDialog(product))">Edit</MudButton>
-                        <MudButton Color="Color.Error" Size="Size.Small" Variant="Variant.Outlined" OnClick="@(() => ConfirmDelete(product.Id))">Delete</MudButton>
+                        <MudButton style="background-color: #2196F3; color:white" Size="Size.Small" Variant="Variant.Filled" OnClick="@(() => OpenEditDialog(product))">Edit</MudButton>
+                        <MudButton Color="Color.Error" Style="margin-left:5px" Size="Size.Small" Variant="Variant.Filled" OnClick="@(() => ConfirmDelete(product.Id))">Delete</MudButton>
                     </MudCardActions>
                 </MudCard>
             </MudItem>
         }
     </MudGrid>
+    @if (isLoading)
+    {
+        <div style="display: flex; justify-content: center; align-items: center">
+            <MudProgressCircular Color="Color.Primary" Style="height: 70px; width: 70px;" Indeterminate="true" />
+        </div>
+    }
 </MudCardContent>
 
 <MudDialog @bind-Visible="_isDialogOpen" Options="this._dialogOptions">
@@ -84,6 +97,7 @@
 @code {
     private MudFileUpload<IBrowserFile> _fileUpload;
     private bool _processing = true;
+    private bool isLoading = true;
     private int categoryId;
     private List<Category> categories = [];
     @inject ISnackbar Snackbar;
@@ -164,7 +178,6 @@
     }
     protected override async Task OnInitializedAsync()
     {
-
         await base.OnInitializedAsync();
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -247,17 +260,12 @@
     }
     public string text { get; set; } = "";
 
-    public void DetectCallBack(string detectedString)
-    {
-    }
 
-    public void ErrorCallBack(string errormesg)
-    {
-    }
     private async Task RefreshProducts()
     {
         try
         {
+            isLoading = true;
             //string id = FormFactor.GetSession()
             _products = await HttpClientService.GetAsync<List<Product>>("/api/products/all/store");
         }
@@ -272,7 +280,7 @@
         }
         finally
         {
-            _processing = false;
+            isLoading = false;
             StateHasChanged();
         }
     }

@@ -1,8 +1,14 @@
 ﻿@page "/"
 
 @inject IFormFactor FormFactor
-
-<div class="mt-5 container">
+<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@code {
+    private List<BreadcrumbItem> _items =
+    [
+        new("Home", href: null, icon: Icons.Material.Filled.Home)
+    ];
+}
+<div class="mt-1 container">
     <div class="row">
 
         <a href="/transaction/index" class="col-12 col-sm-6 col-md-3">
@@ -47,6 +53,23 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Admin</span>
+                    @* <span class="info-box-number">
+
+                        <small>@vm.TotalCount</small>
+                    </span> *@
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </a>
+        <a href="/reports/index" class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+                <span class="info-box-icon bg-info elevation-1">
+                    @* <i class="fa-solid fa-briefcase"></i> *@
+                    <MudIcon Icon="@Icons.Material.Outlined.Report" />
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Reports</span>
                     @* <span class="info-box-number">
 
                         <small>@vm.TotalCount</small>
