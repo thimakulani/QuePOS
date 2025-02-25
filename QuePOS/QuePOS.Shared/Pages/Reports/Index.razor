@@ -1,36 +1,40 @@
-﻿@page "/sales-report"
+﻿@page "/reports/index"
 
 @using ApexCharts
 
 <h3>Sales Report</h3>
+<MudTabs Elevation="2" Rounded="true" Centered="true" Class="my-6" Color="MudBlazor.Color.Dark">
+    <MudTabPanel Icon="@Icons.Material.Filled.Api" Text="Total Sales" BadgeColor="MudBlazor.Color.Error" />
+    <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="Payment Types" BadgeData="1" BadgeColor="MudBlazor.Color.Success" />
+    <MudTabPanel Icon="@Icons.Material.Filled.BugReport" Text="Bugs" BadgeData="0" />
+    <MudTabPanel Icon="@Icons.Material.Filled.AccessTime" Text="Timing" BadgeDot="true" BadgeColor="MudBlazor.Color.Error" />
+    <MudTabPanel Icon="@Icons.Material.Filled.InsertChartOutlined" Text="Metrics" BadgeIcon="@Icons.Material.Filled.Downloading" />
+</MudTabs>
 
-<ApexChart TItem="Sale" Height="350" Width="100%">
-    <ApexPointSeries TItem="Sale" Name="Total Sales" ChartType="ChartType.Line" XValue="@((Sale sale) => sale.SaleDate)" YValue="@((Sale sale) => sale.TotalAmount)" />
-</ApexChart>
 
-<ApexChart TItem="KeyValuePair<string, decimal>" Height="350" Width="100%">
+@* <ApexChart TItem="KeyValuePair<string, decimal>" Height="400" Width="Width.lg">
     <ApexPointSeries TItem="KeyValuePair<string, decimal>" Name="Payment Types" ChartType="ChartType.Pie" XValue="@((KeyValuePair<string, decimal> p) => p.Key)" YValue="@((KeyValuePair<string, decimal> p) => p.Value)" />
 </ApexChart>
 
 <ApexChart TItem="KeyValuePair<string, decimal>" Height="350" Width="100%">
     <ApexPointSeries TItem="KeyValuePair<string, decimal>" Name="Sales by Store" ChartType="ChartType.Bar" XValue="@((KeyValuePair<string, decimal> store) => store.Key)" YValue="@((KeyValuePair<string, decimal> store) => store.Value)" />
-</ApexChart>
+</ApexChart> *@
 
 @code {
-    private List<Sale> sales = new List<Sale>
-    {
-        new Sale { Id = 1, StoreUserId = 1, SaleDate = DateTime.Now.AddDays(-2), TotalAmount = 100, StoreID = 1, PaymentType = "Cash" },
-        new Sale { Id = 2, StoreUserId = 2, SaleDate = DateTime.Now.AddDays(-1), TotalAmount = 200, StoreID = 2, PaymentType = "Credit Card" },
-        new Sale { Id = 3, StoreUserId = 1, SaleDate = DateTime.Now, TotalAmount = 300, StoreID = 1, PaymentType = "Cash" }
-    };
+    /*   private List<Sale> sales = new List<Sale>
+           {
+           new Sale { Id = 1, StoreUserId = 1, SaleDate = DateTime.Now.AddDays(-2), TotalAmount = 100, StoreID = 1, PaymentType = "Cash" },
+           new Sale { Id = 2, StoreUserId = 2, SaleDate = DateTime.Now.AddDays(-1), TotalAmount = 200, StoreID = 2, PaymentType = "Credit Card" },
+           new Sale { Id = 3, StoreUserId = 1, SaleDate = DateTime.Now, TotalAmount = 300, StoreID = 1, PaymentType = "Cash" }
+       };
 
-    private List<KeyValuePair<string, decimal>> paymentTypeData =>
-        sales.GroupBy(s => s.PaymentType)
-             .Select(g => new KeyValuePair<string, decimal>(g.Key, g.Sum(s => s.TotalAmount)))
-             .ToList();
+       private List<KeyValuePair<string, decimal>> paymentTypeData =>
+           sales.GroupBy(s => s.PaymentType)
+                .Select(g => new KeyValuePair<string, decimal>(g.Key, g.Sum(s => s.TotalAmount)))
+       .ToList();
 
-    private List<KeyValuePair<string, decimal>> storeSalesData =>
-        sales.GroupBy(s => $"Store {s.StoreID}")
-             .Select(g => new KeyValuePair<string, decimal>(g.Key, g.Sum(s => s.TotalAmount)))
-             .ToList();
+       private List<KeyValuePair<string, decimal>> storeSalesData =>
+           sales.GroupBy(s => $"Store {s.StoreID}")
+                .Select(g => new KeyValuePair<string, decimal>(g.Key, g.Sum(s => s.TotalAmount)))
+    .ToList();*/
 }
