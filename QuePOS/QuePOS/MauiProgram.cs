@@ -1,4 +1,5 @@
-﻿using Camera.MAUI;
+﻿using ApexCharts;
+using Camera.MAUI;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
@@ -27,7 +28,7 @@ namespace QuePOS
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
             });
             // Add device-specific services used by the QuePOS.Shared project
-            builder.Services.AddSingleton<IFormFactor, FormFactor>();
+            builder.Services.AddApexCharts();
 
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddScoped<IUserService, UserService>();

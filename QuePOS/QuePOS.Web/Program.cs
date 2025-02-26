@@ -1,3 +1,4 @@
+using ApexCharts;
 using Blazored.SessionStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
@@ -26,7 +27,7 @@ builder.Services.AddHttpClient("api", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 builder.Services.AddDistributedMemoryCache();
-
+builder.Services.AddApexCharts();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromDays(100);  //you can change the session expired time.  

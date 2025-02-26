@@ -126,20 +126,20 @@
 
     /*
 
-    private void CalculateChange(ChangeEventArgs e)
-    {
-        if (double.TryParse(e.Value?.ToString(), out var cash))
+        private void CalculateChange(ChangeEventArgs e)
         {
+        if (double.TryParse(e.Value?.ToString(), out var cash))
+            {
             cashReceived = cash;
             changeAmount = cashReceived - totalAmount;
-        }
-        else
-        {
+            }
+            else
+            {
             cashReceived = 0;
             changeAmount = -totalAmount;
-        }
+     }
     }
-     */
+    */
     private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
     private double totalAmount => cartItems.Sum(i => i.Quantity * i.Price);
 
@@ -227,8 +227,21 @@
             return;
         }
 
-        await HttpClientService.PostAsync<Sale>("/api/sales/add", new Sale { SaleDate = DateTime.Now, TotalAmount = (decimal)totalAmount, PaymentType = selectedPaymentMethod, SaleDetails = cartItems });
-        cartItems.Clear();
-        Snackbar.Add("Transaction was successful", Severity.Success);
+
+        try
+        {
+            await HttpClientService.PostAsync<Sale>("/api/sales/add", new Sale { SaleDate = DateTime.Now, TotalAmount = (decimal)totalAmount, PaymentType = selectedPaymentMethod, SaleDetails = cartItems });
+            cartItems.Clear();
+            Snackbar.Add("Transaction was successful", Severity.Success);
+            ClearCart();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 }

@@ -4,7 +4,22 @@
 
 <h3>Sales Report</h3>
 <MudTabs Elevation="2" Rounded="true" Centered="true" Class="my-6" Color="MudBlazor.Color.Dark">
-    <MudTabPanel Icon="@Icons.Material.Filled.Api" Text="Total Sales" BadgeColor="MudBlazor.Color.Error" />
+    <MudTabPanel Icon="@Icons.Material.Filled.Api" Text="Total Sales" BadgeColor="MudBlazor.Color.Error">
+
+        <ApexChart TItem="Sale"
+                   Title="Total Sales by Day (Current Week)">
+
+            <ApexPointSeries TItem="Sale"
+                             Items="Sales"
+                             Name="Total Sales"
+                             XValue="@(e => e.SaleDate.DayOfWeek.ToString())"
+                             YAggregate="@(e => e.Sum(e => e.TotalAmount))"
+                             OrderByDescending="e => e.Y"
+                             SeriesType="SeriesType.Bar"
+                             Color="#28a745"
+                             PointColor="e => GetColor(e)" />
+        </ApexChart>
+    </MudTabPanel>
     <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="Payment Types" BadgeData="1" BadgeColor="MudBlazor.Color.Success" />
     <MudTabPanel Icon="@Icons.Material.Filled.BugReport" Text="Bugs" BadgeData="0" />
     <MudTabPanel Icon="@Icons.Material.Filled.AccessTime" Text="Timing" BadgeDot="true" BadgeColor="MudBlazor.Color.Error" />
@@ -21,20 +36,30 @@
 </ApexChart> *@
 
 @code {
-    /*   private List<Sale> sales = new List<Sale>
-           {
-           new Sale { Id = 1, StoreUserId = 1, SaleDate = DateTime.Now.AddDays(-2), TotalAmount = 100, StoreID = 1, PaymentType = "Cash" },
-           new Sale { Id = 2, StoreUserId = 2, SaleDate = DateTime.Now.AddDays(-1), TotalAmount = 200, StoreID = 2, PaymentType = "Credit Card" },
-           new Sale { Id = 3, StoreUserId = 1, SaleDate = DateTime.Now, TotalAmount = 300, StoreID = 1, PaymentType = "Cash" }
-       };
+    private List<Sale> Sales = new();
+    @inject IHttpClientService HttpClientService;
+    private string GetColor(Sale sale)
+    {
+        return sale.TotalAmount > 1000 ? "#28a745" : "#dc3545";
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        Sales = (await GetSalesAsync()).Where(s => s.SaleDate.Date >= GetStartOfWeek(DateTime.Now) && s.SaleDate.Date <= GetEndOfWeek(DateTime.Now))
+            .ToList();
+    }
+    private DateTime GetStartOfWeek(DateTime date)
+    {
+        int diff = (7 + (date.DayOfWeek - DayOfWeek.Sunday)) % 7;
+        return date.AddDays(-diff).Date;
+    }
 
-       private List<KeyValuePair<string, decimal>> paymentTypeData =>
-           sales.GroupBy(s => s.PaymentType)
-                .Select(g => new KeyValuePair<string, decimal>(g.Key, g.Sum(s => s.TotalAmount)))
-       .ToList();
+    private DateTime GetEndOfWeek(DateTime date)
+    {
+        return GetStartOfWeek(date).AddDays(6);
+    }
+    private async Task<List<Sale>> GetSalesAsync()
+    {
 
-       private List<KeyValuePair<string, decimal>> storeSalesData =>
-           sales.GroupBy(s => $"Store {s.StoreID}")
-                .Select(g => new KeyValuePair<string, decimal>(g.Key, g.Sum(s => s.TotalAmount)))
-    .ToList();*/
+        return await HttpClientService.GetAsync<List<Sale>>("api/sales/get_history");
+    }
 }
