@@ -17,22 +17,32 @@
 
 <MudTable Items="sales" Dense="true">
     <HeaderContent>
-        <MudTh>Sale ID</MudTh>
+        <MudTh>Transaction Id</MudTh>
         <MudTh>User</MudTh>
         <MudTh>Date</MudTh>
         <MudTh>Quantity</MudTh>
         <MudTh>Total Amount</MudTh>
+        <MudTh>Products</MudTh>
     </HeaderContent>
     <RowTemplate Context="sale">
-        <MudTd DataLabel="Sale ID">@sale.Id</MudTd>
+        <MudTd DataLabel="Transaction Id">@sale.Id</MudTd>
         <MudTd DataLabel="User">@sale.User.FirstName</MudTd>
         <MudTd DataLabel="Date">@sale.SaleDate.ToShortDateString()</MudTd>
         <MudTd DataLabel="Quantity">@sale.SaleDetails.Count()</MudTd>
         <MudTd DataLabel="Total Amount">@sale.TotalAmount.ToString("C")</MudTd>
+        <MudTd DataLabel="Products">@sale.TotalAmount.ToString("C")</MudTd>
     </RowTemplate>
+    <ChildRowContent>
+        @if(context.SaleDetails.Any())
+        {
+
+        }
+    </ChildRowContent>
+    
 </MudTable>
 
 @code {
+
     private string selectedFilter = "Daily";
     private DateTime? startDate = DateTime.Today;
     private DateTime? endDate = DateTime.Today;

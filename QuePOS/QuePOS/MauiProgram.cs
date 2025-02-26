@@ -32,6 +32,7 @@ namespace QuePOS
 
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IFormFactor, FormFactor>();
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
             builder.Services.AddScoped<IHttpClientService, HttpClientService>();
             builder.Services.AddAuthorizationCore();
