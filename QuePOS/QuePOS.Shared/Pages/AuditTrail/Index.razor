@@ -1,0 +1,41 @@
+﻿@page "/audit/index"
+<MudCard>
+    <MudCardHeader Title="Audit Trail Records" />
+    <MudCardContent>
+        <MudTable Items="AuditTrails" Dense="true" Hover="true">
+            <HeaderContent>
+                <MudTh>ID</MudTh>
+                <MudTh>User</MudTh>
+                <MudTh>Action</MudTh>
+                <MudTh>Table</MudTh>
+                <MudTh>Record ID</MudTh>
+                <MudTh>Timestamp</MudTh>
+                <MudTh>IP Address</MudTh>
+                <MudTh>User Agent</MudTh>
+            </HeaderContent>
+            <RowTemplate Context="audit">
+                <MudTd>@audit.Id</MudTd>
+                <MudTd>@audit.ApplicationUser?.StoreUser?.FirstName</MudTd>
+                <MudTd>@audit.Action</MudTd>
+                <MudTd>@audit.TableName</MudTd>
+                <MudTd>@audit.RecordId</MudTd>
+                <MudTd>@audit.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
+                <MudTd>@audit.IPAddress</MudTd>
+                <MudTd>
+                    <MudTooltip Text="@audit.UserAgent">
+                        <MudText Truncate="true">@audit.UserAgent</MudText>
+                    </MudTooltip>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private List<AuditTrail> AuditTrails = new();
+    @inject IHttpClientService HttpClient;
+    protected override async Task OnInitializedAsync()
+    {
+        AuditTrails = await HttpClient.GetAsync<List<AuditTrail>>("/api/audittrail");
+    }
+}

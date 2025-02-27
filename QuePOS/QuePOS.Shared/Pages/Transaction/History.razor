@@ -1,6 +1,13 @@
 ﻿@page "/transaction/history"
 
-
+<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@code {
+    private List<BreadcrumbItem> _items =
+    [
+        new("Home", href: "/", icon: Icons.Material.Filled.Home),
+    new("Transaction History", href: null, disabled: true),
+    ];
+}
 <MudCard>
     <MudCardContent>
         <MudGrid>
@@ -33,12 +40,12 @@
         <MudTd DataLabel="Products">@sale.TotalAmount.ToString("C")</MudTd>
     </RowTemplate>
     <ChildRowContent>
-        @if(context.SaleDetails.Any())
+        @if (context.SaleDetails.Any())
         {
 
         }
     </ChildRowContent>
-    
+
 </MudTable>
 
 @code {

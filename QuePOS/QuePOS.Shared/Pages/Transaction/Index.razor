@@ -1,6 +1,13 @@
 ﻿@page "/transaction/index"
 @using MudBlazor
-
+<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@code {
+    private List<BreadcrumbItem> _items =
+    [
+        new("Home", href: "/", icon: Icons.Material.Filled.Home),
+    new("Transaction", href: null, disabled: true),
+    ];
+}
 <MudGrid>
     <MudItem xs="12" sm="8" md="2" lg="6">
         <MudPaper Elevation="4" Class="p-2">
