@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QuePOS.API.Data;
 using QuePOS.API.Interfaces;
 using QuePOS.API.Models;
@@ -7,6 +9,7 @@ using System.Security.Claims;
 
 namespace QuePOS.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TrailsController : ControllerBase
@@ -28,8 +31,8 @@ namespace QuePOS.API.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = context.StoreUsers.Where(x => x.UserId == userId).FirstOrDefault();
-
-            return Ok();
+            var trail = await context.AuditTrails.Where(x => x.StoreId == user.StoreID).ToListAsync();
+            return Ok(trail);
         }
     }
 }

@@ -38,7 +38,9 @@
         <MudTd DataLabel="Quantity">@sale.SaleDetails.Count()</MudTd>
         <MudTd DataLabel="Total Amount">@sale.TotalAmount.ToString("C")</MudTd>
         <MudTd DataLabel="Products">
-            <MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowBtnPress(context.id))">@((context.ShowDetails == true) ? "Hide" : "Show") Address Details</MudButton></MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Rounded.Details" />
+            </MudTd>
         </MudTd>
     </RowTemplate>
     <ChildRowContent>

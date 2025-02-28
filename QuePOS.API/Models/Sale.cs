@@ -12,7 +12,8 @@ namespace QuePOS.API.Models
         public DateTime SaleDate { get; set; } = DateTime.Now;
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; }
-
+        public decimal? CashReceived { get; set; }
+        public decimal? ChangeAmount { get; set; }
         // Foreign Key for Store
         public int? StoreID { get; set; }
         public string PaymentType { get; set; } = "Cash";

@@ -1,6 +1,16 @@
 ﻿@page "/audit/index"
+<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@code {
+    private List<BreadcrumbItem> _items =
+    [
+        new("Home", href: "/", icon: Icons.Material.Filled.Home),
+    new("Audit Trail", href: null, disabled: true),
+    ];
+}
 <MudCard>
-    <MudCardHeader Title="Audit Trail Records" />
+    <MudCardHeader >
+        <MudText>Audit Trail Records</MudText>
+        </MudCardHeader>
     <MudCardContent>
         <MudTable Items="AuditTrails" Dense="true" Hover="true">
             <HeaderContent>
@@ -34,8 +44,21 @@
 @code {
     private List<AuditTrail> AuditTrails = new();
     @inject IHttpClientService HttpClient;
+    @inject ISnackbar Snackbar;
     protected override async Task OnInitializedAsync()
     {
-        AuditTrails = await HttpClient.GetAsync<List<AuditTrail>>("/api/audittrail");
+        try
+        {
+            AuditTrails = await HttpClient.GetAsync<List<AuditTrail>>("/api/trails/store");
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode != System.Net.HttpStatusCode.NotFound)
+                Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
     }
 }

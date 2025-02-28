@@ -22,6 +22,7 @@ namespace QuePOS.API.Controllers
             this._context = context;
         }
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Add(Category category)
         {
             return Ok(await repository.Add(category));

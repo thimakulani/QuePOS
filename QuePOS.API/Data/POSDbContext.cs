@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using QuePOS.API.Interfaces;
 using QuePOS.API.Models;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,11 @@ namespace QuePOS.API.Data
 {
     public class POSDbContext : IdentityDbContext
     {
-        public POSDbContext(DbContextOptions<POSDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options)
+        public POSDbContext(DbContextOptions<POSDbContext> options, IHttpContextAccessor httpContextAccessor, /*IRepository<StoreUser> repository,*/ IServiceProvider serviceProvider) : base(options)
         {
             _httpContextAccessor = httpContextAccessor;
+            // _repository = repository;
+            _serviceProvider = serviceProvider;
         }
 
         // Define DbSets for each entity
@@ -29,14 +32,25 @@ namespace QuePOS.API.Data
         public DbSet<Store> Stores { get; set; }
 
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        //private readonly IRepository<StoreUser> _repository;
+        private readonly IServiceProvider _serviceProvider;
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             try
             {
                 var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
-                var userAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent;
+                var userAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString();
                 var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var entries = ChangeTracker.Entries().ToList(); // Create a copy of the entries collection
+
+                // Ensure store is not null
+                var scope = _serviceProvider.CreateScope();
+                var _repository = scope.ServiceProvider.GetRequiredService<IRepository<StoreUser>>();
+                var store = await _repository.GetFirstOrDefault(x => x.UserId == userId);
+
+                var storeId = store?.Id ?? 0; // Handle null store
+
+                var entries = ChangeTracker.Entries().ToList();
                 foreach (var entry in entries)
                 {
                     var entity = entry.Entity;
@@ -59,21 +73,23 @@ namespace QuePOS.API.Data
                             Timestamp = DateTime.UtcNow,
                             Details = $"{action}",
                             IPAddress = ipAddress,
-                            UserAgent = userAgent
+                            UserAgent = userAgent,
+                            StoreId = storeId,
                         };
 
-                        AuditTrails.Add(auditLog);
+                        await AuditTrails.AddAsync(auditLog, cancellationToken); // Use async AddAsync
                     }
                 }
 
-
+                return await base.SaveChangesAsync(cancellationToken); // Ensure database changes are saved
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error : " + ex.Message);
+                Console.WriteLine("Error: " + ex.Message);
+                throw; // Re-throw to ensure errors propagate
             }
-            return base.SaveChangesAsync(cancellationToken);
         }
+
 
         private static int GetRecordId(object entity)
         {
