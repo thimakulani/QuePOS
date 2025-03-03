@@ -1,8 +1,15 @@
 ﻿@page "/users/index"
-
+<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@code {
+    private List<BreadcrumbItem> _items =
+    [
+        new("Home", href: "/", icon: Icons.Material.Filled.Home),
+    new("Users", href: null, disabled: true),
+    ];
+}
 <MudCard>
     <MudCardContent>
-        <MudButton Color="Color.Primary" OnClick="OpenCreateDialog">Add User</MudButton>
+        <MudButton Variant="Variant.Outlined" Style="margin-bottom: 10px" Color="Color.Primary" OnClick="OpenCreateDialog">Add User</MudButton>
         <MudTable Items="@users" Striped="true" Bordered="true" Hover="true">
             <HeaderContent>
                 <MudTh>First Name</MudTh>
@@ -17,8 +24,10 @@
                 <MudTd DataLabel="Phone Number">@context.PhoneNumber</MudTd>
                 <MudTd DataLabel="Created At">@context.CreatedAt.ToString("yyyy-MM-dd")</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudIconButton Icon="@Icons.Material.Outlined.Edit" Color="Color.Primary" OnClick="() => OpenEditDialog(context)" />
-                    <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="() => DeleteUser(context.Id)" />
+                    <MudStack Row="true" Spacing="2">
+                        <MudIconButton Edge="Edge.End" Size="Size.Small" Variant="Variant.Outlined" Icon="@Icons.Material.Outlined.Edit" Color="Color.Primary" OnClick="() => OpenEditDialog(context)" />
+                        <MudIconButton Edge="Edge.End" Size="Size.Small" Variant="Variant.Outlined" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="() => DeleteUser(context.Id)" />
+                    </MudStack>
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -27,24 +36,24 @@
 </MudCard>
 
 <!-- Create/Edit User Dialog -->
-<MudDialog @bind-IsOpen="dialogOpen" Options="dialogOptions">
+<MudDialog @bind-Visible="dialogOpen" Options="dialogOptions">
     <TitleContent>@(selectedUser.Id == 0 ? "CREATE USER" : "EDIT USER")</TitleContent>
     <DialogContent>
-        <MudTextField @bind-Value="selectedUser.FirstName" Label="First Name" Required="true" />
-        <MudTextField @bind-Value="selectedUser.LastName" Label="Last Name" Required="true" />
-        <MudTextField @bind-Value="selectedUser.PhoneNumber" Label="Phone Number" Required="true" />
-        @* <MudTextField @bind-Value="selectedUser.Email" Label="Email" Required="true" /> *@
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="selectedUser.FirstName" Label="First Name" Required="true" />
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="selectedUser.LastName" Label="Last Name" Required="true" />
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="selectedUser.PhoneNumber" Label="Phone Number" Required="true" />
+        <MudTextField Variant="Variant.Outlined" Disabled="@(selectedUser.Id != 0 ? true : false)" Margin="Margin.Dense" @bind-Value="selectedUser.Email" Label="Email" Required="true" />
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="SaveUser" Color="Color.Primary">Save</MudButton>
-        <MudButton OnClick="CloseDialog" Color="Color.Secondary">Cancel</MudButton>
+        <MudButton OnClick="SaveUser" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
+        <MudButton OnClick="CloseDialog" Variant="Variant.Filled" Color="Color.Secondary">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
     private List<StoreUser> users = new List<StoreUser>();
     private bool dialogOpen = false;
-    private DialogOptions dialogOptions = new DialogOptions { MaxWidth = MaxWidth.Medium };
+    private DialogOptions dialogOptions = new DialogOptions { FullWidth = true, };
     private StoreUser selectedUser = new StoreUser();
     @inject IHttpClientService HttpClientService;
     @inject ISnackbar Snackbar;
@@ -98,26 +107,58 @@
 
     private async Task SaveUser()
     {
-        if (selectedUser.Id == 0)  // Create new user
+        try
         {
-            var response = await HttpClientService.PostAsync<StoreUser>("/api/users", selectedUser);
 
-            users.Add(response);
+            if (selectedUser.Id == 0)  // Create new user
+            {
+                var response = await HttpClientService.PostAsync<StoreUser>("/api/StoreUser", selectedUser);
 
+                users.Add(response);
+
+            }
+            else  // Update existing user
+            {
+                var response = await HttpClientService.PutAsync<StoreUser>($"/api/StoreUser/{selectedUser.Id}", selectedUser);
+                var index = users.FindIndex(u => u.Id == selectedUser.Id);
+                users[index] = selectedUser;
+            }
+
+            CloseDialog();
         }
-        else  // Update existing user
+        catch (HttpRequestException ex)
         {
-            var response = await HttpClientService.PutAsync<StoreUser>($"/api/users/{selectedUser.Id}", selectedUser);
-            var index = users.FindIndex(u => u.Id == selectedUser.Id);
-            users[index] = selectedUser;
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
-
-        CloseDialog();
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 
     private async Task DeleteUser(int userId)
     {
-        await HttpClientService.DeleteAsync($"/api/users/{userId}");
-        users.RemoveAll(u => u.Id == userId);
+        try
+        {
+            await HttpClientService.DeleteAsync($"/api/StoreUser/{userId}");
+            users.RemoveAll(u => u.Id == userId);
+
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            StateHasChanged();
+        }
     }
 }

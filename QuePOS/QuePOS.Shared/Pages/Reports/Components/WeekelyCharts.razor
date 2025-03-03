@@ -1,0 +1,29 @@
+﻿@using ApexCharts
+
+<ApexChart TItem="Sale"
+           Title="Total Sales by Day (Current Week)">
+
+    <ApexPointSeries TItem="Sale"
+                     Items="Sales"
+                     Name="Total Sales"
+                     XValue="@(e => e.SaleDate.DayOfWeek.ToString())"
+                     YAggregate="@(e => e.Sum(e => (decimal)e.TotalAmount))"
+                     OrderByDescending="e => e.Y"
+                     SeriesType="SeriesType.Bar"
+                     Color="#28a745"
+                     PointColor="e => GetColor(e)" />
+</ApexChart>
+
+@code {
+    [Parameter]
+    public List<Sale> Sales { get; set; }
+    private string GetColor(Sale sale)
+    {
+        return sale.TotalAmount > 1000 ? "#28a745" : "#dc3545";
+    }
+    protected override Task OnParametersSetAsync()
+    {
+        StateHasChanged();
+        return base.OnParametersSetAsync();
+    }
+}

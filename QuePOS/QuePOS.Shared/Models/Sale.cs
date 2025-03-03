@@ -5,9 +5,9 @@
         public int Id { get; set; }
         public int UserID { get; set; }
         public DateTime SaleDate { get; set; } = DateTime.Now;
-        public decimal TotalAmount { get; set; }
-        public decimal CashReceived { get; set; }
-        public decimal ChangeAmount { get; set; }
+        public double TotalAmount { get; set; }
+        public double? CashReceived { get; set; }
+        public double? ChangeAmount { get; set; }
         public string PaymentType { get; set; } = "Cash";
         // Foreign Key for Store
         public int StoreID { get; set; }

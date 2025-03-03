@@ -8,72 +8,73 @@
     new("Transaction", href: null, disabled: true),
     ];
 }
-<MudGrid>
-    <MudItem xs="12" sm="8" md="2" lg="6">
-        <MudPaper Elevation="4" Class="p-2">
-            <MudText Style="margin: 10px" Typo="Typo.h5">Transaction</MudText>
-            <br />
-            <MudGrid Class="mb-2" Justify="Justify.SpaceAround">
-                <MudButton Variant="Variant.Outlined" OnClick="ShowScanner" StartIcon="@Icons.Material.Outlined.QrCodeScanner">Scan</MudButton>
-                <MudButton Variant="Variant.Outlined" OnClick="ShowProducts" StartIcon="@Icons.Material.Outlined.Add">Get Products</MudButton>
-            </MudGrid>
+<MudItem xs="12" sm="8" md="2" lg="6">
+    <MudPaper Elevation="4" Class="p-2">
+        <MudText Style="margin: 10px" Typo="Typo.h6">Transaction</MudText>
+        <br />
+        <MudGrid Class="mb-2" Justify="Justify.SpaceAround">
+            <MudButton Variant="Variant.Outlined" OnClick="ShowScanner" StartIcon="@Icons.Material.Outlined.QrCodeScanner">Scan</MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="ShowProducts" StartIcon="@Icons.Material.Outlined.Add">Get Products</MudButton>
+        </MudGrid>
 
-            <!-- Cart Items -->
-            <MudList Dense T="string" Class="mt-2">
-                @foreach (var item in cartItems)
-                {
-                    <MudListItem>
-                        <MudPaper Elevation="3" Class="p-2">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="2">
-                                <MudText Color="Color.Success" Typo="Typo.subtitle1">@item.Name</MudText>
-                                <MudSpacer />
 
-                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity - 1)" Disabled="item.Quantity <= 1" Size="Size.Small" />
-                                    <MudText>@item.Quantity</MudText>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity + 1)" Size="Size.Small" />
-                                </MudStack>
 
-                                <MudText Align="Align.Right" Typo="Typo.subtitle1">@((item.Quantity * item.Price).ToString("C"))</MudText>
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => RemoveItem(item)" Color="Color.Error" />
-                            </MudStack>
-                        </MudPaper>
-                    </MudListItem>
-                }
-            </MudList>
+        <MudDivider Class="my-2" />
+        <MudText Color="Color.Dark" Typo="Typo.h6">Total: @totalAmount.ToString("C") (@cartItems.Sum(i => i.Quantity) items)</MudText>
 
-            <MudDivider Class="my-2" />
-            <MudText Color="Color.Dark" Typo="Typo.h6">Total: @totalAmount.ToString("C") (@cartItems.Sum(i => i.Quantity) items)</MudText>
-
-            <MudSelect @bind-Value="selectedPaymentMethod" Label="Payment Method" Margin="Margin.Dense" Variant="Variant.Outlined">
-                @foreach (var method in paymentMethods)
-                {
-                    <MudSelectItem Value="@method">@method</MudSelectItem>
-                }
-            </MudSelect>
-            @if (selectedPaymentMethod == "Cash")
+        <MudSelect @bind-Value="selectedPaymentMethod" Label="Payment Method" Margin="Margin.Dense" Variant="Variant.Outlined">
+            @foreach (var method in paymentMethods)
             {
-                <MudNumericField @bind-Value="cashReceived" Format="F1" Label="Cash Received" Margin="Margin.Dense" Variant="Variant.Outlined"
-                                 Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Rounded.Money" />
-
-                <MudText Typo="Typo.subtitle1">Change: @changeAmount.ToString("C")</MudText>
-
-                @if (changeAmount < 0)
-                {
-                    <MudText Color="Color.Error" Typo="Typo.body2">* Insufficient cash received</MudText>
-                }
+                <MudSelectItem Value="@method">@method</MudSelectItem>
             }
+        </MudSelect>
+        @if (selectedPaymentMethod == "Cash")
+        {
+            <MudNumericField @bind-Value="cashReceived" Format="F1" Label="Cash Received" Margin="Margin.Dense" Variant="Variant.Outlined"
+                             Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Rounded.Money" />
+
+            <MudText Typo="Typo.h6">Change: @changeAmount.ToString("C")</MudText>
+
+            @if (changeAmount < 0)
+            {
+                <MudText Color="Color.Error" Typo="Typo.body2">* Insufficient cash received</MudText>
+            }
+        }
 
 
-            <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success" OnClick="() => confirmSaleDialog = true">
-                Complete Sale
-            </MudButton>
-            <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Error" OnClick="ClearCart">
-                Clear Cart
-            </MudButton>
-        </MudPaper>
-    </MudItem>
-</MudGrid>
+        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success" OnClick="() => confirmSaleDialog = true">
+            Complete Sale
+        </MudButton>
+        <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Error" OnClick="ClearCart">
+            Clear Cart
+        </MudButton>
+        <!-- Cart Items -->
+
+    </MudPaper>
+</MudItem>
+<MudText Style="margin: 10px" Typo="Typo.h6">Items</MudText>
+<MudList Dense T="string">
+    @foreach (var item in cartItems)
+    {
+        <MudListItem>
+            <MudPaper Elevation="3" Class="p-2">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="2">
+                    <MudText Color="Color.Success" Typo="Typo.subtitle1">@item.Name</MudText>
+                    <MudSpacer />
+
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                        <MudIconButton Icon="@Icons.Material.Filled.Remove" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity - 1)" Disabled="item.Quantity <= 1" Size="Size.Small" />
+                        <MudText>@item.Quantity</MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity + 1)" Size="Size.Small" />
+                    </MudStack>
+
+                    <MudText Align="Align.Right" Typo="Typo.subtitle1">@((item.Quantity * item.Price).ToString("C"))</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => RemoveItem(item)" Color="Color.Error" />
+                </MudStack>
+            </MudPaper>
+        </MudListItem>
+    }
+</MudList>
 
 <!-- Product Dialog -->
 <MudDialog @bind-Visible="products_visible" Options="_dialogOptions">
@@ -128,8 +129,10 @@
     [Inject] private ISnackbar Snackbar { get; set; }
     [Inject] private IFormFactor FormFactor { get; set; }
     [Inject] private IHttpClientService HttpClientService { get; set; }
-    private double cashReceived;
-    private double changeAmount => cashReceived - totalAmount;
+    private double? cashReceived;
+    //private double changeAmount => (double)cashReceived - totalAmount;
+    private double changeAmount => cashReceived.HasValue ? cashReceived.Value - totalAmount : -totalAmount;
+
 
     /*
 
@@ -223,7 +226,12 @@
 
     private void RemoveItem(SaleDetail item) => cartItems.Remove(item);
 
-    private void ClearCart() => cartItems.Clear();
+    private void ClearCart()
+    {
+        cartItems.Clear();
+        cashReceived = 0;
+        StateHasChanged();
+    }
 
     private async void ProcessSale()
     {
@@ -237,7 +245,7 @@
 
         try
         {
-            await HttpClientService.PostAsync<Sale>("/api/sales/add", new Sale { SaleDate = DateTime.Now, TotalAmount = (decimal)totalAmount, PaymentType = selectedPaymentMethod, SaleDetails = cartItems });
+            await HttpClientService.PostAsync<Sale>("/api/sales/add", new Sale { ChangeAmount = changeAmount, CashReceived = cashReceived, SaleDate = DateTime.Now, TotalAmount = totalAmount, PaymentType = selectedPaymentMethod, SaleDetails = cartItems });
             cartItems.Clear();
             Snackbar.Add("Transaction was successful", Severity.Success);
             ClearCart();

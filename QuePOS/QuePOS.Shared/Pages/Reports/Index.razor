@@ -10,22 +10,28 @@
     ];
 }
 <h3>Sales Report</h3>
+
 <MudTabs Elevation="2" Rounded="true" Centered="true" Class="my-6" Color="MudBlazor.Color.Dark">
     <MudTabPanel Icon="@Icons.Material.Filled.Api" Text="Total Sales" BadgeColor="MudBlazor.Color.Error">
+        @if (loading)
+        {
+            <MudProgressCircular Indeterminate="true" Size="MudBlazor.Size.Medium" Rounded="true" />
+        }
+        else
+        {
+            @if (Sales.Count > 0)
+            {
+                <QuePOS.Shared.Pages.Reports.Components.WeekelyCharts Sales="@Sales" />
+            }
+            else
+            {
+                <div class="justify-content-center">
+                    <MudText>No Data At The Moment</MudText>
+                </div>
+            }
+        }
 
-        <ApexChart TItem="Sale"
-                   Title="Total Sales by Day (Current Week)">
 
-            <ApexPointSeries TItem="Sale"
-                             Items="Sales"
-                             Name="Total Sales"
-                             XValue="@(e => e.SaleDate.DayOfWeek.ToString())"
-                             YAggregate="@(e => e.Sum(e => e.TotalAmount))"
-                             OrderByDescending="e => e.Y"
-                             SeriesType="SeriesType.Bar"
-                             Color="#28a745"
-                             PointColor="e => GetColor(e)" />
-        </ApexChart>
     </MudTabPanel>
     <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="Payment Types" BadgeData="1" BadgeColor="MudBlazor.Color.Success" />
     <MudTabPanel Icon="@Icons.Material.Filled.BugReport" Text="Bugs" BadgeData="0" />
@@ -34,25 +40,20 @@
 </MudTabs>
 
 
-@* <ApexChart TItem="KeyValuePair<string, decimal>" Height="400" Width="Width.lg">
-    <ApexPointSeries TItem="KeyValuePair<string, decimal>" Name="Payment Types" ChartType="ChartType.Pie" XValue="@((KeyValuePair<string, decimal> p) => p.Key)" YValue="@((KeyValuePair<string, decimal> p) => p.Value)" />
-</ApexChart>
-
-<ApexChart TItem="KeyValuePair<string, decimal>" Height="350" Width="100%">
-    <ApexPointSeries TItem="KeyValuePair<string, decimal>" Name="Sales by Store" ChartType="ChartType.Bar" XValue="@((KeyValuePair<string, decimal> store) => store.Key)" YValue="@((KeyValuePair<string, decimal> store) => store.Value)" />
-</ApexChart> *@
 
 @code {
     private List<Sale> Sales = new();
     @inject IHttpClientService HttpClientService;
-    private string GetColor(Sale sale)
-    {
-        return sale.TotalAmount > 1000 ? "#28a745" : "#dc3545";
-    }
+    private bool loading = true;
+
     protected override async Task OnInitializedAsync()
     {
-        Sales = (await GetSalesAsync()).Where(s => s.SaleDate.Date >= GetStartOfWeek(DateTime.Now) && s.SaleDate.Date <= GetEndOfWeek(DateTime.Now))
+
+        Sales = (await GetSalesAsync())
+            .Where(s => s.SaleDate.Date >= GetStartOfWeek(DateTime.Now) && s.SaleDate.Date <= GetEndOfWeek(DateTime.Now))
             .ToList();
+        loading = false;
+        StateHasChanged();
     }
     private DateTime GetStartOfWeek(DateTime date)
     {
@@ -66,7 +67,6 @@
     }
     private async Task<List<Sale>> GetSalesAsync()
     {
-
         return await HttpClientService.GetAsync<List<Sale>>("api/sales/get_history");
     }
 }

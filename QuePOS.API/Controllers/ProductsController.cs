@@ -60,7 +60,10 @@ namespace QuePOS.API.Controllers
             }
             var product = await _posdbContext.Products
                     .FirstOrDefaultAsync(x => x.StoreID == user.StoreID && x.BarCode == barcode && !x.IsDeleted);
-
+            if(product == null)
+            {
+                return NotFound("Product not found in store inventory");
+            }
             return Ok(product);
         }
 

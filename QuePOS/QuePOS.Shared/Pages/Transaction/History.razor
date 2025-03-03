@@ -8,19 +8,13 @@
     new("Transaction History", href: null, disabled: true),
     ];
 }
-<MudCard>
-    <MudCardContent>
-        <MudGrid>
-            <MudItem xs="12" md="4" class="d-flex align-center">
-                <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="Start Date" @bind-Date="startDate" Disabled="true" />
-                <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="End Date" @bind-Date="endDate" Disabled="true" />
-            </MudItem>
-            <MudItem xs="12" md="4">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadSales">Apply Filter</MudButton>
-            </MudItem>
-        </MudGrid>
-    </MudCardContent>
-</MudCard>
+
+<MudStack Row="true" Spacing="2" Justify="Justify.SpaceAround">
+    <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="Start Date" @bind-Date="startDate" Disabled="true" />
+    <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="End Date" @bind-Date="endDate" Disabled="true" />
+    <MudIconButton Variant="Variant.Text" Icon="@Icons.Material.Outlined.Search" Size="Size.Small" Color="Color.Primary" OnClick="LoadSales" />
+</MudStack>
+
 
 <MudTable Items="sales" Dense="true">
     <HeaderContent>
@@ -38,12 +32,10 @@
         <MudTd DataLabel="Quantity">@sale.SaleDetails.Count()</MudTd>
         <MudTd DataLabel="Total Amount">@sale.TotalAmount.ToString("C")</MudTd>
         <MudTd DataLabel="Products">
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Rounded.Details" />
-            </MudTd>
+            <MudIconButton Edge="Edge.End" Size="Size.Small" Icon="@Icons.Material.Filled.Preview" Variant="Variant.Outlined" />
         </MudTd>
     </RowTemplate>
-    <ChildRowContent>
+    @* <ChildRowContent>
         @if (context.SaleDetails.Any())
         {
             <MudTr>
@@ -77,7 +69,7 @@
                 </td>
             </MudTr>
         }
-    </ChildRowContent>
+    </ChildRowContent> *@
 
 </MudTable>
 

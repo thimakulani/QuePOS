@@ -198,6 +198,14 @@ else
                             </div>
                         </div>
                         <div class="input-group mb-3">
+                            <InputText class="form-control" @bind-Value="signupViewModel.StoreName" placeholder="Store Name" />
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-phone"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
                             <InputText class="form-control" @bind-Value="signupViewModel.Email" placeholder="Email Address" />
                             <div class="input-group-append">
                                 <div class="input-group-text">
@@ -205,8 +213,6 @@ else
                                 </div>
                             </div>
                         </div>
-
-
 
                         <div class="input-group mb-3">
                             <InputText class="form-control" @bind-Value="signupViewModel.Password" placeholder="Password" type="password" />
