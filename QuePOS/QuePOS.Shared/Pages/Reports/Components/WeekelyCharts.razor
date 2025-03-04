@@ -19,7 +19,7 @@
     public List<Sale> Sales { get; set; }
     private string GetColor(Sale sale)
     {
-        return sale.TotalAmount > 1000 ? "#28a745" : "#dc3545";
+        return sale.TotalAmount > 500 ? "#28a745" : "#dc3545";
     }
     protected override Task OnParametersSetAsync()
     {

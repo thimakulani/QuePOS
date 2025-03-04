@@ -33,6 +33,31 @@
     <script src="_content/Blazor.QRCode/html5-qrcode.min.js"></script>
     <script src="_content/Blazor.QRCode/qrcode.min.js"></script>
     <script src="_content/Blazor.QRCode/qrcode-init.js"></script>
+    <script>
+           window.networkStatus = {
+            isOnline: () => navigator.onLine,
+            registerConnectionEvents: (dotNetHelper) => {
+                window.addEventListener("online", () => {
+                    dotNetHelper.invokeMethodAsync("UpdateConnectionStatus", true);
+                });
+                window.addEventListener("offline", () => {
+                    dotNetHelper.invokeMethodAsync("UpdateConnectionStatus", false);
+                });
+            }
+        };
+        window.downloadFile = async (fileName, streamRef) => {
+            const arrayBuffer = await streamRef.arrayBuffer();
+            const blob = new Blob([arrayBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        };
+    </script>
 </body>
 
 </html>

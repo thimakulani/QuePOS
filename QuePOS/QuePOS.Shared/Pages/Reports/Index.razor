@@ -1,7 +1,10 @@
 ﻿@page "/reports/index"
 
 @using ApexCharts
+@inject IHttpClientService HttpClientService
+
 <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+
 @code {
     private List<BreadcrumbItem> _items =
     [
@@ -9,29 +12,28 @@
     new("Reports", href: null, disabled: true),
     ];
 }
-<h3>Sales Report</h3>
 
 <MudTabs Elevation="2" Rounded="true" Centered="true" Class="my-6" Color="MudBlazor.Color.Dark">
     <MudTabPanel Icon="@Icons.Material.Filled.Api" Text="Total Sales" BadgeColor="MudBlazor.Color.Error">
         @if (loading)
         {
-            <MudProgressCircular Indeterminate="true" Size="MudBlazor.Size.Medium" Rounded="true" />
+            <div class="d-flex align-center justify-center" style="height: 200px;">
+                <MudProgressCircular Indeterminate="true" Size="MudBlazor.Size.Medium" Rounded="true" />
+            </div>
         }
         else
         {
-            @if (Sales.Count > 0)
+            @if (WeeklySalesData.Any())
             {
-                <QuePOS.Shared.Pages.Reports.Components.WeekelyCharts Sales="@Sales" />
+                <QuePOS.Shared.Pages.Reports.Components.WeekelyCharts Sales="@WeeklySalesData" />
             }
             else
             {
-                <div class="justify-content-center">
+                <MudContainer Class="d-flex align-center justify-center">
                     <MudText>No Data At The Moment</MudText>
-                </div>
+                </MudContainer>
             }
         }
-
-
     </MudTabPanel>
     <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="Payment Types" BadgeData="1" BadgeColor="MudBlazor.Color.Success" />
     <MudTabPanel Icon="@Icons.Material.Filled.BugReport" Text="Bugs" BadgeData="0" />
@@ -39,34 +41,68 @@
     <MudTabPanel Icon="@Icons.Material.Filled.InsertChartOutlined" Text="Metrics" BadgeIcon="@Icons.Material.Filled.Downloading" />
 </MudTabs>
 
-
-
 @code {
-    private List<Sale> Sales = new();
-    @inject IHttpClientService HttpClientService;
+    private List<Sale> WeeklySalesData = [];
     private bool loading = true;
 
     protected override async Task OnInitializedAsync()
     {
-
-        Sales = (await GetSalesAsync())
-            .Where(s => s.SaleDate.Date >= GetStartOfWeek(DateTime.Now) && s.SaleDate.Date <= GetEndOfWeek(DateTime.Now))
-            .ToList();
-        loading = false;
-        StateHasChanged();
-    }
-    private DateTime GetStartOfWeek(DateTime date)
-    {
-        int diff = (7 + (date.DayOfWeek - DayOfWeek.Sunday)) % 7;
-        return date.AddDays(-diff).Date;
+        await LoadSalesData();
     }
 
-    private DateTime GetEndOfWeek(DateTime date)
+    private async Task LoadSalesData()
     {
-        return GetStartOfWeek(date).AddDays(6);
+        try
+        {
+            var allSales = await GetSalesAsync();
+            var startOfWeek = GetStartOfWeek(DateTime.Now);
+            var endOfWeek = GetEndOfWeek(DateTime.Now);
+
+            // Create a dictionary with all days of the current week initialized to zero sales
+            var weekData = Enumerable.Range(0, 7)
+                .Select(i => new Sale
+                    {
+                        SaleDate = startOfWeek.AddDays(i),
+                        TotalAmount = 0 // Default sales amount is 0
+                    })
+                .ToDictionary(s => s.SaleDate.Date);
+
+            // Map actual sales data to the correct days
+            foreach (var sale in allSales.Where(s => s.SaleDate.Date >= startOfWeek && s.SaleDate.Date <= endOfWeek))
+            {
+                if (weekData.ContainsKey(sale.SaleDate.Date))
+                {
+                    weekData[sale.SaleDate.Date].TotalAmount += sale.TotalAmount;
+                }
+            }
+
+            // Convert dictionary back to list for UI display
+            WeeklySalesData = weekData.Values.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading sales data: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
     }
+
+    private DateTime GetStartOfWeek(DateTime date) => date.Date.AddDays(-(int)date.DayOfWeek);
+
+    private DateTime GetEndOfWeek(DateTime date) => GetStartOfWeek(date).AddDays(6);
+
     private async Task<List<Sale>> GetSalesAsync()
     {
-        return await HttpClientService.GetAsync<List<Sale>>("api/sales/get_history");
+        try
+        {
+            return await HttpClientService.GetAsync<List<Sale>>("api/sales/get_history") ?? new List<Sale>();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching sales data: {ex.Message}");
+            return [];
+        }
     }
 }

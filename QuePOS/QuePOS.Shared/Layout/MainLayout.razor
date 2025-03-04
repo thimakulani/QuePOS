@@ -31,7 +31,7 @@
     <AuthorizeView>
         <Authorized>
 
-            <MudMainContent >
+            <MudMainContent>
                 <div style="margin: 20px">
                     @Body
                 </div>
@@ -93,10 +93,7 @@
         AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
 
 
-        IsOnline = await JSRuntime.InvokeAsync<bool>("networkStatus.isOnline");
 
-        // Register real-time connection events
-        await JSRuntime.InvokeVoidAsync("networkStatus.registerConnectionEvents", DotNetObjectReference.Create(this));
 
 
         await base.OnInitializedAsync();
@@ -128,6 +125,10 @@
                 session_loading = false;
             }
             StateHasChanged();
+            IsOnline = await JSRuntime.InvokeAsync<bool>("networkStatus.isOnline");
+
+            // Register real-time connection events
+            await JSRuntime.InvokeVoidAsync("networkStatus.registerConnectionEvents", DotNetObjectReference.Create(this));
         }
         await base.OnAfterRenderAsync(firstRender);
     }

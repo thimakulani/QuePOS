@@ -1,0 +1,26 @@
+﻿@page "/data_management/index"
+
+
+
+<MudIconButton Variant="Variant.Outlined" Icon="@Icons.Custom.FileFormats.FileExcel" OnClick="ExportToExcel">EXPORT TO EXCEL</MudIconButton>
+<MudIconButton Variant="Variant.Outlined" Icon="@Icons.Custom.Brands.Google" OnClick="BackUpGoogleDrive">BACKUP TO GOOGLE DRIVE</MudIconButton>
+
+
+@code {
+    @inject IHttpClientService HttpClientService;
+    private async void ExportToExcel()
+    {
+        try
+        {
+            var obj = await HttpClientService.DownloadFileAsync("/api/export_to_excel");
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+
+
+    }
+    private void BackUpGoogleDrive() { }
+}
