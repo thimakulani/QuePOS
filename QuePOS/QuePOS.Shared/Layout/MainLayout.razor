@@ -17,7 +17,7 @@
             <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" />
             <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Color="Color.Inherit" />
         </MudAppBar>
-        <MudAppBar style="background-color: #2196F3" Bottom=true Elevation="4">
+        @* <MudAppBar style="background-color: #2196F3" Bottom=true Elevation="4">
             <MudIconButton Icon="@Icons.Material.Filled.Dashboard" OnClick="x=>SwitchView(0)" Color="Color.Inherit" Edge="Edge.Start" />
             <MudSpacer />
             <MudIconButton Icon="@Icons.Material.Filled.Inventory2" OnClick="x=>SwitchView(1)" Color="Color.Inherit" />
@@ -25,7 +25,7 @@
             <MudIconButton Icon="@Icons.Material.Filled.PointOfSale" OnClick="x=>SwitchView(2)" Color="Color.Inherit" />
             <MudSpacer />
             <MudIconButton Icon="@Icons.Material.Filled.People" OnClick="x=>SwitchView(3)" Color="Color.Inherit" />
-        </MudAppBar>
+        </MudAppBar> *@
 
     </AuthorizeView>
     <AuthorizeView>
@@ -91,11 +91,6 @@
     {
         var claims = await AuthStateProvider.GetAuthenticationStateAsync();
         AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
-
-
-
-
-
         await base.OnInitializedAsync();
     }
     [JSInvokable]

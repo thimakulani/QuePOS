@@ -12,34 +12,33 @@
     new("Reports", href: null, disabled: true),
     ];
 }
+<MudContainer Style="height: 100%">
 
-<MudTabs Elevation="2" Rounded="true" Centered="true" Class="my-6" Color="MudBlazor.Color.Dark">
-    <MudTabPanel Icon="@Icons.Material.Filled.Api" Text="Total Sales" BadgeColor="MudBlazor.Color.Error">
-        @if (loading)
-        {
-            <div class="d-flex align-center justify-center" style="height: 200px;">
-                <MudProgressCircular Indeterminate="true" Size="MudBlazor.Size.Medium" Rounded="true" />
-            </div>
-        }
-        else
-        {
-            @if (WeeklySalesData.Any())
+    <MudTabs Elevation="2" Rounded="true" style="height: 80vh" Color="MudBlazor.Color.Primary">
+        <MudTabPanel Icon="@Icons.Material.Filled.Api" Text="Total Sales" BadgeColor="MudBlazor.Color.Error">
+            @if (loading)
             {
-                <QuePOS.Shared.Pages.Reports.Components.WeekelyCharts Sales="@WeeklySalesData" />
+                <div class="d-flex align-center justify-center" style="height: 200px;">
+                    <MudProgressCircular Indeterminate="true" Size="MudBlazor.Size.Medium" Rounded="true" />
+                </div>
             }
             else
             {
-                <MudContainer Class="d-flex align-center justify-center">
-                    <MudText>No Data At The Moment</MudText>
-                </MudContainer>
+                @if (WeeklySalesData.Any())
+                {
+                    <QuePOS.Shared.Pages.Reports.Components.WeekelyCharts Sales="@WeeklySalesData" />
+                }
+                else
+                {
+                    <MudContainer Class="d-flex align-center justify-center">
+                        <MudText>No Data At The Moment</MudText>
+                    </MudContainer>
+                }
             }
-        }
-    </MudTabPanel>
-    <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="Payment Types" BadgeData="1" BadgeColor="MudBlazor.Color.Success" />
-    <MudTabPanel Icon="@Icons.Material.Filled.BugReport" Text="Bugs" BadgeData="0" />
-    <MudTabPanel Icon="@Icons.Material.Filled.AccessTime" Text="Timing" BadgeDot="true" BadgeColor="MudBlazor.Color.Error" />
-    <MudTabPanel Icon="@Icons.Material.Filled.InsertChartOutlined" Text="Metrics" BadgeIcon="@Icons.Material.Filled.Downloading" />
-</MudTabs>
+        </MudTabPanel>
+        <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="Payment Types" BadgeData="1" BadgeColor="MudBlazor.Color.Success" />
+    </MudTabs>
+</MudContainer>
 
 @code {
     private List<Sale> WeeklySalesData = [];

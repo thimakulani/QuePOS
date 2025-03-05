@@ -1,4 +1,6 @@
-﻿using Blazored.SessionStorage;
+﻿using Blazored.LocalStorage;
+using Blazored.SessionStorage;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Newtonsoft.Json;
 using QuePOS.Shared.Services;
 using QuePOS.Shared.ViewModels;
@@ -10,22 +12,24 @@ namespace QuePOS.Web.Services
 {
     public class HttpClientService : IHttpClientService
     {
-        private readonly ISessionStorageService _sessionStorage;
+        //private readonly ISessionStorageService _sessionStorage;
+        private readonly ILocalStorageService _sessionStorage;
         private readonly HttpClient _httpClient;
         private readonly IUserService _userService;
         private string _accessToken;
         private string _refreshToken;
 
-        public HttpClientService(IHttpClientFactory httpClientFactory, IUserService userService)
+        public HttpClientService(IHttpClientFactory httpClientFactory, IUserService userService, ILocalStorageService sessionStorage)
         {
             _httpClient = httpClientFactory.CreateClient("api");
             _userService = userService;
+            _sessionStorage = sessionStorage;
         }
 
         private async Task LoadTokensAsync()
         {
-            _accessToken = await SecureStorage.GetAsync("accessToken");
-            _refreshToken = await SecureStorage.GetAsync("refreshToken");
+            _accessToken = await _sessionStorage.GetItemAsync<string>("accessToken");
+            _refreshToken = await _sessionStorage.GetItemAsync<string>("refreshToken");
         }
 
         private async Task<bool> RefreshAccessTokenAsync()
@@ -48,8 +52,8 @@ namespace QuePOS.Web.Services
                     {
                         _accessToken = tokenResponse.AccessToken;
                         _refreshToken = tokenResponse.RefreshToken;
-                        await SecureStorage.SetAsync("accessToken", _accessToken);
-                        await SecureStorage.SetAsync("refreshToken", _refreshToken);
+                        await _sessionStorage.SetItemAsync("accessToken", _accessToken);
+                        await _sessionStorage.SetItemAsync("refreshToken", _refreshToken);
                         Console.WriteLine("Token refreshed successfully.");
                         return true;
                     }
@@ -68,8 +72,8 @@ namespace QuePOS.Web.Services
 
         private async Task<bool> AttemptReauthenticationAsync()
         {
-            var username = await SecureStorage.GetAsync("username");
-            var password = await SecureStorage.GetAsync("password");
+            var username = await _sessionStorage.GetItemAsync<string>("username");
+            var password = await _sessionStorage.GetItemAsync<string>("password");
             if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
             {
                 var userLogin = new UserLogin { Email = username, Password = password };
@@ -78,8 +82,8 @@ namespace QuePOS.Web.Services
                 {
                     _accessToken = token.AccessToken;
                     _refreshToken = token.RefreshToken;
-                    await SecureStorage.SetAsync("accessToken", _accessToken);
-                    await SecureStorage.SetAsync("refreshToken", _refreshToken);
+                    await _sessionStorage.SetItemAsync("accessToken", _accessToken);
+                    await _sessionStorage.SetItemAsync("refreshToken", _refreshToken);
                     return true;
                 }
             }

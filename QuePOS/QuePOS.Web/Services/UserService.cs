@@ -1,4 +1,5 @@
-﻿using Blazored.SessionStorage;
+﻿using Blazored.LocalStorage;
+using Blazored.SessionStorage;
 using Newtonsoft.Json;
 using QuePOS.Shared.Services;
 using QuePOS.Shared.ViewModels;
@@ -10,8 +11,8 @@ namespace QuePOS.Web.Services
     public class UserService : IUserService
     {
         private readonly HttpClient httpClient;
-        private readonly ISessionStorageService sessionStorage;
-        public UserService(IHttpClientFactory _httpClient, ISessionStorageService sessionStorage)
+        private readonly ILocalStorageService sessionStorage;
+        public UserService(IHttpClientFactory _httpClient, ILocalStorageService sessionStorage)
         {
             httpClient = _httpClient.CreateClient("api");
             this.sessionStorage = sessionStorage;
