@@ -32,5 +32,6 @@ namespace QuePOS.Services
             return await camview.WaitForResultAsync();
             //return await Task.FromResult("");
         }
+
     }
 }

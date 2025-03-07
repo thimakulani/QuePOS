@@ -2,25 +2,37 @@
 
 
 
-<MudIconButton Variant="Variant.Outlined" Icon="@Icons.Custom.FileFormats.FileExcel" OnClick="ExportToExcel">EXPORT TO EXCEL</MudIconButton>
+<MudIconButton Variant="Variant.Outlined" Icon="@Icons.Custom.FileFormats.FileExcel" OnClick="ExportToExcelAsync">EXPORT TO EXCEL</MudIconButton>
 <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Custom.Brands.Google" OnClick="BackUpGoogleDrive">BACKUP TO GOOGLE DRIVE</MudIconButton>
 
 
 @code {
     @inject IHttpClientService HttpClientService;
-    private async void ExportToExcel()
+    @inject ISnackbar Snackbar;
+    private async Task ExportToExcelAsync()
     {
         try
         {
-            var obj = await HttpClientService.DownloadFileAsync("/api/export_to_excel");
+            var fileBytes = await HttpClientService.DownloadFileAsync("/api/export/export_to_excel");
+
+            string fileName = "exported_data.xlsx";
+            string filePath = Path.Combine(FileSystem.AppDataDirectory, fileName);
+
+            await File.WriteAllBytesAsync(filePath, fileBytes);
+
+
+            Snackbar.Add($"File downloaded successfully: {filePath}", Severity.Success);
         }
-        catch (Exception)
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error downloading file: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
         {
 
-            throw;
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
         }
-
-
     }
+
     private void BackUpGoogleDrive() { }
 }
