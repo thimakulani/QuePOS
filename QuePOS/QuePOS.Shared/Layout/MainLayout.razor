@@ -1,38 +1,33 @@
 ﻿@using System.Security.Claims
 @inject IJSRuntime JSRuntime
 @inherits LayoutComponentBase
-@* Required *@
+@using Microsoft.Extensions.Localization
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-
 <MudLayout>
     <AuthorizeView>
-
         <MudAppBar style="background-color: #2196F3">
             <MudText> @($"STORE: ") @store?.StoreName  </MudText>
             <MudSpacer />
+            <MudSelect Variant="Variant.Outlined" T="string" Label="@("Language")" >
+                <MudSelectItem Value="@("en")">English</MudSelectItem>
+                <MudSelectItem Value="@("fr")">Français</MudSelectItem>
+                <MudSelectItem Value="@("pt")">Português</MudSelectItem>
+            </MudSelect>
             <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" />
             <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Color="Color.Inherit" />
         </MudAppBar>
-        @* <MudAppBar style="background-color: #2196F3" Bottom=true Elevation="4">
-            <MudIconButton Icon="@Icons.Material.Filled.Dashboard" OnClick="x=>SwitchView(0)" Color="Color.Inherit" Edge="Edge.Start" />
-            <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Inventory2" OnClick="x=>SwitchView(1)" Color="Color.Inherit" />
-            <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.PointOfSale" OnClick="x=>SwitchView(2)" Color="Color.Inherit" />
-            <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.People" OnClick="x=>SwitchView(3)" Color="Color.Inherit" />
-        </MudAppBar> *@
-
     </AuthorizeView>
+
     <AuthorizeView>
         <Authorized>
-
             <MudMainContent>
-                <div style="margin: 20px">
+                <MudBreadcrumbs Items="@breadcrumbs"></MudBreadcrumbs>
+
+                <div style="padding: 8px;">
                     @Body
                 </div>
             </MudMainContent>
@@ -52,118 +47,63 @@
     </AuthorizeView>
 </MudLayout>
 
-
 @code {
-    @inject AuthenticationStateProvider AuthStateProvider;
-    @inject ISnackbar Snackbar;
-    @inject IUserService IUserService;
-    @inject IFormFactor FormFactor;
-    @inject NavigationManager NavigationManager;
+    //@inject IStringLocalizer<AppResources> Localizer
+    [Inject] AuthenticationStateProvider AuthStateProvider { get; set; }
+    [Inject] ISnackbar Snackbar { get; set; }
+    [Inject] IUserService IUserService { get; set; }
+    [Inject] IFormFactor FormFactor { get; set; }
+    [Inject] NavigationManager NavigationManager { get; set; }
+    [Inject] IHttpClientService HttpClientService { get; set; }
 
-    bool _drawerOpen = true;
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
-    private void SwitchView(int index)
-    {
-        switch (index)
-        {
-            case 0:
-                NavigationManager.NavigateTo("/");
-                break;
-            case 1:
-                NavigationManager.NavigateTo("/products/index");
-                break;
-            case 2:
-                NavigationManager.NavigateTo("/transaction/index");
-                break;
-            case 3:
-                NavigationManager.NavigateTo("/users/index");
-                break;
-        }
-    }
+    private List<BreadcrumbItem> breadcrumbs = new();
+    private bool _drawerOpen = true;
     private bool session_loading = true;
-    @inject IJSRuntime JSRuntime;
     private bool IsOnline = true;
-    // private List<NotificationModel> Notifications = [];
+    private Store store = new Store();
+    private string UserName;
+
     protected override async Task OnInitializedAsync()
     {
         var claims = await AuthStateProvider.GetAuthenticationStateAsync();
         AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+        UpdateBreadcrumbs();
         await base.OnInitializedAsync();
     }
-    [JSInvokable]
-    public Task UpdateConnectionStatus(bool status)
-    {
-        IsOnline = status;
-        StateHasChanged();
-        return Task.CompletedTask;
-    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-
             var sl = await IUserService.SessionLogin();
 
-            if (sl != null)
+            if (sl != null && AuthStateProvider is CustomAuthStateProvider customProvider)
             {
-                if (AuthStateProvider is CustomAuthStateProvider customProvider)
-                {
-                    customProvider.NotifyNotificationState(sl);
-                }
-
+                customProvider.NotifyNotificationState(sl);
+                await GetStore();
+                session_loading = false;
             }
             else
             {
                 session_loading = false;
             }
-            StateHasChanged();
-            IsOnline = await JSRuntime.InvokeAsync<bool>("networkStatus.isOnline");
 
-            // Register real-time connection events
+            IsOnline = await JSRuntime.InvokeAsync<bool>("networkStatus.isOnline");
             await JSRuntime.InvokeVoidAsync("networkStatus.registerConnectionEvents", DotNetObjectReference.Create(this));
+
+            await InvokeAsync(StateHasChanged);
         }
         await base.OnAfterRenderAsync(firstRender);
     }
-    private void Logout()
-    {
-        if (AuthStateProvider is CustomAuthStateProvider externalAuthProvider)
-        {
-            externalAuthProvider.NotifyNotificationState(null);
-        }
-        NavigationManager.NavigateTo("login/index");
-        session_loading = false;
-        StateHasChanged();
-        // await hubConnection.StopAsync();
-    }
-    string UserName;
-    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
-    {
-        var authState = await task;
-        var user = authState.User;
 
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            UserName = user.Identity.Name;
-            string id = user.FindFirst(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            //SignalRListener(id);
-            // NavigationManager.NavigateTo("/");
-            await GetStore();
-        }
-        // StateHasChanged(); //
-    }
-    private Store store = new Store();
-    [Inject]
-    private IHttpClientService HttpClientService { get; set; }
     private async Task GetStore()
     {
         try
         {
             store = await HttpClientService.GetAsync<Store>("/api/store");
             await FormFactor.SetSession("StoreId", store.Id.ToString());
-
         }
         catch (HttpRequestException ex)
         {
@@ -175,34 +115,67 @@
         }
         finally
         {
-            //StateHasChanged();
-            await InvokeAsync(() =>
-            {
-                StateHasChanged();
-            });
+            await InvokeAsync(StateHasChanged);
         }
     }
+
+    private void Logout()
+    {
+        if (AuthStateProvider is CustomAuthStateProvider externalAuthProvider)
+        {
+            externalAuthProvider.NotifyNotificationState(null);
+        }
+
+        NavigationManager.NavigateTo("login/index");
+        session_loading = false;
+        StateHasChanged();
+    }
+
+    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        UpdateBreadcrumbs();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateBreadcrumbs()
+    {
+        var segments = NavigationManager.Uri.Replace(NavigationManager.BaseUri, "").Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var breadcrumbList = new List<BreadcrumbItem> { new("HOME", "/", icon: Icons.Material.Outlined.Home) };
+
+        string path = "";
+        foreach (var segment in segments)
+        {
+            path += $"/{segment}";
+            breadcrumbList.Add(new BreadcrumbItem(segment.ToUpperInvariant(), null, false));
+        }
+
+        breadcrumbs = breadcrumbList;
+    }
+
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        var authState = await task;
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            UserName = user.Identity.Name;
+            string id = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            await GetStore();
+        }
+    }
+
+    [JSInvokable]
+    public Task UpdateConnectionStatus(bool status)
+    {
+        IsOnline = status;
+        InvokeAsync(StateHasChanged);
+        return Task.CompletedTask;
+    }
+
     public void Dispose()
     {
         AuthStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+        NavigationManager.LocationChanged -= OnLocationChanged;
     }
-    private void ToggleNotifications()
-    {
-
-    }
-    private void MarkAllAsRead()
-    {
-
-    }
-
 }
-@*     void LogoutHandle()
-    {
-        NavigationManager.NavigateTo("login/index");
-    } *@
-
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>

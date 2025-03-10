@@ -1,6 +1,6 @@
-﻿@page "/transaction/history"
+﻿@page "/history"
 
-<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@* <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
 @code {
     private List<BreadcrumbItem> _items =
     [
@@ -8,7 +8,7 @@
     new("Transaction History", href: null, disabled: true),
     ];
 }
-
+ *@
 <MudStack Row="true" Spacing="2" Justify="Justify.SpaceAround">
     <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="Start Date" @bind-Date="startDate" Disabled="true" />
     <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="End Date" @bind-Date="endDate" Disabled="true" />
@@ -34,7 +34,7 @@
         <MudTd DataLabel="Products">
             <MudIconButton Edge="Edge.End" Size="Size.Small" Icon="@Icons.Material.Filled.Preview" Variant="Variant.Outlined" />
         </MudTd>
-    </RowTemplate> 
+    </RowTemplate>
     @* <ChildRowContent>
         @if (context.SaleDetails.Any())
         {

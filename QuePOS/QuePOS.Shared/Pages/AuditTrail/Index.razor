@@ -1,16 +1,16 @@
-﻿@page "/audit/index"
-<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+﻿@page "/audit"
+@* <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
 @code {
     private List<BreadcrumbItem> _items =
     [
         new("Home", href: "/", icon: Icons.Material.Filled.Home),
     new("Audit Trail", href: null, disabled: true),
     ];
-}
+} *@
 <MudCard>
-    <MudCardHeader >
+    <MudCardHeader>
         <MudText>Audit Trail Records</MudText>
-        </MudCardHeader>
+    </MudCardHeader>
     <MudCardContent>
         <MudTable Items="AuditTrails" Dense="true" Hover="true">
             <HeaderContent>

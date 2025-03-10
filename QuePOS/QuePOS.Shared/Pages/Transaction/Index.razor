@@ -1,13 +1,13 @@
-﻿@page "/transaction/index"
+﻿@page "/transaction"
 @using MudBlazor
-<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@* <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
 @code {
     private List<BreadcrumbItem> _items =
     [
         new("Home", href: "/", icon: Icons.Material.Filled.Home),
     new("Transaction", href: null, disabled: true),
     ];
-}
+} *@
 <MudPaper Elevation="4" Class="p-2">
     <MudText Style="margin: 10px" Typo="Typo.h6">Transaction</MudText>
     <br />

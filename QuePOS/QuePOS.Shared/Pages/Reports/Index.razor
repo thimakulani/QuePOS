@@ -1,9 +1,9 @@
-﻿@page "/reports/index"
+﻿@page "/reports"
 
 @using ApexCharts
 @inject IHttpClientService HttpClientService
 
-<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@* <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
 
 @code {
     private List<BreadcrumbItem> _items =
@@ -11,7 +11,7 @@
         new("Home", href: "/", icon: Icons.Material.Filled.Home),
     new("Reports", href: null, disabled: true),
     ];
-}
+} *@
 <MudContainer Style="height: 100%">
 
     <MudTabs Elevation="2" Rounded="true" style="height: 80vh" Color="MudBlazor.Color.Primary">

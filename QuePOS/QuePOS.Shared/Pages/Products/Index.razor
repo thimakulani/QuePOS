@@ -1,14 +1,14 @@
-﻿@page "/products/index"
+﻿@page "/products"
 @using ZXing.Net.Maui
 @inject IDialogService DialogService
-<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@* <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
 @code {
     private List<BreadcrumbItem> _items =
     [
         new("Home", href: "/", icon: Icons.Material.Filled.Home),
     new("Products", href: null, disabled: true),
     ];
-}
+} *@
 <MudCardHeader>
     <MudTextField @bind-Value="_searchTerm" Placeholder="Search..." Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" />
     <MudButton Variant="Variant.Outlined" Style="margin-left:5px" Color="Color.Primary" OnClick="()=> OpenEditDialog(new Product())">Add</MudButton>
@@ -41,7 +41,7 @@
     @if (isLoading)
     {
         <div style="display: flex; justify-content: center; align-items: center">
-            <MudProgressCircular Color="Color.Primary" Style="height: 70px; width: 70px;" Indeterminate="true" />
+            <MudProgressCircular Color="Color.Primary" Size="Size.Small" Style="height: 70px; width: 70px;" Indeterminate="true" />
         </div>
     }
 </MudCardContent>
@@ -96,7 +96,6 @@
 
 @code {
     private MudFileUpload<IBrowserFile> _fileUpload;
-    private bool _processing = true;
     private bool isLoading = true;
     private int categoryId;
     private List<Category> categories = [];
@@ -222,7 +221,6 @@
         }
         finally
         {
-            _processing = false;
             StateHasChanged();
         }
 
@@ -253,7 +251,6 @@
             }
             finally
             {
-                _processing = false;
                 StateHasChanged();
             }
         }
@@ -304,7 +301,6 @@
         }
         finally
         {
-            _processing = false;
             StateHasChanged();
         }
     }

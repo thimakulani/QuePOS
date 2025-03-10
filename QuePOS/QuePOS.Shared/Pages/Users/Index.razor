@@ -1,12 +1,12 @@
-﻿@page "/users/index"
-<MudBreadcrumbs Items="_items"></MudBreadcrumbs>
-@code {
+﻿@page "/users"
+@* <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
+@* @code {
     private List<BreadcrumbItem> _items =
     [
         new("Home", href: "/", icon: Icons.Material.Filled.Home),
     new("Users", href: null, disabled: true),
     ];
-}
+} *@
 <MudCard>
     <MudCardContent>
         <MudButton Variant="Variant.Outlined" Style="margin-bottom: 10px" Color="Color.Primary" OnClick="OpenCreateDialog">Add User</MudButton>
