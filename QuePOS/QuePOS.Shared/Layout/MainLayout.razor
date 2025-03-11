@@ -12,7 +12,7 @@
         <MudAppBar style="background-color: #2196F3">
             <MudText> @($"STORE: ") @store?.StoreName  </MudText>
             <MudSpacer />
-            <MudSelect Variant="Variant.Outlined" T="string" Label="@("Language")">
+            <MudSelect Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="@("Lang")">
                 <MudSelectItem Value="@("en")">English</MudSelectItem>
                 <MudSelectItem Value="@("fr")">Français</MudSelectItem>
                 <MudSelectItem Value="@("pt")">Português</MudSelectItem>
