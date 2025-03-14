@@ -134,6 +134,7 @@
             var results = await FormFactor.ShowBarCodeScanner();
             Snackbar.Add(results.FirstOrDefault().Value, Severity.Success);
             _product.BarCode = results.FirstOrDefault().Value;
+
             await SearchProduct(results.FirstOrDefault().Value);
         }
         catch (Exception ex)
@@ -151,6 +152,8 @@
             var _productItem = await HttpClientService.GetAsync<ProductItems>($"/api/ProductItems/scan/{barcode}");
             _product.Description = _productItem.Desc_sourced;
             _product.Name = _productItem.brn;
+            var cat = categories.Where(x => x.CategoryName == _productItem.Cat).FirstOrDefault();
+            categoryId = cat.Id;
         }
         catch (HttpRequestException ex)
         {

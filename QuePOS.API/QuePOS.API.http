@@ -1,6 +1,0 @@
-@QuePOS.API_HostAddress = http://localhost:5053
-
-GET {{QuePOS.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
