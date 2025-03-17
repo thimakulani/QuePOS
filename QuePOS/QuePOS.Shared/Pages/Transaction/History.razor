@@ -19,7 +19,6 @@
         <MudTh>Quantity</MudTh>
         <MudTh>Total Amount</MudTh>
         <MudTh>Products</MudTh>
-        <MudTh>Slip</MudTh>
     </HeaderContent>
     <RowTemplate Context="sale">
         <MudTd DataLabel="Transaction Id">@sale.Id</MudTd>
@@ -27,65 +26,59 @@
         <MudTd DataLabel="Date">@sale.SaleDate.ToShortDateString()</MudTd>
         <MudTd DataLabel="Quantity">@sale.SaleDetails.Count()</MudTd>
         <MudTd DataLabel="Total Amount">@sale.TotalAmount.ToString("C")</MudTd>
-        <MudTd DataLabel="Products">
-            <MudIconButton Edge="Edge.End" Size="Size.Small" OnClick="() => {sale.ShowDetails = !sale.ShowDetails;}" Icon="@Icons.Material.Filled.Preview" Variant="Variant.Outlined" />
-        </MudTd>
+
         <MudTd DataLabel="Slip">
-            <MudIconButton Edge="Edge.End" Size="Size.Small" Icon="@Icons.Material.Filled.Print" Variant="Variant.Outlined" />
+            <MudIconButton Edge="Edge.End" Size="Size.Small" OnClick="()=>ShowSlipDialog(sale)" Icon="@Icons.Material.Filled.Print" Variant="Variant.Outlined" />
         </MudTd>
     </RowTemplate>
-    <ChildRowContent>
-        @if (context.ShowDetails)
-        {
-            <MudTr>
-                <td colspan="7">
-                    <MudCard Elevation="0">
-                        <MudCardHeader>
-                            <CardHeaderContent>
-                                <MudText Typo="Typo.body1">Transaction Details for <strong>@context.Id</strong></MudText>
-                            </CardHeaderContent>
-                        </MudCardHeader>
-                        <MudCardContent Class="pa-0">
-                            <MudTable Items="@context.SaleDetails" Context="_context" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
-                                <HeaderContent>
-                                    <MudTh>Product Name</MudTh>
-                                    <MudTh>Quantity</MudTh>
-                                    <MudTh>Price</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd DataLabel="Product Name">@_context.Product.Name</MudTd>
-                                    <MudTd DataLabel="Quantity">@_context.Quantity</MudTd>
-                                    <MudTd DataLabel="Price">@_context.Price.ToString("C")</MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        </MudCardContent>
-                    </MudCard>
-                </td>
-            </MudTr>
-        }
-    </ChildRowContent>
+
 
 </MudTable>
-
+<!-- Transaction Slip Dialog -->
+<MudDialog @bind-Visible="showSlipDialog">
+    <TitleContent>Transaction Slip</TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.h6">Transaction Date: @_sale.SaleDate.ToString("F")</MudText>
+        <MudDivider Class="my-2" />
+        <MudList T="string">
+            @foreach (var item in _sale.SaleDetails)
+            {
+                <MudListItem>
+                    @item.Name - Quantity: @item.Quantity - Total: @(item.Quantity * item.Price).ToString("C")
+                </MudListItem>
+            }
+        </MudList>
+        <MudDivider Class="my-2" />
+        <MudText Typo="Typo.body1">Payment Method: @_sale.PaymentType</MudText>
+        <MudText Typo="Typo.body1">Total Amount: @_sale.TotalAmount.ToString("C")</MudText>
+        @if (_sale.PaymentType == "Cash")
+        {
+            <MudText Typo="Typo.body1">Cash Received: @_sale.CashReceived?.ToString("C")</MudText>
+            <MudText Typo="Typo.body1">Change: @_sale.ChangeAmount?.ToString("C")</MudText>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="() => showSlipDialog = false">Close</MudButton>
+    </DialogActions>
+</MudDialog>
 @code {
 
     private DateTime? startDate = DateTime.Today;
     private DateTime? endDate = DateTime.Today;
     private List<Sale> sales = new();
+    private Sale _sale = new();
     private DateRange _dateRange = new DateRange(DateTime.Now.Date, DateTime.Now.AddDays(5).Date);
     [Inject] IHttpClientService HttpClientService { get; set; }
     [Inject] ISnackbar Snackbar { get; set; }
-
+    private bool showSlipDialog;
     protected override async Task OnInitializedAsync()
     {
         await LoadSales();
         await base.OnInitializedAsync();
     }
-
-    private void ShowBtnPress(int nr)
+    private void ShowSlipDialog(Sale sale)
     {
-        sales.First(f => f.Id == nr).ShowDetails = !sales.First(f => f.Id == nr).ShowDetails;
-        StateHasChanged();
+        _sale = sale;
     }
 
     private async Task LoadSales()
