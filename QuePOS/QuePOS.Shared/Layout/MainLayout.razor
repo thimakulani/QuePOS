@@ -19,6 +19,7 @@
             </MudSelect> *@
             <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" />
             <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Color="Color.Inherit" />
+
         </MudAppBar>
     </AuthorizeView>
 
@@ -57,7 +58,6 @@
     [Inject] IHttpClientService HttpClientService { get; set; }
 
     private List<BreadcrumbItem> breadcrumbs = new();
-    private bool _drawerOpen = true;
     private bool session_loading = true;
     private bool IsOnline = true;
     private Store store = new Store();

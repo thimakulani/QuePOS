@@ -1,20 +1,15 @@
 ﻿@page "/history"
 
-@* <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
-@code {
-    private List<BreadcrumbItem> _items =
-    [
-        new("Home", href: "/", icon: Icons.Material.Filled.Home),
-    new("Transaction History", href: null, disabled: true),
-    ];
-}
- *@
+<div style="display: flex; justify-content: space-between">
+    <MudText Style="margin: 0px" Typo="Typo.h6">History</MudText>
+    <a class="btn-sm btn btn-primary" href="/transaction">Transaction</a>
+</div>
+<br />
 <MudStack Row="true" Spacing="2" Justify="Justify.SpaceAround">
     <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="Start Date" @bind-Date="startDate" Disabled="true" />
     <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="End Date" @bind-Date="endDate" Disabled="true" />
     <MudIconButton Variant="Variant.Text" Icon="@Icons.Material.Outlined.Search" Size="Size.Small" Color="Color.Primary" OnClick="LoadSales" />
 </MudStack>
-
 
 <MudTable Items="sales" Dense="true">
     <HeaderContent>
@@ -24,6 +19,7 @@
         <MudTh>Quantity</MudTh>
         <MudTh>Total Amount</MudTh>
         <MudTh>Products</MudTh>
+        <MudTh>Slip</MudTh>
     </HeaderContent>
     <RowTemplate Context="sale">
         <MudTd DataLabel="Transaction Id">@sale.Id</MudTd>
@@ -32,14 +28,17 @@
         <MudTd DataLabel="Quantity">@sale.SaleDetails.Count()</MudTd>
         <MudTd DataLabel="Total Amount">@sale.TotalAmount.ToString("C")</MudTd>
         <MudTd DataLabel="Products">
-            <MudIconButton Edge="Edge.End" Size="Size.Small" Icon="@Icons.Material.Filled.Preview" Variant="Variant.Outlined" />
+            <MudIconButton Edge="Edge.End" Size="Size.Small" OnClick="() => {sale.ShowDetails = !sale.ShowDetails;}" Icon="@Icons.Material.Filled.Preview" Variant="Variant.Outlined" />
+        </MudTd>
+        <MudTd DataLabel="Slip">
+            <MudIconButton Edge="Edge.End" Size="Size.Small" Icon="@Icons.Material.Filled.Print" Variant="Variant.Outlined" />
         </MudTd>
     </RowTemplate>
-    @* <ChildRowContent>
-        @if (context.SaleDetails.Any())
+    <ChildRowContent>
+        @if (context.ShowDetails)
         {
             <MudTr>
-                <td colspan="4">
+                <td colspan="7">
                     <MudCard Elevation="0">
                         <MudCardHeader>
                             <CardHeaderContent>
@@ -47,21 +46,16 @@
                             </CardHeaderContent>
                         </MudCardHeader>
                         <MudCardContent Class="pa-0">
-                            <MudTable Items="@context.SaleDetails" Context="AddressContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
-                                <ColGroup>
-                                    <col />
-                                    <col />
-                                    <col style="width:200px;" />
-                                </ColGroup>
+                            <MudTable Items="@context.SaleDetails" Context="_context" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
                                 <HeaderContent>
                                     <MudTh>Product Name</MudTh>
-                                    <MudTh>Price</MudTh>
                                     <MudTh>Quantity</MudTh>
+                                    <MudTh>Price</MudTh>
                                 </HeaderContent>
                                 <RowTemplate>
-                                    <MudTd DataLabel="Product Nmae">@AddressContext.Product.Name</MudTd>
-                                    <MudTd DataLabel="Address Line 2">@AddressContext.Product.Name</MudTd>
-                                    <MudTd DataLabel="Postal Code">@AddressContext.Product.Name</MudTd>
+                                    <MudTd DataLabel="Product Name">@_context.Product.Name</MudTd>
+                                    <MudTd DataLabel="Quantity">@_context.Quantity</MudTd>
+                                    <MudTd DataLabel="Price">@_context.Price.ToString("C")</MudTd>
                                 </RowTemplate>
                             </MudTable>
                         </MudCardContent>
@@ -69,41 +63,33 @@
                 </td>
             </MudTr>
         }
-    </ChildRowContent> *@
+    </ChildRowContent>
 
 </MudTable>
 
 @code {
 
-    private string selectedFilter = "Daily";
     private DateTime? startDate = DateTime.Today;
     private DateTime? endDate = DateTime.Today;
     private List<Sale> sales = new();
-    private MudDateRangePicker _picker;
     private DateRange _dateRange = new DateRange(DateTime.Now.Date, DateTime.Now.AddDays(5).Date);
-    private bool _autoClose;
-    @inject IHttpClientService HttpClientService;
-    @inject ISnackbar Snackbar;
+    [Inject] IHttpClientService HttpClientService { get; set; }
+    [Inject] ISnackbar Snackbar { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         await LoadSales();
         await base.OnInitializedAsync();
     }
+
     private void ShowBtnPress(int nr)
     {
-        // Person tmpPerson = People.First(f => f.Number == nr);
-        // tmpPerson.ShowDetails = !tmpPerson.ShowDetails;
+        sales.First(f => f.Id == nr).ShowDetails = !sales.First(f => f.Id == nr).ShowDetails;
+        StateHasChanged();
     }
+
     private async Task LoadSales()
     {
-        /*
-         *
-        FilterViewModel filter = new()
-             {
-                 StartDate = startDate,
-                 EndDate = endDate,
-             };
-         */
         try
         {
             sales = await HttpClientService.GetAsync<List<Sale>>($"api/sales/get_history");

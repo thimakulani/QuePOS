@@ -1,14 +1,7 @@
 ﻿@page "/products"
 @using ZXing.Net.Maui
 @inject IDialogService DialogService
-@* <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
-@code {
-    private List<BreadcrumbItem> _items =
-    [
-        new("Home", href: "/", icon: Icons.Material.Filled.Home),
-    new("Products", href: null, disabled: true),
-    ];
-} *@
+
 <MudCardHeader>
     <MudTextField @bind-Value="_searchTerm" Placeholder="Search..." Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" />
     <MudButton Variant="Variant.Outlined" Style="margin-left:5px" Color="Color.Primary" OnClick="()=> OpenEditDialog(new Product())">Add</MudButton>

@@ -9,6 +9,7 @@
         public double? CashReceived { get; set; }
         public double? ChangeAmount { get; set; }
         public string PaymentType { get; set; } = "Cash";
+        public bool ShowDetails { get; set; } = false;
         // Foreign Key for Store
         public int StoreID { get; set; }
         public Store Store { get; set; } = null!;

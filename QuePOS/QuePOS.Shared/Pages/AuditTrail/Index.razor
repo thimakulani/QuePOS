@@ -24,22 +24,23 @@
                 <MudTh>User Agent</MudTh>
             </HeaderContent>
             <RowTemplate Context="audit">
-                <MudTd>@audit.Id</MudTd>
-                <MudTd>@audit.ApplicationUser?.StoreUser?.FirstName</MudTd>
-                <MudTd>@audit.Action</MudTd>
-                <MudTd>@audit.TableName</MudTd>
-                <MudTd>@audit.RecordId</MudTd>
-                <MudTd>@audit.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
-                <MudTd>@audit.IPAddress</MudTd>
-                <MudTd>
+                <MudTd DataLabel="ID">@audit.Id</MudTd>
+                <MudTd DataLabel="User">@audit.ApplicationUser?.StoreUser?.FirstName</MudTd>
+                <MudTd DataLabel="Action">@audit.Action</MudTd>
+                <MudTd DataLabel="Table">@audit.TableName</MudTd>
+                <MudTd DataLabel="Record ID">@audit.RecordId</MudTd>
+                <MudTd DataLabel="Timestamp">@audit.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
+                <MudTd DataLabel="IP Address">@audit.IPAddress</MudTd>
+                <MudTd DataLabel="User Agent">
                     <MudTooltip Text="@audit.UserAgent">
-                        <MudText Truncate="true">@audit.UserAgent</MudText>
+                        <MudText>@audit.UserAgent</MudText>
                     </MudTooltip>
                 </MudTd>
             </RowTemplate>
         </MudTable>
     </MudCardContent>
 </MudCard>
+
 
 @code {
     private List<AuditTrail> AuditTrails = new();
