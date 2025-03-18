@@ -144,7 +144,7 @@ namespace QuePOS.Web.Services
             if (!response.IsSuccessStatusCode)
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException($"Error {response.StatusCode}: {errorMessage}");
+                throw new HttpRequestException($"Error {response.StatusCode}: {errorMessage}", inner: null, statusCode: response.StatusCode);
             }
 
             var json = await response.Content.ReadAsStringAsync();
