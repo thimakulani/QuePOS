@@ -89,6 +89,7 @@
 
 @code {
     private MudFileUpload<IBrowserFile> _fileUpload;
+    private IBrowserFile File { get; set; }
     private bool isLoading = true;
     private int categoryId;
     private List<Category> categories = [];
@@ -101,7 +102,6 @@
     private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
     private Product _product = new();
     private bool _isDialogOpen = false;
-    private IBrowserFile File { get; set; }
     [Inject]
     private IFormFactor FormFactor { get; set; }
     [Inject]
