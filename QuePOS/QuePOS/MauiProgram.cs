@@ -30,6 +30,7 @@ namespace QuePOS
             // Add device-specific services used by the QuePOS.Shared project
             builder.Services.AddApexCharts();
 
+
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IFormFactor, FormFactor>();

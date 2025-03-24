@@ -34,20 +34,18 @@
         @if (selectedPaymentMethod == "Cash")
         {
 
-            <MudNumericField @bind-Value="cashReceived" Format="F1" Label="Cash Received" Margin="Margin.Dense" Variant="Variant.Outlined"
+            <MudNumericField @bind-Value="cashReceived" Immediate="true" Format="F1" Label="Cash Received" Margin="Margin.Dense" Variant="Variant.Outlined"
                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Rounded.Money" />
 
         }
-        @*    else
-        {
-            <MudText>@totalAmount.ToString("C")</MudText>
-        } *@
+
     </MudStack>
 
     <MudText Typo="Typo.h6">Change: @changeAmount.ToString("C")</MudText>
 
     @if (changeAmount < 0)
     {
+
         <MudText Color="Color.Error" Typo="Typo.body2">* Insufficient cash received</MudText>
     }
 
@@ -61,8 +59,10 @@
     <!-- Cart Items -->
 
 </MudPaper>
-<MudText Style="margin: 10px" Typo="Typo.h6">Items</MudText>
 <MudList Dense T="string">
+    <MudListSubheader>
+        Products
+    </MudListSubheader>
     @foreach (var item in cartItems)
     {
         <MudListItem>
@@ -89,25 +89,25 @@
 <MudDialog @bind-Visible="products_visible" Options="_dialogOptions">
     <TitleContent>Products</TitleContent>
     <DialogContent>
-        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="searchText" Label="Search by Name or Barcode" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
 
-        <MudItem>
-            <MudList T="string" ReadOnly="true" CheckBoxColor="MudBlazor.Color.Tertiary">
-                @foreach (var item in FilteredProducts)
-                {
-                    <MudListItem Class="p-2">
-                        <MudPaper Elevation="3" Class="p-2">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
-                                <MudText Typo="Typo.h6">@item.Name</MudText>
-                                <MudSpacer />
-                                <MudText Typo="Typo.body1" Color="Color.Secondary">@item.Price?.ToString("C")</MudText>
-                                <MudIconButton Icon="@Icons.Material.Rounded.Add" OnClick="@(() => AddItemToCart(item))" Color="Color.Primary" Size="Size.Small" />
-                            </MudStack>
-                        </MudPaper>
-                    </MudListItem>
-                }
-            </MudList>
-        </MudItem>
+        <MudList T="string" ReadOnly="true" CheckBoxColor="MudBlazor.Color.Tertiary">
+            <MudListSubheader>
+                <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" @bind-Value="searchText" Label="Search by Name or Barcode" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
+            </MudListSubheader>
+            @foreach (var item in FilteredProducts)
+            {
+                <MudListItem>
+                    <MudPaper Elevation="3" Class="p-2">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudText>@item.Name</MudText>
+                            <MudSpacer />
+                            <MudText Typo="Typo.body1" Color="Color.Secondary">@item.Price?.ToString("C")</MudText>
+                            <MudIconButton Icon="@Icons.Material.Rounded.Add" OnClick="@(() => AddItemToCart(item))" Color="Color.Primary" Size="Size.Small" />
+                        </MudStack>
+                    </MudPaper>
+                </MudListItem>
+            }
+        </MudList>
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Filled" Color="MudBlazor.Color.Primary" OnClick="CloseDlg">Close</MudButton>
@@ -122,7 +122,23 @@
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Error" OnClick="() => confirmSaleDialog = false">Cancel</MudButton>
-        <MudButton Color="Color.Success" OnClick="ProcessSale">Confirm</MudButton>
+        @*  <MudButton Color="Color.Success" OnClick="ProcessSale">Confirm</MudButton> *@
+
+        <MudButton Disabled="@processingSale" Variant="Variant.Filled" OnClick="ProcessSale" Color="Color.Success">
+            @if (processingSale)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Processing..</MudText>
+            }
+            else
+            {
+                <MudText>Confirm</MudText>
+            }
+        </MudButton>
+
+
+
+
     </DialogActions>
 </MudDialog>
 <!-- Transaction Slip Dialog -->
@@ -135,7 +151,7 @@
             @foreach (var item in cartItems)
             {
                 <MudListItem>
-                    @item.Name - Quantity: @item.Quantity - Total: @(item.Quantity * item.Price).ToString("C")
+                    @item.Product.Name - Quantity: @item.Quantity - Total: @(item.Quantity * item.Price).ToString("C")
                 </MudListItem>
             }
         </MudList>
@@ -161,6 +177,7 @@
     private bool products_visible;
     private bool confirmSaleDialog;
     private bool showSlipDialog;
+    private bool processingSale = false;
     [Inject] private ISnackbar Snackbar { get; set; }
     [Inject] private IFormFactor FormFactor { get; set; }
     [Inject] private IHttpClientService HttpClientService { get; set; }
@@ -169,22 +186,6 @@
     private double changeAmount => cashReceived.HasValue ? cashReceived.Value - totalAmount : -totalAmount;
     private DateTime saleDate;
 
-    /*
-
-        private void CalculateChange(ChangeEventArgs e)
-        {
-        if (double.TryParse(e.Value?.ToString(), out var cash))
-            {
-            cashReceived = cash;
-            changeAmount = cashReceived - totalAmount;
-            }
-            else
-            {
-            cashReceived = 0;
-            changeAmount = -totalAmount;
-     }
-    }
-    */
     private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
     private double totalAmount => cartItems.Sum(i => i.Quantity * i.Price);
 
@@ -259,6 +260,8 @@
     private void AddItemToCart(Product product)
     {
         var existingItem = cartItems.FirstOrDefault(i => i.Name == product.Name);
+        string n = product.Name;
+        Snackbar.Add(n, Severity.Warning);
         if (existingItem != null) existingItem.Quantity++;
         else cartItems.Add(new SaleDetail { Name = product.Name, ProductID = product.Id, Quantity = 1, Price = (double)product.Price });
         StateHasChanged();
@@ -290,7 +293,7 @@
 
     private async void ProcessSale()
     {
-        confirmSaleDialog = false;
+        processingSale = true;
 
         if (!cartItems.Any())
         {
@@ -322,7 +325,8 @@
             await HttpClientService.PostAsync<Sale>("/api/sales/add", sale);
             Snackbar.Add("Transaction was successful", Severity.Success);
             saleDate = DateTime.Now;
-            showSlipDialog = true;
+            //showSlipDialog = true;
+            confirmSaleDialog = false;
             ClearCart();
         }
         catch (Exception ex)

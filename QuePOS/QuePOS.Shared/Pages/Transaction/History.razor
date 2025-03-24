@@ -5,12 +5,34 @@
     <a class="btn-sm btn btn-primary" href="/transaction">Transaction</a>
 </div>
 <br />
-<MudStack Row="true" Spacing="2" Justify="Justify.SpaceAround">
-    <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="Start Date" @bind-Date="startDate" Disabled="true" />
-    <MudDatePicker Variant="Variant.Outlined" Margin="Margin.Dense" Label="End Date" @bind-Date="endDate" Disabled="true" />
-    <MudIconButton Variant="Variant.Text" Icon="@Icons.Material.Outlined.Search" Size="Size.Small" Color="Color.Primary" OnClick="LoadSales" />
-</MudStack>
+<MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
+    <MudSelect Variant="Variant.Outlined" @bind-Value="SelectedHistory" Margin="Margin.Dense" T="string">
+        <MudSelectItem Value="@("Daily")">Daily</MudSelectItem>
+        <MudSelectItem Value="@("Monthly")">Monthly</MudSelectItem>
+        <MudSelectItem Value="@("Yearly")">Yearly</MudSelectItem>
+    </MudSelect>
+    @if (SelectedHistory == "Daily")
+    {
 
+        <MudDatePicker Variant="Variant.Outlined" Elevation="3" Margin="Margin.Dense" DateChanged="@(e=>OnDateChange(e.Value))" Label="Date" Disabled="false" />
+    }
+
+    else if (SelectedHistory == "Monthly")
+    {
+        <MudDatePicker Label="Year-Month" Variant="Variant.Outlined" Elevation="3" DateChanged="@(e=>OnDateChange(e.Value))" Margin="Margin.Dense" OpenTo="OpenTo.Year" FixDay="1" DateFormat="yyyy/MM" />
+    }
+    else if (SelectedHistory == "Yearly")
+    {
+        <MudDatePicker Label="Year Picker" Variant="Variant.Outlined" Elevation="3" DateChanged="@(e=>OnDateChange(e.Value))" Margin="Margin.Dense" OpenTo="OpenTo.Year" FixMonth="@DateTime.Today.Month" FixDay="@DateTime.Today.Day" DateFormat="yyyy" />
+    }
+</MudStack>
+@if (sales.Count > 0)
+{
+    <MudAlert Elevation="3" Severity="Severity.Info" Dense="true" NoIcon="true">
+        <MudText>Total: @sales.Sum(x => x.TotalAmount).ToString("C") </MudText>
+        <MudText>Products Sold: @sales.Sum(x => x.SaleDetails.Sum(y => y.Quantity)) </MudText>
+    </MudAlert>
+}
 <MudTable Items="sales" Dense="true">
     <HeaderContent>
         <MudTh>Transaction Id</MudTh>
@@ -24,69 +46,125 @@
         <MudTd DataLabel="Transaction Id">@sale.Id</MudTd>
         <MudTd DataLabel="User">@sale.User.FirstName</MudTd>
         <MudTd DataLabel="Date">@sale.SaleDate.ToShortDateString()</MudTd>
-        <MudTd DataLabel="Quantity">@sale.SaleDetails.Count()</MudTd>
+        <MudTd DataLabel="Quantity">@sale.SaleDetails.Sum(x => x.Quantity)</MudTd>
         <MudTd DataLabel="Total Amount">@sale.TotalAmount.ToString("C")</MudTd>
 
         <MudTd DataLabel="Slip">
-            <MudIconButton Edge="Edge.End" Size="Size.Small" OnClick="()=>ShowSlipDialog(sale)" Icon="@Icons.Material.Filled.Print" Variant="Variant.Outlined" />
+            <MudIconButton Edge="Edge.End" Size="Size.Small" OnClick="()=>{ ShowSlipDialog(sale);}" Icon="@Icons.Material.Filled.Print" Variant="Variant.Outlined" />
         </MudTd>
     </RowTemplate>
 
 
 </MudTable>
+
+@if (isLoading)
+{
+    <div style="display: flex; justify-content: center; align-items: center">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Small" Style="height: 70px; width: 70px; margin-top: 20%" Indeterminate="true" />
+    </div>
+}
+else
+{
+    if (sales.Count() == 0)
+    {
+        <div style="display: flex; justify-content: center; align-items: center; margin-top: 20%">
+            <MudAlert Elevation="3" Icon="@Icons.Material.Outlined.HourglassEmpty" Severity="Severity.Success">No Transaction found</MudAlert>
+        </div>
+    }
+}
+
+
+
+
+
+
 <!-- Transaction Slip Dialog -->
 <MudDialog @bind-Visible="showSlipDialog">
     <TitleContent>Transaction Slip</TitleContent>
     <DialogContent>
-        <MudText Typo="Typo.h6">Transaction Date: @_sale.SaleDate.ToString("F")</MudText>
-        <MudDivider Class="my-2" />
-        <MudList T="string">
+        <MudAlert NoIcon="true" Severity="Severity.Normal" Dense="true">
+            <MudText>Transaction Date: @_sale.SaleDate.ToString("F")</MudText>
+        </MudAlert>
+        <MudList T="string" Dense="true">
+            <MudListSubheader>
+                Products
+            </MudListSubheader>
             @foreach (var item in _sale.SaleDetails)
             {
                 <MudListItem>
-                    @item.Name - Quantity: @item.Quantity - Total: @(item.Quantity * item.Price).ToString("C")
+                    @item.Name - : (@item.Quantity) - Total: @((item.Quantity * item.Price).ToString("C"))
                 </MudListItem>
             }
         </MudList>
         <MudDivider Class="my-2" />
-        <MudText Typo="Typo.body1">Payment Method: @_sale.PaymentType</MudText>
-        <MudText Typo="Typo.body1">Total Amount: @_sale.TotalAmount.ToString("C")</MudText>
-        @if (_sale.PaymentType == "Cash")
-        {
-            <MudText Typo="Typo.body1">Cash Received: @_sale.CashReceived?.ToString("C")</MudText>
-            <MudText Typo="Typo.body1">Change: @_sale.ChangeAmount?.ToString("C")</MudText>
-        }
+        <MudAlert NoIcon="true" Severity="Severity.Success" Dense="true">
+
+            <MudText Typo="Typo.body1">Payment Method: @_sale.PaymentType</MudText>
+            <MudText Typo="Typo.body1">Total Amount: @_sale.TotalAmount.ToString("C")</MudText>
+            @if (_sale.PaymentType == "Cash")
+            {
+                <MudText Typo="Typo.body1">Cash Received: @_sale.CashReceived?.ToString("C") </MudText>
+                <MudText Typo="Typo.body1">Change: @_sale.ChangeAmount?.ToString("C") </MudText>
+            }
+        </MudAlert>
     </DialogContent>
     <DialogActions>
-        
+
         <MudButton Color="Color.Primary" OnClick="() => showSlipDialog = false">Close</MudButton>
     </DialogActions>
 </MudDialog>
 @code {
-
-    private DateTime? startDate = DateTime.Today;
-    private DateTime? endDate = DateTime.Today;
+    private DateTime? _yearMonth;
+    private string SelectedHistory = "Daily";
+    private DateTime? SaleDates = DateTime.Today;
     private List<Sale> sales = new();
     private Sale _sale = new();
-    private DateRange _dateRange = new DateRange(DateTime.Now.Date, DateTime.Now.AddDays(5).Date);
     [Inject] IHttpClientService HttpClientService { get; set; }
     [Inject] ISnackbar Snackbar { get; set; }
     private bool showSlipDialog;
+
+
+    private DateRange _dateRange { get; set; }
+    private int _minDays = 3;
+    private int _maxDays = 7;
+
+
+    private DateTime? _monthDay;
+    private DateTime? _yearDay;
+    private DateTime? _year;
+    private DateTime? _month;
+    private DateTime? _day;
+
+    private string HelperText => $"Range: {_minDays} to {_maxDays} days";
+
     protected override async Task OnInitializedAsync()
     {
-        await LoadSales();
+        // await LoadSales(SaleDates);
         await base.OnInitializedAsync();
     }
     private void ShowSlipDialog(Sale sale)
     {
         _sale = sale;
+        showSlipDialog = true;
     }
-
-    private async Task LoadSales()
+    private async void OnDateChange(DateTime date)
+    {
+        //Snackbar.Add(date.ToString(), Severity.Success);
+        await LoadSales(date);
+    }
+    private bool isLoading = false;
+    private async Task LoadSales(DateTime date)
     {
         try
         {
-            sales = await HttpClientService.GetAsync<List<Sale>>($"api/sales/get_history");
+            isLoading = true;
+            HistoryVM history = new()
+                {
+                    Type = SelectedHistory,
+                    Dates = date
+                };
+            sales.Clear();
+            sales = await HttpClientService.PostAsync<List<Sale>>($"api/sales/get_history", history);
         }
         catch (HttpRequestException ex)
         {
@@ -98,7 +176,13 @@
         }
         finally
         {
+            isLoading = false;
             StateHasChanged();
         }
+    }
+    public class HistoryVM()
+    {
+        public string Type { get; set; }
+        public DateTime Dates { get; set; }
     }
 }

@@ -26,9 +26,10 @@
 		<PackageReference Include="BlazorAnimate" Version="3.0.0" />
 		<PackageReference Include="Camera.MAUI" Version="1.5.1" />
 		<PackageReference Include="CodeBeam.MudBlazor.Extensions" Version="8.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.2" />
+		<PackageReference Include="MailKit" Version="4.11.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.3" />
 		<PackageReference Include="MudBlazor" Version="8.3.0" />
 		<!--<PackageReference Include="MudBlazor" Version="7.15.0" />-->
 		<PackageReference Include="MudBlazor.ThemeManager" Version="3.0.0" />

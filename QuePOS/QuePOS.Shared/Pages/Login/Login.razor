@@ -172,38 +172,13 @@ else
                                 <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Start" ShowCloseIcon="true" CloseIconClicked="(() => CloseAlert())">@errorMessage</MudAlert>
                             </div>
                         }
-                        <div class="input-group mb-3">
-                            <InputText class="form-control" placeholder="Firstname" @bind-Value="signupViewModel.Firstname" />
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-person-booth"></span>
-                                </div>
+                        @if (!string.IsNullOrEmpty(successMessage))
+                        {
+                            <div>
+                                <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Start" ShowCloseIcon="true" CloseIconClicked="(() => successMessage = string.Empty)">@successMessage</MudAlert>
                             </div>
-                        </div>
-                        <div class="input-group mb-3">
-                            <InputText class="form-control" @bind-Value="signupViewModel.Lastname" placeholder="Lastname" />
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-person-booth"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="input-group mb-3">
-                            <InputText class="form-control" @bind-Value="signupViewModel.PhoneNumber" placeholder="Phone Number" />
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-phone"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="input-group mb-3">
-                            <InputText class="form-control" @bind-Value="signupViewModel.StoreName" placeholder="Store Name" />
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-phone"></span>
-                                </div>
-                            </div>
-                        </div>
+                        }
+
                         <div class="input-group mb-3">
                             <InputText class="form-control" @bind-Value="signupViewModel.Email" placeholder="Email Address" />
                             <div class="input-group-append">
@@ -212,17 +187,6 @@ else
                                 </div>
                             </div>
                         </div>
-
-                        <div class="input-group mb-3">
-                            <InputText class="form-control" @bind-Value="signupViewModel.Password" placeholder="Password" type="password" />
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-lock"></span>
-                                </div>
-                            </div>
-                        </div>
-
-
                         <div class="row">
 
                             <!-- /.col -->
@@ -235,7 +199,7 @@ else
                                     }
                                     else
                                     {
-                                        <MudText>Register</MudText>
+                                        <MudText>Submit</MudText>
                                     }
                                 </MudButton>
                             </div>
@@ -259,7 +223,15 @@ else
     </div>
 
 }
-
+<MudDialog @bind-Visible="@showDlg" Options="@dialogOptions">
+    <DialogContent>
+        <MudText>@dlg_message</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Href="@link">Continue with Application</MudButton>
+        <MudButton OnClick="@(()=>{ showDlg = false; })">Close</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     private ForgotPasswordViewModel ForgotPassword = new ForgotPasswordViewModel();
@@ -267,6 +239,7 @@ else
     private bool _processing = false;
     private bool show_login = true;
     private string ConfirmPassword;
+    private bool showDlg = false;
     private SignupViewModel signupViewModel = new();
     private UserLogin loginModel = new UserLogin();
     [Inject]
@@ -276,6 +249,11 @@ else
     @inject NavigationManager Navigation;
     private int password_reset_steps = 0;
     bool signin = true;
+    string successMessage = "";
+    private DialogOptions dialogOptions = new DialogOptions()
+        {
+            MaxWidth = MaxWidth.ExtraSmall
+        };
     private void CloseAlert()
     {
         errorMessage = string.Empty;
@@ -319,6 +297,7 @@ else
     private void HandleSignUp()
     {
         signin = false;
+        successMessage = string.Empty;
     }
     private void HandleForgotPassword()
     {
@@ -399,14 +378,18 @@ else
         show_login = true;
         password_reset_steps = 0;
     }
-
+    string dlg_message = "";
+    string link = "";
     private async Task HandleRegister()
     {
         try
         {
             CloseAlert();
             _processing = true;
-            await IHttpClientService.PostAsync<string>("/api/account/signup", signupViewModel);
+            var template = await IHttpClientService.PostAsync<EmailVviewModel>("/api/account/apply", signupViewModel);
+            dlg_message = "Thank you for your application, A link to complete your application form has been sent to your email";
+            link = template.Link;
+            showDlg = true;
         }
         catch (HttpRequestException ex)
         {
@@ -429,5 +412,10 @@ else
     private void SwitchToLogin(MouseEventArgs e)
     {
         signin = true;
+    }
+    private class EmailVviewModel()
+    {
+        public string Template { get; set; }
+        public string Link { get; set; }
     }
 }

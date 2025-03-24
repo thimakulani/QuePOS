@@ -10,12 +10,20 @@
     <MudGrid>
         @foreach (var product in _filteredProducts)
         {
-            <MudItem xs="12" sm="6" md="4" lg="3">
+            <MudItem xs="12" sm="6" lg="3">
                 <MudCard Elevation="2">
                     <MudCardContent Class="d-flex align-center">
                         @*  <MudAvatar Size="Size.Large" Image="@product.ImageUrl" Alt="Product Image" Class="mr-2" /> *@
                         <MudAvatar Size="Size.Large">
-                            <img src="@product.ImageUrl.Replace("http://", "https://")" />
+                            @if (string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <MudIcon Icon="@Icons.Material.Outlined.BrokenImage" />
+                            }
+                            else
+                            {
+                                <img src="@product.ImageUrl.Replace("http://", "https://")" />
+                            }
+
                         </MudAvatar>
                         <div>
                             <MudText Typo="Typo.h6">@product.Name</MudText>
@@ -36,6 +44,15 @@
         <div style="display: flex; justify-content: center; align-items: center">
             <MudProgressCircular Color="Color.Primary" Size="Size.Small" Style="height: 70px; width: 70px;" Indeterminate="true" />
         </div>
+    }
+    else
+    {
+        if (_filteredProducts.Count() == 0)
+        {
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 20%">
+                <MudAlert Elevation="3" Icon="@Icons.Material.Outlined.HourglassEmpty" Severity="Severity.Success">No Transaction History Products</MudAlert>
+            </div>
+        }
     }
 </MudCardContent>
 

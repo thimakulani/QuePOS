@@ -1,5 +1,102 @@
 ﻿@page "/admin"
 
-@code {
 
+
+
+<MudText Typo="Typo.h4">Store Information</MudText>
+
+<MudStack Row="true" Justify="Justify.FlexEnd">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ToggleEditMode">
+        @(IsEditMode ? "View Store" : "Edit Store Info")
+    </MudButton>
+</MudStack>
+
+@if (!IsEditMode)
+{
+    <!-- Store Details -->
+    <MudPaper Class="mb-4 p-2">
+        <MudText Typo="Typo.h6">Store Details</MudText>
+        <dl class="row">
+            <dt class="col-sm-2">Store Name</dt>
+            <dd class="col-sm-10">@Model.StoreName</dd>
+            <dt class="col-sm-2">Address</dt>
+            <dd class="col-sm-10">@Model.Address</dd>
+            <dt class="col-sm-2">Phone</dt>
+            <dd class="col-sm-10">@Model.Phone</dd>
+        </dl>
+
+
+    </MudPaper>
+}
+else
+{
+    <!-- Edit Form -->
+    <MudPaper Class="p-4">
+        <MudText Typo="Typo.h6">Edit Store</MudText>
+        <EditForm Model="@Model" OnValidSubmit="SaveChanges">
+            <MudTextField Variant="Variant.Outlined" Label="Store Name" @bind-Value="Model.StoreName" FullWidth="true" />
+            <MudTextField Variant="Variant.Outlined" Label="Address" @bind-Value="Model.Address" FullWidth="true" />
+            <MudTextField Variant="Variant.Outlined" Label="Phone" @bind-Value="Model.Phone" FullWidth="true" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save Changes</MudButton>
+        </EditForm>
+    </MudPaper>
+}
+
+@code {
+    private Store Model { get; set; } = new();
+    @inject IHttpClientService HttpClient
+    @inject ISnackbar Snackbar
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Model = await HttpClient.GetAsync<Store>("/api/store");
+            await base.OnInitializedAsync();
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            //_processing = false;
+            StateHasChanged();
+        }
+
+
+    }
+    private bool IsEditMode = false;
+
+    private void ToggleEditMode()
+    {
+        IsEditMode = !IsEditMode;
+    }
+
+    private async void SaveChanges()
+    {
+        try
+        {
+            Model = await HttpClient.PutAsync<Store>($"/api/store/{Model.Id}", Model);
+            await base.OnInitializedAsync();
+            IsEditMode = false;
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            //_processing = false;
+            StateHasChanged();
+        }
+
+    }
 }

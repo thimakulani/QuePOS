@@ -13,7 +13,11 @@
             <MudText> @($"STORE: ") @store?.StoreName  </MudText>
             <MudSpacer />
 
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" />
+            <MudBadge Color="Color.Success" Overlap="true" Bordered="true">
+                <MudAvatar>
+                    @UserName[0]
+                </MudAvatar>
+            </MudBadge>
             <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Color="Color.Inherit" />
 
         </MudAppBar>
