@@ -1,4 +1,5 @@
 ﻿@page "/transaction"
+@using Microsoft.Extensions.Logging
 @using MudBlazor
 @* <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
 @code {
@@ -65,6 +66,7 @@
     </MudListSubheader>
     @foreach (var item in cartItems)
     {
+
         <MudListItem>
             <MudPaper Elevation="3" Class="p-2">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Spacing="2">
@@ -72,9 +74,9 @@
                     <MudSpacer />
 
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                        <MudIconButton Icon="@Icons.Material.Filled.Remove" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity - 1)" Disabled="item.Quantity <= 1" Size="Size.Small" />
-                        <MudText>@item.Quantity</MudText>
-                        <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity + 1)" Size="Size.Small" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Remove" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity - 1)" Disabled="item.Quantity <= 1 || item.Product.Unit == UnitOfMeasure.Gram || item.Product.Unit == UnitOfMeasure.Kilogram || item.Product.Unit == UnitOfMeasure.Liter" Size="Size.Small" />
+                        <MudText>@item.Quantity @item.UnitOfMeasure</MudText>
+                        <MudIconButton Disabled="@(item.UnitOfMeasure == UnitOfMeasure.Kilogram || item.UnitOfMeasure == UnitOfMeasure.Gram || item.UnitOfMeasure == UnitOfMeasure.Liter ? true : false)" Icon="@Icons.Material.Filled.Add" Variant="Variant.Outlined" OnClick="() => UpdateQuantity(item, item.Quantity + 1)" Size="Size.Small" />
                     </MudStack>
 
                     <MudText Align="Align.Right" Typo="Typo.subtitle1">@((item.Quantity * item.Price).ToString("C"))</MudText>
@@ -101,7 +103,7 @@
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                             <MudText>@item.Name</MudText>
                             <MudSpacer />
-                            <MudText Typo="Typo.body1" Color="Color.Secondary">@item.Price?.ToString("C")</MudText>
+                            <MudText Typo="Typo.body1" Color="Color.Secondary">@item.Price?.ToString("C") @(item.Unit == UnitOfMeasure.Gram || item.Unit == UnitOfMeasure.Gram ? GetUnitDisplay(item.Unit) : "") </MudText>
                             <MudIconButton Icon="@Icons.Material.Rounded.Add" OnClick="@(() => AddItemToCart(item))" Color="Color.Primary" Size="Size.Small" />
                         </MudStack>
                     </MudPaper>
@@ -168,7 +170,20 @@
         <MudButton Color="Color.Primary" OnClick="() => showSlipDialog = false">Close</MudButton>
     </DialogActions>
 </MudDialog>
+<!-- Weight dlg -->
+<MudDialog @bind-Visible="showWeightDlg">
+    <TitleContent>Enter Weight</TitleContent>
+    <DialogContent>
+        <MudNumericField @bind-Value="weight" Immediate="true" Format="F1" Label="Enter Weight" Margin="Margin.Dense" Variant="Variant.Outlined"
+                         Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Rounded.MonitorWeight" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="() => showWeightDlg = false">Close</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="() => {AddWeightItem(weightProduct);}">Add</MudButton>
+    </DialogActions>
+</MudDialog>
 @code {
+    private decimal? weight;
     private List<Product> products = [];
     private List<SaleDetail> cartItems = [];
     private List<string> paymentMethods = new() { "Cash", "Card" };
@@ -183,7 +198,7 @@
     [Inject] private IHttpClientService HttpClientService { get; set; }
     private double? cashReceived;
     //private double changeAmount => (double)cashReceived - totalAmount;
-    private double changeAmount => cashReceived.HasValue ? cashReceived.Value - totalAmount : -totalAmount;
+    private double changeAmount => cashReceived.HasValue ? cashReceived.Value - totalAmount : totalAmount;
     private DateTime saleDate;
 
     private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
@@ -196,6 +211,20 @@
         .ToList();
 
     private void CloseDlg() => products_visible = false;
+    private string GetUnitDisplay(UnitOfMeasure unit)
+    {
+        return unit switch
+        {
+            UnitOfMeasure.Each => "each",
+            UnitOfMeasure.Gram => "g",
+            UnitOfMeasure.Kilogram => "kg",
+            UnitOfMeasure.Liter => "L",
+            UnitOfMeasure.Small => "small item",
+            UnitOfMeasure.Medium => "medium item",
+            UnitOfMeasure.Large => "large item",
+            _ => unit.ToString().ToLower()
+        };
+    }
 
     private async void ShowScanner()
     {
@@ -256,20 +285,59 @@
             Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
     }
+    @inject ILogger<Index> logger;
+    private bool showWeightDlg = false;
+    private Product weightProduct = new Product();
+    private void AddWeightItem(Product product)
+    {
+        try
+        {
+            if (weight.HasValue)
+            {
+                cartItems.Add(new SaleDetail { Name = product.Name, ProductID = product.Id, Quantity = 1, Price = (double)product.Price * (double)weight.Value, UnitOfMeasure = product.Unit });
+                showWeightDlg = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex.Message, ex);
+            Snackbar.Add(ex.Message, Severity.Warning);
+        }
 
+
+    }
     private void AddItemToCart(Product product)
     {
-        var existingItem = cartItems.FirstOrDefault(i => i.Name == product.Name);
-        string n = product.Name;
-        Snackbar.Add(n, Severity.Warning);
-        if (existingItem != null) existingItem.Quantity++;
-        else cartItems.Add(new SaleDetail { Name = product.Name, ProductID = product.Id, Quantity = 1, Price = (double)product.Price });
-        StateHasChanged();
+        try
+        {
+
+            if (product.Unit == UnitOfMeasure.Gram || product.Unit == UnitOfMeasure.Kilogram)
+            {
+                weightProduct = product;
+                showWeightDlg = true;
+            }
+            else
+            {
+                var existingItem = cartItems.FirstOrDefault(i => i.Name == product.Name);
+                if (existingItem != null) existingItem.Quantity++;
+                else
+                    cartItems.Add(new SaleDetail { Name = product.Name, ProductID = product.Id, Quantity = 1, Price = (double)product.Price, UnitOfMeasure = product.Unit });
+            }
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex.Message, ex);
+            Snackbar.Add(ex.Message, Severity.Warning);
+        }
     }
 
     //private void UpdateQuantity(SaleDetail item, int quantity) => item.Quantity = quantity;
     private void UpdateQuantity(SaleDetail item, int quantity)
     {
+        // if(item.Product.Unit == UnitOfMeasure.Gram || item.Product.Unit == UnitOfMeasure.Kilogram)
         if (quantity > 0)
         {
             item.Quantity = quantity;
@@ -317,7 +385,8 @@
                 SaleDate = DateTime.Now,
                 TotalAmount = totalAmount,
                 PaymentType = selectedPaymentMethod,
-                SaleDetails = cartItems
+                SaleDetails = cartItems,
+
             };
 
         try
@@ -335,6 +404,7 @@
         }
         finally
         {
+            processingSale = false;
             StateHasChanged();
         }
     }

@@ -15,7 +15,7 @@ namespace QuePOS.Shared.Models
         public string Pac { get; set; }
         public string Var { get; set; }
         public string Man { get; set; }
-        public string brn { get; set; }
+        public string Brn { get; set; }
         public string Sub_brn { get; set; }
         public string Desc_sourced { get; set; }
         public string Desc_algo { get; set; }

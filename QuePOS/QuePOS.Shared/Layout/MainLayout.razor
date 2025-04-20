@@ -13,8 +13,8 @@
             <MudText> @($"STORE: ") @store?.StoreName  </MudText>
             <MudSpacer />
 
-            <MudBadge Color="Color.Success" Overlap="true" Bordered="true">
-                <MudAvatar Elevation="2" Size="Size.Small">
+            <MudBadge Color="@(IsOnline? Color.Success: Color.Error)" Overlap="true" Bordered="true">
+                <MudAvatar Elevation="2" Size="Size.Medium">
                     @UserName[0]
                 </MudAvatar>
             </MudBadge>
@@ -128,6 +128,7 @@
 
         NavigationManager.NavigateTo("login/index");
         session_loading = false;
+
         StateHasChanged();
     }
 

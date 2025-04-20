@@ -1,6 +1,30 @@
 ﻿namespace QuePOS.Shared.Models;
+public enum UnitOfMeasure
+{
+    Each,
+    Gram,
+    Kilogram,
+    Liter,
+    Small,
+    Medium,
+    Large
+}
 
 public class Product
+{
+    public int Id { get; set; }
+    public string BarCode { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public decimal? Price { get; set; }
+    public decimal? StockQuantity { get; set; }
+    public string ImageUrl { get; set; }
+    public string Base64Url { get; set; }
+    public int CategoryID { get; set; }
+    public UnitOfMeasure Unit { get; set; } = UnitOfMeasure.Each;
+}
+
+/*public class Product
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -22,5 +46,5 @@ public class Product
     public Category Category { get; set; } = null!;
     public ICollection<SaleDetail> SaleDetails { get; set; } = [];
     public ICollection<Inventory> InventoryChanges { get; set; } = [];
-}
+}*/
 

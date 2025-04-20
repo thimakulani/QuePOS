@@ -21,6 +21,11 @@ namespace QuePOS.Services
             return await SecureStorage.GetAsync(key);
         }
 
+        public void RemoveSession(string key)
+        {
+            SecureStorage.Remove(key);
+        }
+
         public async Task SetSession(string key, string value)
         {
             await SecureStorage.SetAsync(key, value);

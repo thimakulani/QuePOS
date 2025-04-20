@@ -7,7 +7,15 @@
             <!-- /.login-logo -->
             <div class="card card-outline card-primary">
                 <div class="card-header text-center">
-                    <a class="h1"><b>Log</b>In</a>
+                    @if (show_login)
+                    {
+                        <a class="h1"><b>Log</b>In</a>
+
+                    }
+                    else
+                    {
+                        <a class="h1"><b>Password</b>@(" ")Reset</a>
+                    }
                 </div>
                 <div class="card-body">
                     @if (show_login)
@@ -75,7 +83,7 @@
                     }
                     else
                     {
-                        <p class="login-box-msg">Password Reset</p>
+
                         <EditForm Model="@ForgotPassword" FormName="PasswordForm">
                             @if (password_reset_steps == 2)
                             {
@@ -136,9 +144,13 @@
                                     }
                                 }
                             </MudButton>
-                            <MudButton Variant="Variant.Text" Color="Color.Secondary" Class="mt-2" OnClick="HandleShowOtp">
-                                Already Have OTP
-                            </MudButton>
+                            @if (password_reset_steps == 1)
+                            {
+                                <MudButton Variant="Variant.Text" Color="Color.Secondary" Class="mt-2" OnClick="HandleShowOtp">
+                                    Already Have OTP
+                                </MudButton>
+                            }
+
                             <MudButton Variant="Variant.Text" Color="Color.Secondary" Class="mt-2" OnClick="HandleSwitchToLogin">
                                 Login
                             </MudButton>
@@ -228,8 +240,7 @@ else
         <MudText>@dlg_message</MudText>
     </DialogContent>
     <DialogActions>
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary" Href="@link">Continue with Application</MudButton>
-        <MudButton OnClick="@(()=>{ showDlg = false; })">Close</MudButton>
+        <MudButton OnClick="@(()=>{ showDlg = false; StateHasChanged(); })">Close</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -272,7 +283,7 @@ else
             {
                 customProvider.NotifyNotificationState(vm);
             }
-
+            Navigation.NavigateTo("/");
             // Redirect to home page
 
             //Snackbar.Add($"Error: {authresponse.User.Email}", Severity.Error);
@@ -325,13 +336,16 @@ else
         // Simulate login process
         try
         {
+            _processing = true;
             if (password_reset_steps == 3)
             {
+
                 if (ForgotPassword.Password == ConfirmPassword)
                 {
-                    await IHttpClientService.PostAsync<string>("api/auth/reset_password", ForgotPassword);
+                    await IHttpClientService.PostAsync<string>("/api/account/reset_password", ForgotPassword);
                     Snackbar.Add($"Password has been successfully updated", Severity.Success);
                     show_login = true;
+                    ForgotPassword = new();
                 }
                 else
                 {
@@ -341,8 +355,7 @@ else
             }
             else if (password_reset_steps == 2)
             {
-                _processing = true;
-                string msg = await IHttpClientService.PostAsync<string>("api/auth/verify_otp", ForgotPassword);
+                string msg = await IHttpClientService.PostAsync<string>("/api/account/verify_otp", ForgotPassword);
                 password_reset_steps = 3;
                 Snackbar.Add(msg, Severity.Success);
 
@@ -351,7 +364,7 @@ else
             else if (password_reset_steps == 1)
             {
                 _processing = true;
-                await IHttpClientService.PostAsync<string>("api/auth/request_otp", ForgotPassword);
+                await IHttpClientService.PostAsync<string>("/api/account/otp", ForgotPassword);
                 password_reset_steps = 2;
             }
         }
@@ -379,16 +392,14 @@ else
         password_reset_steps = 0;
     }
     string dlg_message = "";
-    string link = "";
     private async Task HandleRegister()
     {
         try
         {
             CloseAlert();
             _processing = true;
-            var template = await IHttpClientService.PostAsync<EmailVviewModel>("/api/account/apply", signupViewModel);
-            dlg_message = "Thank you for your application, A link to complete your application form has been sent to your email";
-            link = template.Link;
+            dlg_message = await IHttpClientService.PostAsync<string>("/api/account/apply", signupViewModel);
+            //dlg_message = "Thank you for your application, A link to complete your application form has been sent to your email";
             showDlg = true;
         }
         catch (HttpRequestException ex)

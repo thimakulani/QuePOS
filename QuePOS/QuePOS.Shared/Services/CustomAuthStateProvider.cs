@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QuePOS.Shared.Services 
+namespace QuePOS.Shared.Services
 {
     public class CustomAuthStateProvider : AuthenticationStateProvider
     {
@@ -33,6 +33,8 @@ namespace QuePOS.Shared.Services
                     new(ClaimTypes.Surname, applicationUser.LastName),
                     new(ClaimTypes.NameIdentifier, applicationUser.Id.ToString()),
                     new(ClaimTypes.MobilePhone, applicationUser.PhoneNumber),
+
+
 
 
                 };

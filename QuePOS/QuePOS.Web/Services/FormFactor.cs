@@ -27,6 +27,11 @@ namespace QuePOS.Web.Services
             return await _sessionStorage.GetItemAsync<string>(key);
         }
 
+        public async void RemoveSession(string key)
+        {
+            await _sessionStorage.RemoveItemAsync(key);
+        }
+
         public async Task SetSession(string key, string value)
         {
             await _sessionStorage.SetItemAsync(key, value);

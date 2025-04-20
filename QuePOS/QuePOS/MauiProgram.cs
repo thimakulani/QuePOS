@@ -24,7 +24,8 @@ namespace QuePOS
                 });
             builder.Services.AddHttpClient("api", client =>
             {
-                client.BaseAddress = new Uri("https://queposapi.onrender.com");
+                //client.BaseAddress = new Uri("https://queposapi.onrender.com");
+                client.BaseAddress = new Uri("https://thimakulani-001-site1.jtempurl.com");
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
             });
             // Add device-specific services used by the QuePOS.Shared project

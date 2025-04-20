@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "437722515453",
+    "project_id": "quepos-c7587",
+    "storage_bucket": "quepos-c7587.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437722515453:android:58cfe08a1c5799313cbb94",
+        "android_client_info": {
+          "package_name": "com.que.quepos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvOQ6SF2U7kSvM6LqJfikYBOblZ9rOLrc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

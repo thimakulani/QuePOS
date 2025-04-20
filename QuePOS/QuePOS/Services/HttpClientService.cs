@@ -122,7 +122,7 @@ namespace QuePOS.Services
                 response = await ExecuteRequest(requestFunc); // Retry the request after refreshing token
             }
 
-            return await HandleResponse<T>(response);
+            return await HttpClientService.HandleResponse<T>(response);
         }
 
         private async Task<HttpResponseMessage> ExecuteRequest(Func<Task<HttpResponseMessage>> requestFunc)
@@ -135,7 +135,7 @@ namespace QuePOS.Services
             return await requestFunc();
         }
 
-        private async Task<T> HandleResponse<T>(HttpResponseMessage response)
+        private static async Task<T> HandleResponse<T>(HttpResponseMessage response)
         {
             if (!response.IsSuccessStatusCode)
             {

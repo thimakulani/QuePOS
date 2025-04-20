@@ -6,6 +6,7 @@
     <MudTextField @bind-Value="_searchTerm" Placeholder="Search..." Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" />
     <MudButton Variant="Variant.Outlined" Style="margin-left:5px" Color="Color.Primary" OnClick="()=> OpenEditDialog(new Product())">Add</MudButton>
 </MudCardHeader>
+
 <MudCardContent>
     <MudGrid>
         @foreach (var product in _filteredProducts)
@@ -13,7 +14,6 @@
             <MudItem xs="12" sm="6" lg="3">
                 <MudCard Elevation="2">
                     <MudCardContent Class="d-flex align-center">
-                        @*  <MudAvatar Size="Size.Large" Image="@product.ImageUrl" Alt="Product Image" Class="mr-2" /> *@
                         <MudAvatar Size="Size.Large">
                             @if (string.IsNullOrEmpty(product.ImageUrl))
                             {
@@ -23,83 +23,97 @@
                             {
                                 <img src="@product.ImageUrl.Replace("http://", "https://")" />
                             }
-
                         </MudAvatar>
                         <div>
                             <MudText Typo="Typo.h6">@product.Name</MudText>
-                            <MudText Typo="Typo.body1" Class="font-weight-bold">@product.Price?.ToString("C")</MudText>
-                            <MudText Typo="Typo.body2">Stock: @product.StockQuantity</MudText>
+
+                            <MudText Typo="Typo.body1" Class="font-weight-bold">
+                                @product.Price?.ToString("C") per @GetUnitDisplay(product.Unit)
+                            </MudText>
+                            @if (product.Unit == UnitOfMeasure.Each)
+                            {
+
+                                <MudText Typo="Typo.body2">
+                                    Stock: @Math.Ceiling(@product.StockQuantity ?? 0m)
+                                </MudText>
+                            }
                         </div>
+
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton style="background-color: #2196F3; color:white" Size="Size.Small" Variant="Variant.Filled" OnClick="@(() => OpenEditDialog(product))">Edit</MudButton>
+                        <MudButton Style="background-color: #2196F3; color:white" Size="Size.Small" Variant="Variant.Filled" OnClick="@(() => OpenEditDialog(product))">Edit</MudButton>
                         <MudButton Color="Color.Error" Style="margin-left:5px" Size="Size.Small" Variant="Variant.Filled" OnClick="@(() => ConfirmDelete(product.Id))">Delete</MudButton>
                     </MudCardActions>
                 </MudCard>
             </MudItem>
         }
     </MudGrid>
+
     @if (isLoading)
     {
-        <div style="display: flex; justify-content: center; align-items: center">
+        <div class="d-flex justify-center align-center">
             <MudProgressCircular Color="Color.Primary" Size="Size.Small" Style="height: 70px; width: 70px;" Indeterminate="true" />
         </div>
     }
-    else
+    else if (_filteredProducts.Count == 0)
     {
-        if (_filteredProducts.Count() == 0)
-        {
-            <div style="display: flex; justify-content: center; align-items: center; margin-top: 20%">
-                <MudAlert Elevation="3" Icon="@Icons.Material.Outlined.HourglassEmpty" Severity="Severity.Success">No Transaction History Products</MudAlert>
-            </div>
-        }
+        <div class="d-flex justify-center align-center mt-5">
+            <MudAlert Elevation="3" Icon="@Icons.Material.Outlined.HourglassEmpty" Severity="Severity.Info">No products found</MudAlert>
+        </div>
     }
 </MudCardContent>
 
-<MudDialog @bind-Visible="_isDialogOpen" Options="this._dialogOptions">
+<MudDialog @bind-Visible="_isDialogOpen" Options="_dialogOptions">
     <TitleContent>@(_product.Id == 0 ? "Add Product" : "Edit Product")</TitleContent>
     <DialogContent>
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Bar Code" @bind-Value="_product.BarCode" AdornmentIcon="@Icons.Material.Outlined.QrCodeScanner" Adornment="Adornment.End" OnAdornmentClick="ScannBarCode" />
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Name" @bind-Value="_product.Name" Required="true" />
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Description" @bind-Value="_product.Description" Required="true" />
-        <MudNumericField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Price" Format="F1" @bind-Value="_product.Price" Required="true" />
-        <MudNumericField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Stock Quantity" @bind-Value="_product.StockQuantity" Required="true" />
-        <MudItem>
-            <MudFileUpload @ref="@_fileUpload"
-                           T="IBrowserFile"
-                           Accept="Image/*"
-                           For="@(() => File)"
-                           @bind-Files="File">
-                <ActivatorContent>
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.CloudUpload">
-                        Upload Files
-                    </MudButton>
+        <MudSelect T="UnitOfMeasure" @bind-Value="_product.Unit" Label="Unit of Measure" Variant="Variant.Outlined" Margin="Margin.Dense">
+            @foreach (UnitOfMeasure unit in Enum.GetValues(typeof(UnitOfMeasure)))
+            {
+                <MudSelectItem Value="unit">@unit</MudSelectItem>
+            }
+        </MudSelect>
+        <MudNumericField Variant="Variant.Outlined" Margin="Margin.Dense"
+                         Label="@(_product.Unit == UnitOfMeasure.Each ? "Quantity" :
+                         _product.Unit == UnitOfMeasure.Large || _product.Unit == UnitOfMeasure.Medium || _product.Unit == UnitOfMeasure.Small ? "Size" : $"Weight ({GetUnitDisplay(_product.Unit)})")"
+                         @bind-Value="_product.StockQuantity" Required="true" />
+        <MudNumericField Variant="Variant.Outlined" Margin="Margin.Dense" Label="Price" Format="F2" @bind-Value="_product.Price" Required="true" />
 
-                </ActivatorContent>
-            </MudFileUpload>
-        </MudItem>
+        <!-- 🆕 Unit of Measure Selector -->
 
         <MudSelect Variant="Variant.Outlined" Margin="Margin.Dense" Label="Category" @bind-Value="categoryId">
             @if (categories.Count == 0)
             {
-                <MudSelectItem value="0">
-                    No Category
-                </MudSelectItem>
+                <MudSelectItem Value="0">No Category</MudSelectItem>
             }
             @foreach (var item in categories)
             {
-                <MudSelectItem value="@item.Id">
-                    @item.CategoryName
-                </MudSelectItem>
+                <MudSelectItem Value="@item.Id">@item.CategoryName</MudSelectItem>
             }
         </MudSelect>
-
+        <MudItem>
+            <MudFileUpload @ref="_fileUpload" T="IBrowserFile" Accept="image/*" For="@(() => File)" @bind-Files="File">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">Upload Image</MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+        </MudItem>
 
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="SaveProduct" Variant="Variant.Outlined" Color="Color.Primary">Save</MudButton>
+        <MudButton Disabled="process" OnClick="SaveProduct" Variant="Variant.Outlined" Color="Color.Primary">
+            @if (process)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Adding Product</MudText>
+            }
+            else
+            {
+                <MudText>Save</MudText>
+            }
+        </MudButton>
         <MudButton OnClick="() => _isDialogOpen = false" Variant="Variant.Outlined" Color="Color.Secondary">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
@@ -108,51 +122,62 @@
     private MudFileUpload<IBrowserFile> _fileUpload;
     private IBrowserFile File { get; set; }
     private bool isLoading = true;
+    private bool process = false;
     private int categoryId;
-    private List<Category> categories = [];
-    @inject ISnackbar Snackbar;
-    [Inject]
-    private IHttpClientService HttpClientService { get; set; }
+    private List<Category> categories = new();
     private List<Product> _products = new();
-    private List<Product> _filteredProducts => _products.Where(p => string.IsNullOrEmpty(_searchTerm) || p.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
     private string _searchTerm = "";
-    private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
     private Product _product = new();
     private bool _isDialogOpen = false;
-    [Inject]
-    private IFormFactor FormFactor { get; set; }
-    [Inject]
-    private NavigationManager NavigationManager { get; set; }
+
+    private List<Product> _filteredProducts => _products
+        .Where(p => string.IsNullOrEmpty(_searchTerm) || p.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
+
+    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private IHttpClientService HttpClientService { get; set; }
+    [Inject] private IFormFactor FormFactor { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+
     private void OpenEditDialog(Product product)
     {
-        _product = product.Id == 0 ? new Product() : new Product
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity,
-                CategoryID = product.CategoryID,
-                ImageUrl = product.ImageUrl
-            };
+        _product = product.Id == 0
+            ? new Product()
+            : new Product
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    StockQuantity = product.StockQuantity,
+                    CategoryID = product.CategoryID,
+                    ImageUrl = product.ImageUrl,
+                    BarCode = product.BarCode,
+                    Unit = product.Unit
+                };
+        categoryId = _product.CategoryID;
         _isDialogOpen = true;
     }
+
     private async void ScannBarCode()
     {
         try
         {
             var results = await FormFactor.ShowBarCodeScanner();
-            Snackbar.Add(results.FirstOrDefault().Value, Severity.Success);
-            _product.BarCode = results.FirstOrDefault().Value;
-
-            await SearchProduct(results.FirstOrDefault().Value);
+            var code = results.FirstOrDefault()?.Value;
+            if (!string.IsNullOrEmpty(code))
+            {
+                Snackbar.Add(code, Severity.Success);
+                _product.BarCode = code;
+                await SearchProduct(code);
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Snackbar.Add($"Scan failed: {ex.Message}", Severity.Error);
         }
-        //StateHasChanged();
-
     }
 
     private async Task SearchProduct(string barcode)
@@ -161,37 +186,32 @@
         {
             var _productItem = await HttpClientService.GetAsync<ProductItems>($"/api/ProductItems/scan/{barcode}");
             _product.Description = _productItem.Desc_sourced;
-            _product.Name = _productItem.brn;
-            var cat = categories.Where(x => x.CategoryName == _productItem.Cat).FirstOrDefault();
-            categoryId = cat.Id;
+            _product.Name = _productItem.Brn;
+            var cat = categories.FirstOrDefault(x => x.CategoryName == _productItem.Cat);
+            if (cat != null) categoryId = cat.Id;
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException ex) when (ex.StatusCode != System.Net.HttpStatusCode.NotFound)
         {
-            if (ex.StatusCode != System.Net.HttpStatusCode.NotFound)
-                Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+            Snackbar.Add($"HTTP Error: {ex.Message}", Severity.Error);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Unexpected error: {ex.Message}", Severity.Error);
         }
         finally
         {
-            //_processing = false;
             StateHasChanged();
         }
     }
+
     private async Task<string> ConvertFileToBase64(IBrowserFile file)
     {
         using var stream = file.OpenReadStream();
         using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
-        byte[] fileBytes = memoryStream.ToArray();
-        return Convert.ToBase64String(fileBytes);
+        return Convert.ToBase64String(memoryStream.ToArray());
     }
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -199,45 +219,43 @@
             await RefreshProducts();
             await GetCategories();
         }
-        await base.OnAfterRenderAsync(firstRender);
     }
+
     private async Task SaveProduct()
     {
         try
         {
+            process = true;
+            if (File != null)
+                _product.Base64Url = await ConvertFileToBase64(File);
+
+            _product.CategoryID = categoryId;
+
             if (_product.Id == 0)
             {
-                if (File != null)
-                {
-                    _product.Base64Url = await ConvertFileToBase64(File);
-                }
-                _product.CategoryID = categoryId;
                 var product = await HttpClientService.PostAsync<Product>("/api/products", _product);
                 _products.Add(product);
-                Snackbar.Add("Product added successfully", Severity.Success);
+                Snackbar.Add("Product added", Severity.Success);
             }
             else
             {
                 await HttpClientService.PutAsync<Product>($"/api/products/update/{_product.Id}", _product);
+                Snackbar.Add("Product updated", Severity.Success);
             }
 
             await RefreshProducts();
             _isDialogOpen = false;
         }
-        catch (HttpRequestException ex)
-        {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-        }
         catch (Exception ex)
         {
-            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Save error: {ex.Message}", Severity.Error);
         }
         finally
         {
-            StateHasChanged();
+            process = false;
         }
-
     }
+
     private async Task ConfirmDelete(int id)
     {
         var confirm = await DialogService.ShowMessageBox("Confirm", "Are you sure you want to delete this product?", "Yes", "No");
@@ -246,47 +264,26 @@
             try
             {
                 await HttpClientService.DeleteAsync($"/api/products/{id}");
-                //await RefreshProducts();
-                var productToRemove = _products.FirstOrDefault(p => p.Id == id);
-                if (productToRemove != null)
-                {
-                    _products.Remove(productToRemove);
-                }
-                Snackbar.Add("Product deleted successfully", Severity.Success);
-            }
-            catch (HttpRequestException ex)
-            {
-                Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+                _products.RemoveAll(p => p.Id == id);
+                Snackbar.Add("Product deleted", Severity.Success);
             }
             catch (Exception ex)
             {
-                Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
-            }
-            finally
-            {
-                StateHasChanged();
+                Snackbar.Add($"Delete error: {ex.Message}", Severity.Error);
             }
         }
     }
-    public string text { get; set; } = "";
-
 
     private async Task RefreshProducts()
     {
         try
         {
             isLoading = true;
-            //string id = FormFactor.GetSession()
             _products = await HttpClientService.GetAsync<List<Product>>("/api/products/all/store");
-        }
-        catch (HttpRequestException ex)
-        {
-
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -294,27 +291,33 @@
             StateHasChanged();
         }
     }
+    private string GetUnitDisplay(UnitOfMeasure unit)
+    {
+        return unit switch
+        {
+            UnitOfMeasure.Each => "each",
+            UnitOfMeasure.Gram => "g",
+            UnitOfMeasure.Kilogram => "kg",
+            UnitOfMeasure.Liter => "L",
+            UnitOfMeasure.Small => "small item",
+            UnitOfMeasure.Medium => "medium item",
+            UnitOfMeasure.Large => "large item",
+            _ => unit.ToString().ToLower()
+        };
+    }
+
+
     private async Task GetCategories()
     {
         try
         {
             categories = await HttpClientService.GetAsync<List<Category>>("/api/category");
             if (categories.Count > 0)
-            {
                 categoryId = categories[0].Id;
-            }
-        }
-        catch (HttpRequestException ex)
-        {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            StateHasChanged();
+            Snackbar.Add($"Category fetch error: {ex.Message}", Severity.Error);
         }
     }
 }

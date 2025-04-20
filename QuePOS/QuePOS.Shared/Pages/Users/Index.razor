@@ -25,8 +25,12 @@
                 <MudTd DataLabel="Created At">@context.CreatedAt.ToString("yyyy-MM-dd")</MudTd>
                 <MudTd DataLabel="Actions">
                     <MudStack Row="true" Spacing="2">
-                        <MudIconButton Edge="Edge.End" Size="Size.Small" Variant="Variant.Outlined" Icon="@Icons.Material.Outlined.Edit" Color="Color.Primary" OnClick="() => OpenEditDialog(context)" />
-                        <MudIconButton Edge="Edge.End" Size="Size.Small" Variant="Variant.Outlined" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="() => DeleteUser(context.Id)" />
+
+                        @*  <MudIconButton Edge="Edge.End" Size="Size.Small" Variant="Variant.Filled" Icon="@Icons.Material.Outlined.Edit" Color="Color.Primary" OnClick="() => OpenEditDialog(context)" />
+                        *@
+                        <MudButton Size="Size.Small" Variant="Variant.Filled" StartIcon="@(context.IsActive ? Icons.Material.Outlined.WorkOff : Icons.Material.Outlined.Work)" Color="@(context.IsActive ? Color.Error : Color.Success)" OnClick="() => UpdateAccess(context)">
+                            @(context.IsActive ? "Deactivate" : "Activate")
+                        </MudButton>
                     </MudStack>
                 </MudTd>
             </RowTemplate>
@@ -42,10 +46,21 @@
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="selectedUser.FirstName" Label="First Name" Required="true" />
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="selectedUser.LastName" Label="Last Name" Required="true" />
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="selectedUser.PhoneNumber" Label="Phone Number" Required="true" />
-        <MudTextField Variant="Variant.Outlined" Disabled="@(selectedUser.Id != 0 ? true : false)" Margin="Margin.Dense" @bind-Value="selectedUser.Email" Label="Email" Required="true" />
+        <MudTextField Variant="Variant.Outlined" ReadOnly="@(selectedUser.Id == 0 ? false : true)" Margin="Margin.Dense" @bind-Value="selectedUser.Email" Label="Email" Required="true" />
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="SaveUser" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
+        <MudButton Disabled="processing" OnClick="SaveUser" Variant="Variant.Filled" Color="Color.Primary">
+            @if (processing)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Adding User</MudText>
+            }
+            else
+            {
+                <MudText>Save</MudText>
+            }
+
+        </MudButton>
         <MudButton OnClick="CloseDialog" Variant="Variant.Filled" Color="Color.Secondary">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
@@ -57,7 +72,7 @@
     private StoreUser selectedUser = new StoreUser();
     @inject IHttpClientService HttpClientService;
     @inject ISnackbar Snackbar;
-
+    private bool processing = false;
     protected override async Task OnInitializedAsync()
     {
         try
@@ -139,26 +154,45 @@
             StateHasChanged();
         }
     }
-
-    private async Task DeleteUser(int userId)
+    [Inject] private IDialogService DialogService { get; set; }
+    private async Task UpdateAccess(StoreUser storeUser)
     {
-        try
-        {
-            await HttpClientService.DeleteAsync($"/api/StoreUser/{userId}");
-            users.RemoveAll(u => u.Id == userId);
+        string action = storeUser.IsActive ? "Deactivate" : "Activate";
+        string fullName = $"{storeUser.FirstName} {storeUser.LastName}";
 
-        }
-        catch (HttpRequestException ex)
+        bool? confirmed = await DialogService.ShowMessageBox(
+            "Confirmation Required",
+            $"Are you sure you want to {action} {fullName}?",
+            yesText: $"{action}!", cancelText: "Cancel",
+            options: new DialogOptions() { CloseOnEscapeKey = true });
+
+        if (confirmed == true)
         {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            StateHasChanged();
+            try
+            {
+                var updatedUser = await HttpClientService.PostAsync<StoreUser>("/api/StoreUser/grant_access", storeUser);
+
+                // Find and update the user in the list
+                var index = users.FindIndex(u => u.Id == updatedUser.Id);
+                if (index != -1)
+                {
+                    users[index] = updatedUser;
+                }
+
+                Snackbar.Add($"{fullName} has been successfully {action.ToLower()}d.", Severity.Success);
+            }
+            catch (HttpRequestException ex)
+            {
+                Snackbar.Add($"Network error: {ex.Message}", Severity.Error);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Unexpected error: {ex.Message}", Severity.Error);
+            }
+            finally
+            {
+                StateHasChanged();
+            }
         }
     }
 }
