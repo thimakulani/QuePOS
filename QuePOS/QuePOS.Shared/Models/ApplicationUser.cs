@@ -2,8 +2,8 @@
 {
     public class ApplicationUser
     {
-        public int StoreUserId { get; set; }
-        public StoreUser StoreUser { get; set; }
+        public string Id { get; set; }
+        public string FullNames { get; set; }
 
     }
 }

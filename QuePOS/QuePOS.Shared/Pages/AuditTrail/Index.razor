@@ -25,7 +25,7 @@
             </HeaderContent>
             <RowTemplate Context="audit">
                 <MudTd DataLabel="ID">@audit.Id</MudTd>
-                <MudTd DataLabel="User">@audit.ApplicationUser?.StoreUser?.FirstName</MudTd>
+                <MudTd DataLabel="User">@audit.ApplicationUser.FullNames</MudTd>
                 <MudTd DataLabel="Action">@audit.Action</MudTd>
                 <MudTd DataLabel="Table">@audit.TableName</MudTd>
                 <MudTd DataLabel="Record ID">@audit.RecordId</MudTd>
