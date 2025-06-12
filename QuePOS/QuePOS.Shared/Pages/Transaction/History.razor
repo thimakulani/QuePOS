@@ -14,16 +14,16 @@
     @if (SelectedHistory == "Daily")
     {
 
-        <MudDatePicker Variant="Variant.Outlined" Elevation="3" Margin="Margin.Dense" DateChanged="@(e=>OnDateChange(e.Value))" Label="Date" Disabled="false" />
+        <MudDatePicker Variant="Variant.Outlined" PickerVariant="PickerVariant.Dialog" Elevation="3" Margin="Margin.Dense" DateChanged="@(e => OnDateChange(e.Value))" Label="Date" Disabled="false" />
     }
 
     else if (SelectedHistory == "Monthly")
     {
-        <MudDatePicker Label="Year-Month" Variant="Variant.Outlined" Elevation="3" DateChanged="@(e=>OnDateChange(e.Value))" Margin="Margin.Dense" OpenTo="OpenTo.Year" FixDay="1" DateFormat="yyyy/MM" />
+        <MudDatePicker Label="Year-Month"  Variant="Variant.Outlined" PickerVariant="PickerVariant.Dialog" Elevation="3" DateChanged="@(e => OnDateChange(e.Value))" Margin="Margin.Dense" OpenTo="OpenTo.Year" FixDay="1" DateFormat="yyyy/MM" />
     }
     else if (SelectedHistory == "Yearly")
     {
-        <MudDatePicker Label="Year Picker" Variant="Variant.Outlined" Elevation="3" DateChanged="@(e=>OnDateChange(e.Value))" Margin="Margin.Dense" OpenTo="OpenTo.Year" FixMonth="@DateTime.Today.Month" FixDay="@DateTime.Today.Day" DateFormat="yyyy" />
+        <MudDatePicker Label="Year Picker" Variant="Variant.Outlined" PickerVariant="PickerVariant.Dialog" Elevation="3" DateChanged="@(e => OnDateChange(e.Value))" Margin="Margin.Dense" OpenTo="OpenTo.Year" FixMonth="@DateTime.Today.Month" FixDay="@DateTime.Today.Day" DateFormat="yyyy" />
     }
 </MudStack>
 @if (sales.Count > 0)
@@ -50,7 +50,7 @@
         <MudTd DataLabel="Total Amount">@sale.TotalAmount.ToString("C")</MudTd>
 
         <MudTd DataLabel="Slip">
-            <MudIconButton Edge="Edge.End" Size="Size.Small" OnClick="()=>{ ShowSlipDialog(sale);}" Icon="@Icons.Material.Filled.Print" Variant="Variant.Outlined" />
+            <MudIconButton Edge="Edge.End" Size="Size.Small" OnClick="() => { ShowSlipDialog(sale); }" Icon="@Icons.Material.Filled.Print" Variant="Variant.Outlined" />
         </MudTd>
     </RowTemplate>
 
@@ -153,10 +153,10 @@ else
         {
             isLoading = true;
             HistoryVM history = new()
-                {
-                    Type = SelectedHistory,
-                    Dates = date
-                };
+            {
+                Type = SelectedHistory,
+                Dates = date
+            };
             sales.Clear();
             sales = await HttpClientService.PostAsync<List<Sale>>($"api/sales/get_history", history);
         }

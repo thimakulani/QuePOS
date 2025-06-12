@@ -6,8 +6,54 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
+<div style="display: flex; flex-direction: column; min-height: 100vh;">
 
-<MudLayout>
+    <MudLayout style="flex: 1; display: flex; flex-direction: column;">
+        <AuthorizeView>
+            <MudAppBar Style="background-color: #2196F3">
+                <MudText> @($"STORE: ") @store?.StoreName </MudText>
+                <MudSpacer />
+                <MudBadge Color="@(IsOnline ? Color.Success : Color.Error)" Overlap="true" Bordered="true">
+                    <MudAvatar Elevation="2" Size="Size.Medium">
+                        @UserName?[0]
+                    </MudAvatar>
+                </MudBadge>
+                <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Color="Color.Inherit" />
+            </MudAppBar>
+        </AuthorizeView>
+
+        <AuthorizeView>
+            <Authorized>
+                <MudMainContent Style="flex: 1;">
+                    <MudBreadcrumbs Items="@breadcrumbs"></MudBreadcrumbs>
+                    <div style="padding: 8px;">
+                        @Body
+                    </div>
+                </MudMainContent>
+            </Authorized>
+            <NotAuthorized>
+                @if (!session_loading)
+                {
+                    <QuePOS.Shared.Pages.Login.Login />
+                }
+                else
+                {
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+                        <MudProgressCircular Color="Color.Primary" Style="height: 70px; width: 70px;" Indeterminate="true" />
+                    </div>
+                }
+            </NotAuthorized>
+        </AuthorizeView>
+
+        <!-- Sticky Footer -->
+        <footer style="padding:16px; background-color:#f5f5f5; text-align:center;">
+            <MudText Typo="Typo.body2" Align="Align.Center">© @DateTime.Now.Year Developed by Thima.</MudText>
+        </footer>
+    </MudLayout>
+
+</div>
+
+@* <MudLayout>
     <AuthorizeView>
         <MudAppBar style="background-color: #2196F3">
             <MudText> @($"STORE: ") @store?.StoreName  </MudText>
@@ -46,14 +92,19 @@
             }
         </NotAuthorized>
     </AuthorizeView>
-</MudLayout>
+    <footer style="width:100%; padding:16px; background-color:#f5f5f5; text-align:center;" class="mt-auto">
+        <MudPaper Elevation="2" Class="px-4 py-3 mud-theme-background">
+            <MudText Typo="Typo.body2" Align="Align.Center">© 2025 Developed by Thima.</MudText>
+        </MudPaper>
+    </footer>
+</MudLayout> *@
 
 @code {
     //@inject IStringLocalizer<AppResources> Localizer
-    [Inject] AuthenticationStateProvider AuthStateProvider { get; set; }
     [Inject] ISnackbar Snackbar { get; set; }
     [Inject] IUserService IUserService { get; set; }
     [Inject] IFormFactor FormFactor { get; set; }
+    [Inject] AuthenticationStateProvider AuthStateProvider { get; set; }
     [Inject] NavigationManager NavigationManager { get; set; }
     [Inject] IHttpClientService HttpClientService { get; set; }
 

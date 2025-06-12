@@ -1,14 +1,7 @@
 ﻿@page "/transaction"
 @using Microsoft.Extensions.Logging
 @using MudBlazor
-@* <MudBreadcrumbs Items="_items"></MudBreadcrumbs>
-@code {
-    private List<BreadcrumbItem> _items =
-    [
-        new("Home", href: "/", icon: Icons.Material.Filled.Home),
-    new("Transaction", href: null, disabled: true),
-    ];
-} *@
+
 <MudPaper Elevation="4" Class="p-2">
     <div style="display: flex; justify-content: space-between">
         <MudText Style="margin: 0px" Typo="Typo.h6">Transaction</MudText>
@@ -153,7 +146,7 @@
             @foreach (var item in cartItems)
             {
                 <MudListItem>
-                    @item.Product.Name - Quantity: @item.Quantity - Total: @(item.Quantity * item.Price).ToString("C")
+                    @(item.Product.Name + " - Quantity: " + @item.Quantity + " - Total: " + (item.Quantity * item.Price).ToString("C"))
                 </MudListItem>
             }
         </MudList>

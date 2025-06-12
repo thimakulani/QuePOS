@@ -11,7 +11,7 @@
         public decimal Total { get; set; }
         // Relationships
         public Sale Sale { get; set; } = null!;
-        public Product Product { get; set; } = null!;
+        public Product Product { get; set; } = new();
 
         public UnitOfMeasure UnitOfMeasure { get; set; }
     }

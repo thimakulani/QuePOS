@@ -239,11 +239,19 @@
             }
             else
             {
-                await HttpClientService.PutAsync<Product>($"/api/products/update/{_product.Id}", _product);
+                var prod = await HttpClientService.PutAsync<Product>($"/api/products/update/{_product.Id}", _product);
+                for (int i = 0; i < _products.Count; i++)
+                {
+                    if (_products[i].Id == prod.Id)
+                    {
+                        _products[i] = prod;
+                        break;
+                    }
+                }
                 Snackbar.Add("Product updated", Severity.Success);
             }
 
-            await RefreshProducts();
+            // await RefreshProducts();
             _isDialogOpen = false;
         }
         catch (Exception ex)
