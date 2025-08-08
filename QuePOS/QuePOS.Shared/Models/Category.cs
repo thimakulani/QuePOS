@@ -1,11 +1,17 @@
-﻿namespace QuePOS.Shared.Models;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class Category
+namespace QuePOS.Shared.Models
 {
-    public int Id { get; set; } 
-    public string CategoryName { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
+    public class Category
+    {
+        [Key]
+        public Guid Id { get; set; }
+        [StringLength(100)]
+        public string CategoryName { get; set; } = string.Empty;
+        [StringLength(100)]
+        public string Description { get; set; } = string.Empty;
 
-    // Relationships
-   // public ICollection<Product> Products { get; set; } = new List<Product>();
+        // Relationships
+    }
+
 }

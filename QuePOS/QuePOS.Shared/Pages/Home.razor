@@ -6,13 +6,26 @@
     @if (hasAccess)
     {
         <div class="row">
-            <a href="/transaction" class="col-12 col-sm-6 col-md-3">
+            <a href="/online_orders" class="col-12 col-sm-6 col-md-3">
+                <div class="info-box">
+                    <span class="info-box-icon elevation-1" style="color: white; background-color: #bd9ded">
+                        <MudIcon Icon="@Icons.Material.Outlined.ProductionQuantityLimits" />
+                    </span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">ONLINE-ORDERS</span>
+                        @* <span class="info-box-number">
+                            <small>@vm.DayCount</small>
+                        </span> *@
+                    </div>
+                </div>
+            </a>
+            <a href="/order" class="col-12 col-sm-6 col-md-3">
                 <div class="info-box">
                     <span class="info-box-icon elevation-1" style="color: white; background-color: #6002ee">
                         <MudIcon Icon="@Icons.Material.Outlined.ProductionQuantityLimits" />
                     </span>
                     <div class="info-box-content">
-                        <span class="info-box-text">TRANSECTION</span>
+                        <span class="info-box-text">ORDER</span>
                         <span class="info-box-number">
                             <small>@vm.DayCount</small>
                         </span>
@@ -20,7 +33,7 @@
                 </div>
             </a>
 
-            <a href="/history" class="col-12 col-sm-6 col-md-3">
+            <a href="/order_history" class="col-12 col-sm-6 col-md-3">
                 <div class="info-box">
                     <span class="info-box-icon elevation-1" style="color: white; background-color: #90ee02">
                         <MudIcon Icon="@Icons.Material.Outlined.History" />
@@ -116,7 +129,7 @@
 
         try
         {
-            vm = await HttpClientService.GetAsync<CounterViewModel>($"api/sales/get_counter");
+            vm = await HttpClientService.GetAsync<CounterViewModel>($"api/order/get_counter");
         }
         catch (HttpRequestException ex)
         {

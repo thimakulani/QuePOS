@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using QuePOS.Shared.Models;
 using QuePOS.Shared.Services;
 using QuePOS.Shared.ViewModels;
 using System;
@@ -36,7 +37,6 @@ namespace QuePOS.Services
             }
             else
             {
-
                 throw new HttpRequestException($"Invalid Email or Password");
             }
         }
@@ -48,9 +48,9 @@ namespace QuePOS.Services
             if (response.IsSuccessStatusCode)
             {
                 string str = await response.Content.ReadAsStringAsync();
-                var vm = JsonConvert.DeserializeObject<ApplicationUserViewModel>(str);
+                var vm = JsonConvert.DeserializeObject<ApiResponse<ApplicationUserViewModel>>(str);
 
-                return vm;
+                return vm.Data;
             }
             else
             {

@@ -35,13 +35,13 @@
 
 @code {
     public StoreUser Profile { get; set; } = new StoreUser
-        {
-            Id = 1,
-            FirstName = "John",
-            LastName = "Doe",
-            //ProfileImage = "https://via.placeholder.com/150",
-            PhoneNumber = "+1 (123) 456-7890",
-            CreatedAt = new DateTime(2020, 5, 15)
-        };
+    {
+        Id = Guid.NewGuid(),
+        FirstName = "John",
+        LastName = "Doe",
+        //ProfileImage = "https://via.placeholder.com/150",
+        PhoneNumber = "+1 (123) 456-7890",
+        CreatedAt = new DateTime(2020, 5, 15)
+    };
 }
 

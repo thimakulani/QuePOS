@@ -18,7 +18,7 @@ builder.Services.AddRazorComponents()
 // Add device-specific services used by the QuePOS.Shared project
 builder.Services.AddScoped<IFormFactor, FormFactor>();
 builder.Services.AddSingleton<AuthenticationStateProvider, CustomAuthStateProvider>();
-builder.Services.AddScoped<IHttpClientService, HttpClientService>();//HttpClientService: IHttpClientService
+builder.Services.AddTransient<HttpClientService>();//HttpClientService: IHttpClientService
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddAuthorizationCore();
 //builder.Services.AddStorage();

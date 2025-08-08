@@ -1,102 +1,236 @@
 ﻿@page "/admin"
+@inject IHttpClientService HttpClient
+@inject ISnackbar Snackbar
+@inject ILocationPickerService LocationPickerService
 
-
-
-
-<MudText Typo="Typo.h4">Store Information</MudText>
-
-<MudStack Row="true" Justify="Justify.FlexEnd">
+<MudStack Row="true" Justify="Justify.FlexStart" Class="mb-4">
+    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Secondary" OnClick="ShowAddSubStoreForm">
+        Add Sub-Store
+    </MudButton>
     <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ToggleEditMode">
-        @(IsEditMode ? "View Store" : "Edit Store Info")
+        Edit Store Info
     </MudButton>
 </MudStack>
 
-@if (!IsEditMode)
-{
-    <!-- Store Details -->
-    <MudPaper Class="mb-4 p-2">
-        <MudText Typo="Typo.h6">Store Details</MudText>
-        <dl class="row">
-            <dt class="col-sm-2">Store Name</dt>
-            <dd class="col-sm-10">@Model.StoreName</dd>
-            <dt class="col-sm-2">Address</dt>
-            <dd class="col-sm-10">@Model.Address</dd>
-            <dt class="col-sm-2">Phone</dt>
-            <dd class="col-sm-10">@Model.Phone</dd>
-        </dl>
+<MudDivider Class="my-4" />
 
+<MudTreeView T="string" ReadOnly>
+    <!-- Main Store -->
+    <MudTreeViewItem Text="Store">
+        <MudPaper Class="mb-4 p-4">
+            <dl class="row">
+                <dt class="col-sm-4">Store Name</dt>
+                <dd class="col-sm-8">@Model.StoreName</dd>
+                <dt class="col-sm-4">Address</dt>
+                <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Address) ? "No Address" : Model.Address)</dd>
+                <dt class="col-sm-4">Phone</dt>
+                <dd class="col-sm-8">@Model.Phone</dd>
+                <dt class="col-sm-4">Accept Online Orders</dt>
+                <dd class="col-sm-8">@(Model.AcceptOnlineOrders ? "Yes" : "No")</dd>
+            </dl>
+        </MudPaper>
+    </MudTreeViewItem>
 
-    </MudPaper>
-}
-else
-{
-    <!-- Edit Form -->
-    <MudPaper Class="p-4">
-        <MudText Typo="Typo.h6">Edit Store</MudText>
-        <EditForm Model="@Model" OnValidSubmit="SaveChanges">
-            <MudTextField Variant="Variant.Outlined" Label="Store Name" @bind-Value="Model.StoreName" FullWidth="true" />
-            <MudTextField Variant="Variant.Outlined" Label="Address" @bind-Value="Model.Address" FullWidth="true" />
-            <MudTextField Variant="Variant.Outlined" Label="Phone" @bind-Value="Model.Phone" FullWidth="true" />
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save Changes</MudButton>
+    <MudDivider Class="my-4" />
+
+    <!-- Sub-Stores -->
+    <MudTreeViewItem Value='"Sub - Store"'>
+        @if (!Model.SubStores.Any())
+        {
+            <MudAlert Severity="Severity.Info" Dense="true" Icon="@Icons.Material.Filled.Note">
+                No Sub-Store(s) Linked at the moment
+            </MudAlert>
+        }
+        else
+        {
+            @foreach (var item in SubStores)
+            {
+                <MudPaper Class="mb-4 p-4">
+                    <MudText Typo="Typo.h6" Class="mb-2">@item.StoreName</MudText>
+                    <dl class="row">
+                        <dt class="col-sm-4">Store Name</dt>
+                        <dd class="col-sm-8">@item.StoreName</dd>
+                        <dt class="col-sm-4">Address</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(item.Address) ? "No Address" : item.Address)</dd>
+                        <dt class="col-sm-4">Phone</dt>
+                        <dd class="col-sm-8">@item.Phone</dd>
+                        <dt class="col-sm-4">Accept Online Orders</dt>
+                        <dd class="col-sm-8">@(item.AcceptOnlineOrders ? "Yes" : "No")</dd>
+                    </dl>
+                </MudPaper>
+            }
+        }
+    </MudTreeViewItem>
+</MudTreeView>
+
+<!-- Edit Main Store Dialog -->
+<MudDialog @bind-Visible="IsEditMode" Options="@dialogOptions">
+    <TitleContent>Edit Store: @EditModel.StoreName</TitleContent>
+    <DialogContent>
+        <MudBadge OnClick="() => SelectImage()" Color="Color.Primary" Icon="@Icons.Material.Rounded.Edit" Overlap="true" Bordered="true">
+            <MudAvatar Variant="Variant.Outlined" Size="Size.Medium">
+                <MudImage Src="@EditModel.ImageUrl?.Replace("http://", "https://")" />
+            </MudAvatar>
+        </MudBadge>
+
+        <EditForm Model="@EditModel" OnValidSubmit="SaveChanges">
+            <MudStack Spacing="2">
+                <MudTextField Label="Store Name" Variant="Variant.Outlined" @bind-Value="EditModel.StoreName" FullWidth="true" />
+                <MudTextField Label="Phone" Variant="Variant.Outlined" @bind-Value="EditModel.Phone" FullWidth="true" />
+                <MudSwitch @bind-Value="EditModel.AcceptOnlineOrders" Size="Size.Medium"
+                           ThumbIcon="@(EditModel.AcceptOnlineOrders? Icons.Material.Filled.Done : Icons.Material.Filled.Close)"
+                           ThumbIconColor="@(EditModel.AcceptOnlineOrders? Color.Success: Color.Error)">
+                    Accept Online Orders
+                </MudSwitch>
+                <MudSwitch @bind-Value="EditModel.AcceptDeliveries" Size="Size.Medium"
+                           ThumbIcon="@(EditModel.AcceptDeliveries? Icons.Material.Filled.Done : Icons.Material.Filled.Close)"
+                           ThumbIconColor="@(EditModel.AcceptDeliveries? Color.Success: Color.Error)">
+                    Accept Delivery
+                </MudSwitch>
+                @if (EditModel.AcceptDeliveries)
+                {
+                    <MudAlert NoIcon="true">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.AddLocationAlt"
+                                       OnClick="() => { _ = LocationPickerClickedForMain(); }"
+                                       Variant="Variant.Outlined" />
+                        @EditModel.Address
+                    </MudAlert>
+                }
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save Changes</MudButton>
+            </MudStack>
         </EditForm>
-    </MudPaper>
-}
+    </DialogContent>
+</MudDialog>
+
+<!-- Add/Edit Sub-Store Dialog -->
+<MudDialog @bind-Visible="IsAddingSubStore" Options="@dialogOptions">
+    <TitleContent>@(SubStoreModel.Id == Guid.Empty ? "ADD A SUB-STORE" : $"EDIT: {SubStoreModel.StoreName.ToUpper()}")</TitleContent>
+    <DialogContent>
+        <EditForm Model="@SubStoreModel" OnValidSubmit="SaveSubStore">
+            <MudStack Spacing="2">
+                <MudTextField Label="Store Name" Variant="Variant.Outlined" @bind-Value="SubStoreModel.StoreName" FullWidth="true" />
+                <MudTextField Label="Phone" Variant="Variant.Outlined" @bind-Value="SubStoreModel.Phone" FullWidth="true" />
+                <MudSwitch @bind-Value="SubStoreModel.AcceptOnlineOrders" Size="Size.Medium"
+                           ThumbIcon="@(SubStoreModel.AcceptOnlineOrders? Icons.Material.Filled.Done : Icons.Material.Filled.Close)"
+                           ThumbIconColor="@(SubStoreModel.AcceptOnlineOrders? Color.Success: Color.Error)">
+                    Accept Online Orders
+                </MudSwitch>
+                <MudSwitch @bind-Value="SubStoreModel.AcceptDeliveries" Size="Size.Medium"
+                           ThumbIcon="@(SubStoreModel.AcceptDeliveries? Icons.Material.Filled.Done : Icons.Material.Filled.Close)"
+                           ThumbIconColor="@(SubStoreModel.AcceptDeliveries? Color.Success: Color.Error)">
+                    Accept Delivery
+                </MudSwitch>
+                @if (SubStoreModel.AcceptDeliveries)
+                {
+                    <MudAlert NoIcon="true">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.AddLocationAlt"
+                                       OnClick="() => { _ = LocationPickerClickedForSubStore(); }"
+                                       Variant="Variant.Outlined" />
+                        @SubStoreModel.Address
+                    </MudAlert>
+                }
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save Changes</MudButton>
+            </MudStack>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
 
 @code {
     private Store Model { get; set; } = new();
-    @inject IHttpClientService HttpClient
-    @inject ISnackbar Snackbar
+    private Store EditModel { get; set; } = new();
+    private Store SubStoreModel { get; set; } = new();
+    public List<Store> SubStores = [];
+    private bool IsEditMode = false;
+    private bool IsAddingSubStore = false;
+    private DialogOptions dialogOptions = new() { FullWidth = true };
+
     protected override async Task OnInitializedAsync()
+    {
+        await LoadStoreData();
+    }
+
+    private async Task LoadStoreData()
     {
         try
         {
-            Model = await HttpClient.GetAsync<Store>("/api/store");
-            await base.OnInitializedAsync();
-        }
-        catch (HttpRequestException ex)
-        {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+            var stor = await HttpClient.GetAsync<Store>("/api/store");
+            Model = stor;
+            SubStores = stor.SubStores.ToList();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
-        finally
-        {
-            //_processing = false;
-            StateHasChanged();
-        }
-
-
     }
-    private bool IsEditMode = false;
 
     private void ToggleEditMode()
     {
-        IsEditMode = !IsEditMode;
+        EditModel = new Store
+        {
+            Id = Model.Id,
+            StoreName = Model.StoreName,
+            Address = Model.Address,
+            Phone = Model.Phone,
+            AcceptOnlineOrders = Model.AcceptOnlineOrders,
+            AcceptDeliveries = Model.AcceptDeliveries,
+            Latitude = Model.Latitude,
+            Longitude = Model.Longitude,
+            ImageUrl = Model.ImageUrl
+        };
+        IsEditMode = true;
     }
 
-    private async void SaveChanges()
+    private async Task SaveChanges()
     {
         try
         {
-            Model = await HttpClient.PutAsync<Store>($"/api/store/{Model.Id}", Model);
-            await base.OnInitializedAsync();
+            var updated = await HttpClient.PutAsync<Store>($"/api/store/{EditModel.Id}", EditModel);
+            Model = updated;
+            Snackbar.Add("Store updated successfully.", Severity.Success);
             IsEditMode = false;
-        }
-        catch (HttpRequestException ex)
-        {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
-        finally
-        {
-            //_processing = false;
-            StateHasChanged();
-        }
+    }
 
+    private void ShowAddSubStoreForm()
+    {
+        SubStoreModel = new Store { ParentStoreId = Model.Id };
+        IsAddingSubStore = true;
+    }
+
+    private async Task SaveSubStore()
+    {
+        try
+        {
+            var newSubStore = await HttpClient.PostAsync<Store>("/api/store", SubStoreModel);
+            Snackbar.Add("Sub-store created successfully.", Severity.Success);
+            Model.SubStores.Add(newSubStore);
+            IsAddingSubStore = false;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void SelectImage() { /* TODO: Implement image selection */ }
+
+    private async Task LocationPickerClickedForMain()
+    {
+        var address = await LocationPickerService.GetAddress();
+        EditModel.Address = address.Address;
+        EditModel.Latitude = address.Latitude;
+        EditModel.Longitude = address.Longitude;
+    }
+
+    private async Task LocationPickerClickedForSubStore()
+    {
+        var address = await LocationPickerService.GetAddress();
+        SubStoreModel.Address = address.Address;
+        SubStoreModel.Latitude = address.Latitude;
+        SubStoreModel.Longitude = address.Longitude;
     }
 }

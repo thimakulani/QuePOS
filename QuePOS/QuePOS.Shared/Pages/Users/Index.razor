@@ -28,7 +28,7 @@
 
                         @*  <MudIconButton Edge="Edge.End" Size="Size.Small" Variant="Variant.Filled" Icon="@Icons.Material.Outlined.Edit" Color="Color.Primary" OnClick="() => OpenEditDialog(context)" />
                         *@
-                        <MudButton Size="Size.Small" Variant="Variant.Filled" StartIcon="@(context.IsActive ? Icons.Material.Outlined.WorkOff : Icons.Material.Outlined.Work)" Color="@(context.IsActive ? Color.Error : Color.Success)" OnClick="() => UpdateAccess(context)">
+                        <MudButton Size="Size.Small" Variant="Variant.Filled" StartIcon="@(context.IsActive? Icons.Material.Outlined.WorkOff : Icons.Material.Outlined.Work)" Color="@(context.IsActive? Color.Error: Color.Success)" OnClick="() => UpdateAccess(context)">
                             @(context.IsActive ? "Deactivate" : "Activate")
                         </MudButton>
                     </MudStack>
@@ -41,12 +41,12 @@
 
 <!-- Create/Edit User Dialog -->
 <MudDialog @bind-Visible="dialogOpen" Options="dialogOptions">
-    <TitleContent>@(selectedUser.Id == 0 ? "CREATE USER" : "EDIT USER")</TitleContent>
+    <TitleContent>@(selectedUser.Id == Guid.Empty ? "CREATE USER" : "EDIT USER")</TitleContent>
     <DialogContent>
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="selectedUser.FirstName" Label="First Name" Required="true" />
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="selectedUser.LastName" Label="Last Name" Required="true" />
         <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="selectedUser.PhoneNumber" Label="Phone Number" Required="true" />
-        <MudTextField Variant="Variant.Outlined" ReadOnly="@(selectedUser.Id == 0 ? false : true)" Margin="Margin.Dense" @bind-Value="selectedUser.Email" Label="Email" Required="true" />
+        <MudTextField Variant="Variant.Outlined" ReadOnly="@(selectedUser.Id == Guid.Empty ? false : true)" Margin="Margin.Dense" @bind-Value="selectedUser.Email" Label="Email" Required="true" />
     </DialogContent>
     <DialogActions>
         <MudButton Disabled="processing" OnClick="SaveUser" Variant="Variant.Filled" Color="Color.Primary">
@@ -104,14 +104,14 @@
     private void OpenEditDialog(StoreUser user)
     {
         selectedUser = new StoreUser
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                PhoneNumber = user.PhoneNumber,
-                //Email = user.Email,
-                CreatedAt = user.CreatedAt
-            };
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            PhoneNumber = user.PhoneNumber,
+            //Email = user.Email,
+            CreatedAt = user.CreatedAt
+        };
         dialogOpen = true;
     }
 
@@ -125,7 +125,7 @@
         try
         {
 
-            if (selectedUser.Id == 0)  // Create new user
+            if (selectedUser.Id == Guid.Empty)  // Create new user
             {
                 var response = await HttpClientService.PostAsync<StoreUser>("/api/StoreUser", selectedUser);
 

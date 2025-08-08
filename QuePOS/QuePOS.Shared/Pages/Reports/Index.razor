@@ -41,7 +41,7 @@
 </MudContainer>
 
 @code {
-    private List<Sale> WeeklySalesData = [];
+    private List<Order> WeeklySalesData = [];
     private bool loading = true;
 
     protected override async Task OnInitializedAsync()
@@ -59,19 +59,19 @@
 
             // Create a dictionary with all days of the current week initialized to zero sales
             var weekData = Enumerable.Range(0, 7)
-                .Select(i => new Sale
-                    {
-                        SaleDate = startOfWeek.AddDays(i),
-                        TotalAmount = 0 // Default sales amount is 0
-                    })
-                .ToDictionary(s => s.SaleDate.Date);
+                .Select(i => new Order
+                {
+                    OrderDate = startOfWeek.AddDays(i),
+                    TotalAmount = 0 // Default sales amount is 0
+                })
+                .ToDictionary(s => s.OrderDate.Date);
 
             // Map actual sales data to the correct days
-            foreach (var sale in allSales.Where(s => s.SaleDate.Date >= startOfWeek && s.SaleDate.Date <= endOfWeek))
+            foreach (var sale in allSales.Where(s => s.OrderDate.Date >= startOfWeek && s.OrderDate.Date <= endOfWeek))
             {
-                if (weekData.ContainsKey(sale.SaleDate.Date))
+                if (weekData.ContainsKey(sale.OrderDate.Date))
                 {
-                    weekData[sale.SaleDate.Date].TotalAmount += sale.TotalAmount;
+                    weekData[sale.OrderDate.Date].TotalAmount += sale.TotalAmount;
                 }
             }
 
@@ -80,7 +80,7 @@
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"Error loading sales data: {ex.Message}");
+            Console.Error.WriteLine($"Error loading order data: {ex.Message}");
         }
         finally
         {
@@ -92,11 +92,11 @@
 
     private DateTime GetEndOfWeek(DateTime date) => GetStartOfWeek(date).AddDays(6);
 
-    private async Task<List<Sale>> GetSalesAsync()
+    private async Task<List<Order>> GetSalesAsync()
     {
         try
         {
-            return await HttpClientService.GetAsync<List<Sale>>("api/sales/get_history") ?? new List<Sale>();
+            return await HttpClientService.GetAsync<List<Order>>("api/order/get_history") ?? new List<Order>();
         }
         catch (Exception ex)
         {

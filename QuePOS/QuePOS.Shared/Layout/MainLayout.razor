@@ -1,6 +1,7 @@
 ﻿@using System.Security.Claims
 @inject IJSRuntime JSRuntime
 @inherits LayoutComponentBase
+@using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Localization
 <MudThemeProvider />
 <MudPopoverProvider />
@@ -13,7 +14,7 @@
             <MudAppBar Style="background-color: #2196F3">
                 <MudText> @($"STORE: ") @store?.StoreName </MudText>
                 <MudSpacer />
-                <MudBadge Color="@(IsOnline ? Color.Success : Color.Error)" Overlap="true" Bordered="true">
+                <MudBadge Color="@(IsOnline? Color.Success: Color.Error)" Overlap="true" Bordered="true">
                     <MudAvatar Elevation="2" Size="Size.Medium">
                         @UserName?[0]
                     </MudAvatar>
@@ -49,58 +50,50 @@
         <footer style="padding:16px; background-color:#f5f5f5; text-align:center;">
             <MudText Typo="Typo.body2" Align="Align.Center">© @DateTime.Now.Year Developed by Thima.</MudText>
         </footer>
+
     </MudLayout>
 
 </div>
 
-@* <MudLayout>
-    <AuthorizeView>
-        <MudAppBar style="background-color: #2196F3">
-            <MudText> @($"STORE: ") @store?.StoreName  </MudText>
-            <MudSpacer />
+<MudDialog @bind-Visible="showOrderDlg" Options="_options">
+    <TitleContent>New Order</TitleContent>
+    <DialogContent>
+        <MudText>Order ID: @order?.Id</MudText>
 
-            <MudBadge Color="@(IsOnline? Color.Success: Color.Error)" Overlap="true" Bordered="true">
-                <MudAvatar Elevation="2" Size="Size.Medium">
-                    @UserName[0]
-                </MudAvatar>
-            </MudBadge>
-            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Color="Color.Inherit" />
-
-        </MudAppBar>
-    </AuthorizeView>
-
-    <AuthorizeView>
-        <Authorized>
-            <MudMainContent>
-                <MudBreadcrumbs Items="@breadcrumbs"></MudBreadcrumbs>
-
-                <div style="padding: 8px;">
-                    @Body
-                </div>
-            </MudMainContent>
-        </Authorized>
-        <NotAuthorized>
-            @if (!session_loading)
+        <MudText>Items:</MudText>
+        <ul>
+            @foreach (var item in order.OrderItems)
             {
-                <QuePOS.Shared.Pages.Login.Login />
+                <li>@item.Name - Quantity: @item.Quantity - Price: @item.Price.ToString("C")</li>
+            }
+        </ul>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="AcceptOrder" Color="Color.Primary">
+            @if (isProcessing)
+            {
+
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Loading....</MudText>
             }
             else
             {
-                <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-                    <MudProgressCircular Color="Color.Primary" Style="height: 70px; width: 70px;" Indeterminate="true" />
-                </div>
+                <MudText>
+                    Accept Order
+                </MudText>
             }
-        </NotAuthorized>
-    </AuthorizeView>
-    <footer style="width:100%; padding:16px; background-color:#f5f5f5; text-align:center;" class="mt-auto">
-        <MudPaper Elevation="2" Class="px-4 py-3 mud-theme-background">
-            <MudText Typo="Typo.body2" Align="Align.Center">© 2025 Developed by Thima.</MudText>
-        </MudPaper>
-    </footer>
-</MudLayout> *@
+
+        </MudButton>
+        <MudButton OnClick="RejectOrder" Color="Color.Primary">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
 
 @code {
     //@inject IStringLocalizer<AppResources> Localizer
+    private bool showOrderDlg = false;
+    private DialogOptions _options = new DialogOptions() { FullWidth = true };
     [Inject] ISnackbar Snackbar { get; set; }
     [Inject] IUserService IUserService { get; set; }
     [Inject] IFormFactor FormFactor { get; set; }
@@ -113,7 +106,7 @@
     private bool IsOnline = true;
     private Store store = new Store();
     private string UserName;
-
+    private Order order = new();
     protected override async Task OnInitializedAsync()
     {
         var claims = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -123,7 +116,35 @@
         UpdateBreadcrumbs();
         await base.OnInitializedAsync();
     }
-
+    private bool isProcessing = false;
+    private async Task AcceptOrder()
+    {
+        try
+        {
+            order.OrderStatus = OrderStatus.Accepted;
+            var response = await HttpClientService.PutAsync<string>($"api/order/accept/{order.Id}", order);
+            isProcessing = true;
+            Snackbar.Add("Order accepted successfully!", Severity.Success);
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+    private void RejectOrder()
+    {
+        // Logic to reject the order
+        Snackbar.Add("Order rejected successfully!", Severity.Warning);
+        //await hubConnection.SendAsync("RejectOrder", order.Id);
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -133,7 +154,6 @@
             if (sl != null && AuthStateProvider is CustomAuthStateProvider customProvider)
             {
                 customProvider.NotifyNotificationState(sl);
-                await GetStore();
                 session_loading = false;
             }
             else
@@ -155,6 +175,7 @@
         {
             store = await HttpClientService.GetAsync<Store>("/api/store");
             await FormFactor.SetSession("StoreId", store.Id.ToString());
+            await OrderListener(store.Id);
         }
         catch (HttpRequestException ex)
         {
@@ -216,6 +237,62 @@
             await GetStore();
         }
     }
+    @inject IHttpClientFactory httpClientFactory;
+    HubConnection hubConnection;
+    private async Task OrderListener(Guid id)
+    {
+        try
+        {
+            var baseUrl = httpClientFactory.CreateClient("api").BaseAddress;
+
+            // Ensure the hubConnection is not already connected
+            if (hubConnection != null && hubConnection.State == HubConnectionState.Connected)
+            {
+                await hubConnection.StopAsync();
+                await hubConnection.DisposeAsync();
+            }
+
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl($"{baseUrl}order")
+                .WithAutomaticReconnect()
+                .Build();
+
+            // Subscribe to order event with dynamic id
+            hubConnection.On<string>($"{id}", async (data) =>
+            {
+                try
+                {
+
+                    var parsedOrder = Newtonsoft.Json.JsonConvert.DeserializeObject<Order>(data);
+
+                    await InvokeAsync(() =>
+                    {
+                        order = parsedOrder;
+                        showOrderDlg = true;
+                        StateHasChanged();
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"Error: {ex.Message}", Severity.Success);
+                }
+
+            });
+
+            await hubConnection.StartAsync();
+            // Ensure the hubConnection is not already connected
+            // if (hubConnection != null && hubConnection.State == HubConnectionState.Connected)
+            // {
+            //     Snackbar.Add("Connected", Severity.Success);
+            // }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Connection to SignalR hub failed: {ex.Message}", Severity.Info);
+        }
+    }
+
 
     [JSInvokable]
     public Task UpdateConnectionStatus(bool status)

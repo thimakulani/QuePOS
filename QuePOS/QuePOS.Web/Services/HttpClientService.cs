@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace QuePOS.Web.Services
 {
-    public class HttpClientService : IHttpClientService
+    public class HttpClientService //: IHttpClientService
     {
         //private readonly ISessionStorageService _sessionStorage;
         private readonly ILocalStorageService _sessionStorage;

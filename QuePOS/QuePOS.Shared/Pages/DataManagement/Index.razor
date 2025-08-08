@@ -9,19 +9,11 @@
 @code {
     @inject IHttpClientService HttpClientService;
     @inject ISnackbar Snackbar;
-    private async Task ExportToExcelAsync()
+    private void ExportToExcelAsync()
     {
         try
         {
-            var fileBytes = await HttpClientService.DownloadFileAsync("/api/export/export_to_excel");
 
-            string fileName = "exported_data.xlsx";
-            string filePath = Path.Combine(FileSystem.AppDataDirectory, fileName);
-
-            await File.WriteAllBytesAsync(filePath, fileBytes);
-
-
-            Snackbar.Add($"File downloaded successfully: {filePath}", Severity.Success);
         }
         catch (HttpRequestException ex)
         {

@@ -1,5 +1,6 @@
 ﻿using ApexCharts;
 using Camera.MAUI;
+using CommunityToolkit.Maui;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
@@ -17,6 +18,7 @@ namespace QuePOS
             builder
                 .UseMauiApp<App>()
                 .UseMauiCameraView()
+                .UseMauiCommunityToolkit()
                 .UseBarcodeReader()
                 .ConfigureFonts(fonts =>
                 {
@@ -33,6 +35,7 @@ namespace QuePOS
 
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddScoped<ILocationPickerService, LocationPickerService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IFormFactor, FormFactor>();
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();

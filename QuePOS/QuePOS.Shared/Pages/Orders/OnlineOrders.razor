@@ -1,0 +1,58 @@
+﻿@page "/online_orders"
+
+<MudPaper>
+    <MudTabs Elevation="2" Rounded="true" Color="MudBlazor.Color.Primary">
+        <MudTabPanel Text="Online Orders" Icon="@Icons.Material.Filled.ShoppingCart" OnClick="LoadOrders">
+            <MudText Typo="Typo.h6">Online Orders</MudText>
+        </MudTabPanel>
+        <MudTabPanel Text="In-Store Orders" Icon="@Icons.Material.Filled.Store">
+            <MudText Typo="Typo.h6">In-Store Orders</MudText>
+        </MudTabPanel>
+    </MudTabs>
+    @foreach (var item in Orders)
+    {
+        <MudCard Class="mb-2">
+            <MudCardHeader>
+                <MudText Typo="Typo.h6">@item.OrderDate.ToShortDateString()</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText>Order ID: @item.Id</MudText>
+                <MudText>Total Amount: @item.TotalAmount.ToString("C")</MudText>
+                <MudText>Items Count: @item.OrderItems.Count</MudText>
+            </MudCardContent>
+        </MudCard>
+    }
+
+
+</MudPaper>
+
+@code {
+    @inject IHttpClientService HttpClient;
+    private List<Order> Orders = [];
+    @inject ISnackbar Snackbar;
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+    private async Task LoadOrders()
+    {
+        try
+        {
+            Orders = await HttpClient.GetAsync<List<Order>>("api/order/online");
+        }
+        catch (HttpRequestException ex)
+        {
+            // Handle HTTP request exceptions
+            Console.WriteLine($"HTTP Request Error: {ex.Message}");
+            Snackbar.Add($"Error loading orders: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            // Handle other exceptions
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add($"Error loading orders: {ex.Message}", Severity.Error);
+        }
+    }
+}
+
+

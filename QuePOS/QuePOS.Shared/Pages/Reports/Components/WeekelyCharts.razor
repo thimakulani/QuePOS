@@ -1,13 +1,13 @@
 ﻿@using ApexCharts
 
-<ApexChart TItem="Sale"
+<ApexChart TItem="Order"
            Title="Total Sales by Day (Current Week)">
 
-    <ApexPointSeries TItem="Sale"
+    <ApexPointSeries TItem="Order"
                      Items="Sales"
                      Name="Total Sales"
-                     XValue="@(e => e.SaleDate.DayOfWeek.ToString())"
-                     YAggregate="@(e => e.Sum(e => (decimal)e.TotalAmount))"
+                     XValue="@(e => e.OrderDate.DayOfWeek.ToString())"
+                     YAggregate="@(e => e.Sum(e => e.TotalAmount))"
                      OrderByDescending="e => e.Y"
                      SeriesType="SeriesType.Bar"
                      Color="#28a745"
@@ -16,8 +16,8 @@
 
 @code {
     [Parameter]
-    public List<Sale> Sales { get; set; }
-    private string GetColor(Sale sale)
+    public List<Order> Sales { get; set; }
+    private string GetColor(Order sale)
     {
         return sale.TotalAmount > 500 ? "#28a745" : "#dc3545";
     }
