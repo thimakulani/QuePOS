@@ -35,7 +35,7 @@
 
     <!-- Sub-Stores -->
     <MudTreeViewItem Value='"Sub - Store"'>
-        @if (!Model.SubStores.Any())
+        @if (!SubStores.Any())
         {
             <MudAlert Severity="Severity.Info" Dense="true" Icon="@Icons.Material.Filled.Note">
                 No Sub-Store(s) Linked at the moment
@@ -46,7 +46,13 @@
             @foreach (var item in SubStores)
             {
                 <MudPaper Class="mb-4 p-4">
-                    <MudText Typo="Typo.h6" Class="mb-2">@item.StoreName</MudText>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+                        <MudText Typo="Typo.h6">@item.StoreName</MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Variant="Variant.Outlined"
+                                       Size="Size.Small"
+                                       OnClick="() => { OpenEditSub(item); }" />
+                    </MudStack>
                     <dl class="row">
                         <dt class="col-sm-4">Store Name</dt>
                         <dd class="col-sm-8">@item.StoreName</dd>
@@ -65,14 +71,16 @@
 
 <!-- Edit Main Store Dialog -->
 <MudDialog @bind-Visible="IsEditMode" Options="@dialogOptions">
-    <TitleContent>Edit Store: @EditModel.StoreName</TitleContent>
+    <TitleContent>EDIT STORE: @EditModel.StoreName</TitleContent>
     <DialogContent>
-        <MudBadge OnClick="() => SelectImage()" Color="Color.Primary" Icon="@Icons.Material.Rounded.Edit" Overlap="true" Bordered="true">
-            <MudAvatar Variant="Variant.Outlined" Size="Size.Medium">
-                <MudImage Src="@EditModel.ImageUrl?.Replace("http://", "https://")" />
+        <MudBadge style="margin: 10px" OnClick="() => SelectImage()" Color="Color.Primary" Icon="@Icons.Material.Rounded.Edit" Overlap="true" Bordered="true">
+            <MudAvatar Variant="Variant.Outlined" Size="Size.Large">
+                <MudImage Src="@GetImageSrc(EditModel.ImageUrl)" />
             </MudAvatar>
         </MudBadge>
+        <MudFileUpload Hidden="true" @ref="_fileUpload" OnFilesChanged="OnFileSelectedChange" T="IBrowserFile" Accept="image/*">
 
+        </MudFileUpload>
         <EditForm Model="@EditModel" OnValidSubmit="SaveChanges">
             <MudStack Spacing="2">
                 <MudTextField Label="Store Name" Variant="Variant.Outlined" @bind-Value="EditModel.StoreName" FullWidth="true" />
@@ -96,7 +104,20 @@
                         @EditModel.Address
                     </MudAlert>
                 }
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save Changes</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">
+                    @if (IsLoading)
+                    {
+                        <MudText>Updating Changes..</MudText>
+                        <MudProgressCircular Color="Color.Success" />
+                    }
+                    else
+                    {
+                        <MudText>
+                            Save Changes
+                        </MudText>
+                    }
+
+                </MudButton>
             </MudStack>
         </EditForm>
     </DialogContent>
@@ -106,6 +127,14 @@
 <MudDialog @bind-Visible="IsAddingSubStore" Options="@dialogOptions">
     <TitleContent>@(SubStoreModel.Id == Guid.Empty ? "ADD A SUB-STORE" : $"EDIT: {SubStoreModel.StoreName.ToUpper()}")</TitleContent>
     <DialogContent>
+        <MudBadge style="margin: 10px" OnClick="() => SelectSubImage()" Color="Color.Primary" Icon="@Icons.Material.Rounded.Edit" Overlap="true" Bordered="true">
+            <MudAvatar Variant="Variant.Outlined" Size="Size.Large">
+                <MudImage Src="@GetImageSrc(SubStoreModel.ImageUrl)" />
+            </MudAvatar>
+        </MudBadge>
+        <MudFileUpload Hidden="true" @ref="_subfileUpload" OnFilesChanged="OnFileSubSelectedChange" T="IBrowserFile" Accept="image/*">
+
+        </MudFileUpload>
         <EditForm Model="@SubStoreModel" OnValidSubmit="SaveSubStore">
             <MudStack Spacing="2">
                 <MudTextField Label="Store Name" Variant="Variant.Outlined" @bind-Value="SubStoreModel.StoreName" FullWidth="true" />
@@ -129,7 +158,28 @@
                         @SubStoreModel.Address
                     </MudAlert>
                 }
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save Changes</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">
+                    @if (IsLoading)
+                    {
+                        <MudText>Processing..</MudText>
+                        <MudProgressCircular Color="Color.Success" />
+                    }
+                    else
+                    {
+                        if (SubStoreModel.Id == Guid.Empty)
+                        {
+                            <MudText>
+                                Save Changes
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudText>
+                                Update Changes
+                            </MudText>
+                        }
+                    }
+                </MudButton>
             </MudStack>
         </EditForm>
     </DialogContent>
@@ -143,12 +193,13 @@
     private bool IsEditMode = false;
     private bool IsAddingSubStore = false;
     private DialogOptions dialogOptions = new() { FullWidth = true };
-
+    private bool IsLoading = false;
     protected override async Task OnInitializedAsync()
     {
         await LoadStoreData();
     }
-
+    private MudFileUpload<IBrowserFile> _fileUpload;
+    private MudFileUpload<IBrowserFile> _subfileUpload;
     private async Task LoadStoreData()
     {
         try
@@ -162,7 +213,30 @@
             Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
     }
-
+    private string selectedFile;
+    private async void OnFileSelectedChange(InputFileChangeEventArgs args)
+    {
+        if (args.File != null)
+        {
+            EditModel.ImageUrl = await ConvertFileToBase64(args.File);
+            StateHasChanged();
+        }
+    }
+    private async void OnFileSubSelectedChange(InputFileChangeEventArgs args)
+    {
+        if (args.File != null)
+        {
+            SubStoreModel.ImageUrl = await ConvertFileToBase64(args.File);
+            StateHasChanged();
+        }
+    }
+    private async Task<string> ConvertFileToBase64(IBrowserFile file)
+    {
+        using var stream = file.OpenReadStream();
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+        return Convert.ToBase64String(memoryStream.ToArray());
+    }
     private void ToggleEditMode()
     {
         EditModel = new Store
@@ -175,8 +249,13 @@
             AcceptDeliveries = Model.AcceptDeliveries,
             Latitude = Model.Latitude,
             Longitude = Model.Longitude,
-            ImageUrl = Model.ImageUrl
+            ImageUrl = Model.ImageUrl,
+            StoreUserId = Model.StoreUserId,
+            IsActive = Model.IsActive,
+            ParentStoreId = Model.ParentStoreId,
+            SubStores = Model.SubStores
         };
+        selectedFile = string.Empty;
         IsEditMode = true;
     }
 
@@ -184,6 +263,7 @@
     {
         try
         {
+            IsLoading = true;
             var updated = await HttpClient.PutAsync<Store>($"/api/store/{EditModel.Id}", EditModel);
             Model = updated;
             Snackbar.Add("Store updated successfully.", Severity.Success);
@@ -192,6 +272,10 @@
         catch (Exception ex)
         {
             Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 
@@ -205,18 +289,76 @@
     {
         try
         {
-            var newSubStore = await HttpClient.PostAsync<Store>("/api/store", SubStoreModel);
-            Snackbar.Add("Sub-store created successfully.", Severity.Success);
-            Model.SubStores.Add(newSubStore);
+
+            IsLoading = true;
+            if (!string.IsNullOrEmpty(selectedFile))
+            {
+                SubStoreModel.ImageUrl = selectedFile;
+            }
+            if (SubStoreModel.Id != Guid.Empty)
+            {
+
+                var updated = await HttpClient.PutAsync<Store>($"/api/store/{SubStoreModel.Id}", SubStoreModel);
+                for (int i = 0; i < SubStores.Count; i++)
+                {
+                    if (SubStores[i].Id == updated.Id)
+                    {
+                        SubStores[i] = updated;
+                        break;
+                    }
+                }
+                Snackbar.Add("Sub-store has been updated successfully.", Severity.Success);
+            }
+            else
+            {
+                var newSubStore = await HttpClient.PostAsync<Store>("/api/store", SubStoreModel);
+                SubStores.Add(newSubStore);
+                Snackbar.Add("Sub-store created successfully.", Severity.Success);
+            }
+
+
+
             IsAddingSubStore = false;
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
     }
-
-    private void SelectImage() { /* TODO: Implement image selection */ }
+    private void OpenEditSub(Store store)
+    {
+        SubStoreModel = new Store
+        {
+            Id = store.Id,
+            StoreName = store.StoreName,
+            Address = store.Address,
+            Phone = store.Phone,
+            AcceptOnlineOrders = store.AcceptOnlineOrders,
+            AcceptDeliveries = store.AcceptDeliveries,
+            Latitude = store.Latitude,
+            Longitude = store.Longitude,
+            ImageUrl = store.ImageUrl,
+            StoreUserId = store.StoreUserId,
+            IsActive = store.IsActive,
+            ParentStoreId = store.ParentStoreId,
+            SubStores = store.SubStores
+        };
+        selectedFile = string.Empty;
+        IsAddingSubStore = true;
+    }
+    private async void SelectSubImage()
+    {
+        await _subfileUpload.OpenFilePickerAsync();
+    }
+    private async void SelectImage()
+    {
+        await _fileUpload.OpenFilePickerAsync();
+    }
 
     private async Task LocationPickerClickedForMain()
     {
@@ -226,6 +368,20 @@
         EditModel.Longitude = address.Longitude;
     }
 
+    private string GetImageSrc(string imageData)
+    {
+        if (string.IsNullOrWhiteSpace(imageData))
+            return "/images/placeholder.png"; // Change to your default image path
+
+        if (imageData.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            imageData.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return imageData;
+
+        // If not a URL, assume it’s base64
+        return $"data:image/png;base64,{imageData}";
+    }
+
+
     private async Task LocationPickerClickedForSubStore()
     {
         var address = await LocationPickerService.GetAddress();
@@ -233,4 +389,5 @@
         SubStoreModel.Latitude = address.Latitude;
         SubStoreModel.Longitude = address.Longitude;
     }
+
 }

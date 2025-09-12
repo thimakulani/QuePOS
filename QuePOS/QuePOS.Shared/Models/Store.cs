@@ -18,11 +18,8 @@ namespace QuePOS.Shared.Models
         [StringLength(15)]
 
         public string Phone { get; set; } = string.Empty;
-        [StringLength(250)]
-
-        public string ImageUrl { get; set; } = string.Empty;
+        public string ImageUrl { get; set; }
         [StringLength(100)]
-
         public string StoreUserId { get; set; } = string.Empty;
         public bool IsActive { get; set; } = false;
         public bool AcceptOnlineOrders { get; set; } = false;
