@@ -3,6 +3,7 @@
 @inherits LayoutComponentBase
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Localization
+@using Newtonsoft.Json
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -139,11 +140,27 @@
             isProcessing = false;
         }
     }
-    private void RejectOrder()
+    private async Task RejectOrder()
     {
-        // Logic to reject the order
-        Snackbar.Add("Order rejected successfully!", Severity.Warning);
-        //await hubConnection.SendAsync("RejectOrder", order.Id);
+        try
+        {
+            order.OrderStatus = OrderStatus.Accepted;
+            var response = await HttpClientService.PutAsync<string>($"api/order/reject/{order.Id}", order);
+            isProcessing = true;
+            Snackbar.Add("Order Rejected!", Severity.Success);
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            isProcessing = false;
+        }
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -169,12 +186,26 @@
         await base.OnAfterRenderAsync(firstRender);
     }
 
+    private void Logout()
+    {
+        if (AuthStateProvider is CustomAuthStateProvider externalAuthProvider)
+        {
+            externalAuthProvider.NotifyNotificationState(null);
+        }
+
+        NavigationManager.NavigateTo("login/index");
+        session_loading = false;
+
+        StateHasChanged();
+    }
+    private string _storeId;
     private async Task GetStore()
     {
         try
         {
             store = await HttpClientService.GetAsync<Store>("/api/store");
             await FormFactor.SetSession("StoreId", store.Id.ToString());
+            _storeId = store.Id.ToString();
             await OrderListener(store.Id);
         }
         catch (HttpRequestException ex)
@@ -191,18 +222,6 @@
         }
     }
 
-    private void Logout()
-    {
-        if (AuthStateProvider is CustomAuthStateProvider externalAuthProvider)
-        {
-            externalAuthProvider.NotifyNotificationState(null);
-        }
-
-        NavigationManager.NavigateTo("login/index");
-        session_loading = false;
-
-        StateHasChanged();
-    }
 
     private void OnLocationChanged(object sender, LocationChangedEventArgs e)
     {
@@ -237,33 +256,33 @@
             await GetStore();
         }
     }
-    @inject IHttpClientFactory httpClientFactory;
+    @inject IHttpClientFactory httpClientFactory
+
     HubConnection hubConnection;
-    private async Task OrderListener(Guid id)
+
+    private async Task OrderListener(Guid storeId)
     {
         try
         {
-            var baseUrl = httpClientFactory.CreateClient("api").BaseAddress;
+            var baseUrl = httpClientFactory.CreateClient("api").BaseAddress!.ToString();
 
-            // Ensure the hubConnection is not already connected
-            if (hubConnection != null && hubConnection.State == HubConnectionState.Connected)
+            if (hubConnection != null)
             {
                 await hubConnection.StopAsync();
                 await hubConnection.DisposeAsync();
             }
 
             hubConnection = new HubConnectionBuilder()
-                .WithUrl($"{baseUrl}order")
+                .WithUrl($"{baseUrl}orderHub") // ✅ MUST match MapHub
                 .WithAutomaticReconnect()
                 .Build();
 
-            // Subscribe to order event with dynamic id
-            hubConnection.On<string>($"{id}", async (data) =>
+            // ✅ SINGLE event name
+            hubConnection.On<string>("OrderUpdated", async data =>
             {
                 try
                 {
-
-                    var parsedOrder = Newtonsoft.Json.JsonConvert.DeserializeObject<Order>(data);
+                    var parsedOrder = JsonConvert.DeserializeObject<Order>(data);
 
                     await InvokeAsync(() =>
                     {
@@ -274,24 +293,30 @@
                 }
                 catch (Exception ex)
                 {
-                    Snackbar.Add($"Error: {ex.Message}", Severity.Success);
+                    Snackbar.Add($"Order parse error: {ex.Message}", Severity.Error);
                 }
-
             });
-
+            hubConnection.Reconnected += async (_) =>
+            {
+                if (!string.IsNullOrEmpty(_storeId))
+                {
+                    await hubConnection.InvokeAsync("JoinStoreGroup", _storeId);
+                }
+            };
             await hubConnection.StartAsync();
-            // Ensure the hubConnection is not already connected
-            // if (hubConnection != null && hubConnection.State == HubConnectionState.Connected)
-            // {
-            //     Snackbar.Add("Connected", Severity.Success);
-            // }
 
+            // ✅ JOIN STORE GROUP
+            await hubConnection.InvokeAsync(
+                "JoinStoreGroup",
+                storeId.ToString()
+            );
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Connection to SignalR hub failed: {ex.Message}", Severity.Info);
+            Snackbar.Add($"SignalR connection failed: {ex.Message}", Severity.Error);
         }
     }
+
 
 
     [JSInvokable]

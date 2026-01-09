@@ -7,10 +7,11 @@ using QuePOS.Shared.ViewModels;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using ZXing.Aztec.Internal;
 
 namespace QuePOS.Web.Services
 {
-    public class HttpClientService //: IHttpClientService
+    public class HttpClientService : IHttpClientService
     {
         //private readonly ISessionStorageService _sessionStorage;
         private readonly ILocalStorageService _sessionStorage;
@@ -18,6 +19,10 @@ namespace QuePOS.Web.Services
         private readonly IUserService _userService;
         private string _accessToken;
         private string _refreshToken;
+        private const string AccessTokenKey = "accessToken";
+        private const string RefreshTokenKey = "refreshToken";
+        private const string UsernameKey = "username";
+        private const string PasswordKey = "password";
 
         public HttpClientService(IHttpClientFactory httpClientFactory, IUserService userService, ILocalStorageService sessionStorage)
         {
@@ -174,130 +179,39 @@ namespace QuePOS.Web.Services
         {
             await SendRequestWithRetry<object>(() => _httpClient.DeleteAsync(endpoint));
         }
-        /*public HttpClientService(IHttpClientFactory httpClientFactory, ISessionStorageService sessionStorage)
+
+        public async Task<bool> LoginAsync(UserLogin payload)
         {
-            _httpClient = httpClientFactory.CreateClient("api");
-            _sessionStorage = sessionStorage;
-        }
+            var json = JsonConvert.SerializeObject(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/login", content);
 
-        private async Task AddAuthorizationHeadersAsync()
-        {
-            _accessToken = await _sessionStorage.GetItemAsync<string>("accessToken");
-            _refreshToken = await _sessionStorage.GetItemAsync<string>("refreshToken");
-            //_accessToken = HttpContext.Session.SetString("", "");// _sessionStorage.GetItemAsync<string>("accessToken");
-            //_refreshToken = await _sessionStorage.GetItemAsync<string>("refreshToken");
-
-
-            if (!string.IsNullOrEmpty(_accessToken))
+            if (response.IsSuccessStatusCode)
             {
-                _httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", _accessToken);
-            }
-        }
-        public async Task<byte[]> DownloadFileAsync(string endpoint)
-        {
-            await LoadTokensAsync();
+                var token = await DeserializeToken(response);
 
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, endpoint);
-            if (!string.IsNullOrEmpty(_accessToken))
-            {
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-            }
-
-            var response = await _httpClient.SendAsync(requestMessage);
-
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && await RefreshAccessTokenAsync())
-            {
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
-                response = await _httpClient.SendAsync(requestMessage); // Retry with refreshed token
-            }
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException($"Failed to download file. Error {response.StatusCode}: {errorMessage}");
-            }
-
-            return await response.Content.ReadAsByteArrayAsync();
-        }
-        private async Task<bool> RefreshAccessTokenAsync()
-        {
-            try
-            {
-                var refreshPayload = new { RefreshToken = _refreshToken };
-                var content = new StringContent(JsonSerializer.Serialize(refreshPayload), Encoding.UTF8, "application/json");
-
-                var response = await _httpClient.PostAsync("/refresh", content);
-
-                if (response.IsSuccessStatusCode)
+                if (token != null)
                 {
-                    var json = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonSerializer.Deserialize<AuthToken>(json);
+                    await _sessionStorage.SetItemAsync(UsernameKey, payload.Email);
+                    await _sessionStorage.SetItemAsync(PasswordKey, payload.Password);
+                    await _sessionStorage.SetItemAsync(AccessTokenKey, token.AccessToken);
+                    await _sessionStorage.SetItemAsync(RefreshTokenKey, token.RefreshToken);
 
-                    if (tokenResponse != null)
-                    {
-                        _accessToken = tokenResponse.AccessToken;
-                        _refreshToken = tokenResponse.RefreshToken;
-
-                        await _sessionStorage.SetItemAsync("accessToken", _accessToken);
-                        await _sessionStorage.SetItemAsync("refreshToken", _refreshToken);
-
-                        return true;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to refresh token: {ex.Message}");
-            }
-            return false;
-        }
-
-        private async Task<T> SendRequestWithRetryAsync<T>(Func<Task<HttpResponseMessage>> requestFunc)
-        {
-            await AddAuthorizationHeadersAsync();
-            var response = await requestFunc();
-
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                if (await RefreshAccessTokenAsync())
-                {
-                    await AddAuthorizationHeadersAsync();
-                    response = await requestFunc(); // Retry the request
+                    return true;
                 }
             }
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException(
-                    $"Request failed with status {response.StatusCode}: {errorContent}");
-            }
-
+            throw new HttpRequestException("Invalid login details.");
+        }
+        private static async Task<Token> DeserializeToken(HttpResponseMessage response)
+        {
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(json) ?? throw new InvalidOperationException("Deserialization returned null.");
+            return JsonConvert.DeserializeObject<Token>(json);
         }
-
-        public async Task<T> GetAsync<T>(string endpoint)
+        public class Token
         {
-            return await SendRequestWithRetryAsync<T>(() => _httpClient.GetAsync(endpoint));
+            public string AccessToken { get; set; }
+            public string RefreshToken { get; set; }
         }
-
-        public async Task<T> PostAsync<T>(string endpoint, object payload)
-        {
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            return await SendRequestWithRetryAsync<T>(() => _httpClient.PostAsync(endpoint, content));
-        }
-
-        public async Task<T> PutAsync<T>(string endpoint, object payload)
-        {
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            return await SendRequestWithRetryAsync<T>(() => _httpClient.PutAsync(endpoint, content));
-        }
-
-        public async Task DeleteAsync(string endpoint)
-        {
-            await SendRequestWithRetryAsync<object>(() => _httpClient.DeleteAsync(endpoint));
-        }*/
     }
 }

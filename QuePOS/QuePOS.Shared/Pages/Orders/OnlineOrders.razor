@@ -1,14 +1,25 @@
 ﻿@page "/online_orders"
 
 <MudPaper>
-    <MudTabs Elevation="2" Rounded="true" Color="MudBlazor.Color.Primary">
-        <MudTabPanel Text="Online Orders" Icon="@Icons.Material.Filled.ShoppingCart" OnClick="LoadOrders">
-            <MudText Typo="Typo.h6">Online Orders</MudText>
-        </MudTabPanel>
-        <MudTabPanel Text="In-Store Orders" Icon="@Icons.Material.Filled.Store">
-            <MudText Typo="Typo.h6">In-Store Orders</MudText>
-        </MudTabPanel>
-    </MudTabs>
+    <MudDivider />
+    <MudText Typo="Typo.h5">ONLINE ORDERS </MudText>
+    <MudDivider />
+
+    <MudStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Class="my-4">
+        @if (loading)
+        {
+            <MudProgressCircular Indeterminate="true"
+                                 Color="Color.Primary"
+                                 Size="Size.Large" />
+        }
+        else if (Orders.Count == 0)
+        {
+            <MudText Typo="Typo.body1">
+                No online orders available.
+            </MudText>
+        }
+    </MudStack>
+
     @foreach (var item in Orders)
     {
         <MudCard Class="mb-2">
@@ -18,8 +29,36 @@
             <MudCardContent>
                 <MudText>Order ID: @item.Id</MudText>
                 <MudText>Total Amount: @item.TotalAmount.ToString("C")</MudText>
-                <MudText>Items Count: @item.OrderItems.Count</MudText>
+                <MudText>Order Type: @item.OrderType </MudText>
+                <MudText>Payment Type: @item.PaymentType </MudText>
+               <MudExpansionPanels Dense="true">
+                            <MudExpansionPanel Text="View order item(s)">
+
+                    <div class="d-flex flex-row gap-2">
+                        <MudChipSet CheckMark="true" T="Guid" Variant="Variant.Outlined">
+                            @foreach (var order_item in item.OrderItems)
+                            {
+                                <MudChip Color="Color.Primary"
+                                         CheckedIcon="@Icons.Material.Filled.RadioButtonChecked"
+                                         Variant="Variant.Filled">
+                                    @order_item.Name (@order_item.Quantity)
+                                </MudChip>
+                            }
+                        </MudChipSet>
+                    </div>
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+               
+
             </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => AcceptOrder(item)" Size="Size.Small" StartIcon="@Icons.Material.Outlined.Approval">
+                    Accept Order
+                </MudButton>
+                <MudButton Variant="Variant.Filled" OnClick="() => RejectOrder(item)" Color="Color.Error" Size="Size.Small" StartIcon="@Icons.Material.Outlined.Cancel">
+                    Reject Order
+                </MudButton>
+            </MudCardActions>
         </MudCard>
     }
 
@@ -30,14 +69,17 @@
     @inject IHttpClientService HttpClient;
     private List<Order> Orders = [];
     @inject ISnackbar Snackbar;
-    protected override Task OnInitializedAsync()
+    private bool loading = false;
+    protected override async Task OnInitializedAsync()
     {
-        return base.OnInitializedAsync();
+        await LoadOrders();
+        await base.OnInitializedAsync();
     }
     private async Task LoadOrders()
     {
         try
         {
+            loading = true;
             Orders = await HttpClient.GetAsync<List<Order>>("api/order/online");
         }
         catch (HttpRequestException ex)
@@ -51,6 +93,62 @@
             // Handle other exceptions
             Console.WriteLine($"Error: {ex.Message}");
             Snackbar.Add($"Error loading orders: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            loading = false;
+            StateHasChanged();
+        }
+    }
+    @inject IDialogService DialogService;
+    private async Task AcceptOrder(Order order)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Accept Order",
+            "Are you sure you want to accept this order?",
+            yesText: "Yes", cancelText: "Cancel", options: new DialogOptions() { FullWidth = true, MaxWidth = MaxWidth.Medium });
+
+        if (confirmed == true)
+        {
+            try
+            {
+                order.OrderStatus = OrderStatus.Accepted;
+                var response = await HttpClient.PutAsync<string>($"api/order/accept/{order.Id}", order);
+                Snackbar.Add("Order accepted successfully!", Severity.Success);
+            }
+            catch (HttpRequestException ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+            finally
+            {
+                StateHasChanged();
+            }
+        }
+    }
+    private async Task RejectOrder(Order order)
+    {
+        try
+        {
+            order.OrderStatus = OrderStatus.Accepted;
+            var response = await HttpClient.PutAsync<string>($"api/order/reject/{order.Id}", order);
+            Snackbar.Add("Order Rejected!", Severity.Success);
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            StateHasChanged();
         }
     }
 }

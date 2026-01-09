@@ -24,7 +24,7 @@ namespace QuePOS.Shared.Services
         public void NotifyNotificationState(ApplicationUserViewModel vm)
         {
 
-            if (vm != null)
+            if (vm.UserRoles != null && vm.UserRoles != null)
             {
                 var applicationUser = vm.StoreUser;
                 var claims = new List<Claim>
